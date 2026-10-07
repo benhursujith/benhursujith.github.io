@@ -1,0 +1,8 @@
+# Not used by the pages (kept locally as the source footage for the GBF demo)
+assets/media/gbf.mp4
+assets/media/gbf.jpg
+
+# Held back from the public site (unreleased concept)
+assets/media/demos/nurseplus-nia.*
+
+.DS_Store

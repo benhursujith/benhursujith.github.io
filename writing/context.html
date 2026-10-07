@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>One file to resume any project</title>
+<meta name="description" content="Context management for AI agents: an index file, a paste-in briefing, an append-only log, and a short ritual at each end of a session.">
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12130F" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F4D3A'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1EA'%3ES%3C/text%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=2">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="mark" href="../">Sujith Benhur</a>
+  <nav class="nav nav-article" aria-label="Site"><a href="../#writing">All writing</a><a href="../#contact">Contact</a></nav>
+</header>
+
+<main id="main" class="article wrap">
+  <header class="article-head">
+    <h1>One file to resume any project</h1>
+    <p class="dek">Context management for AI agents: an index file, a paste-in briefing, an append-only log, and a two-minute ritual at each end of a session.</p>
+    <p class="byline">October 2026. 8 minute read.</p>
+  </header>
+
+  <div class="prose">
+    <p>Every new conversation with a model starts from nothing. The usual fixes are to paste in the history, which costs tokens and buries the point, or to explain the project again, which costs me. Neither tells the model which parts are settled and which are still open.</p>
+    <p>My workspace is built around one idea instead:</p>
+    <blockquote>Every project holds its own resumable state in plain markdown, in a fixed place, in a fixed shape, so any model in any app can be brought up to speed by reading one file.</blockquote>
+    <p>Everything else in the setup exists to protect that.</p>
+
+    <h2>The index file</h2>
+    <p>Each project has an <code>_index.md</code>. It's short, and it always has the same shape.</p>
+<pre><code>---
+project: selah
+status: active          # active, paused, idea, shipped, frozen
+privacy: public         # public, private, confidential
+updated: 2026-08-06
+---
+
+# Selah
+
+## State (as of 2026-08-06)
+Working: interface, pipeline, local generation.
+Stubbed: semantic retrieval (tag matching for now).
+README is stale; it still calls generation mocked.
+
+## Next 3
+1. Real semantic retrieval and a bigger knowledge base.
+2. Watch the pipeline for answers that are pastorally wrong.
+3. Fix the README.
+
+## Decisions (closed, do not reopen without cause)
+- Architecture and design specs are final.</code></pre>
+    <p>Each section does one job.</p>
+    <ul>
+      <li><strong>State</strong> is rewritten every session, never appended to. It says what is true now, with a date, so a reader can tell how stale it is.</li>
+      <li><strong>Next 3</strong> is the three smallest actions that resume the work from a cold start. Three, because a longer list is a backlog, and a backlog doesn't tell you where to begin.</li>
+      <li><strong>Decisions</strong> is the list of things that are settled. Without it, every new model helpfully reopens the database question.</li>
+      <li><strong>The frontmatter</strong> feeds a dashboard. Status and privacy are queryable across every project, and the privacy tier tells an agent what it may send to a hosted model.</li>
+    </ul>
+
+    <h2>A briefing for chats that can't read files</h2>
+    <p>Agents in an editor read the index. A chat in a browser can't. For those, each project keeps a <code>PASTE-ME.md</code>: under 400 words, self-contained, written to be pasted into any chat.</p>
+    <p>It's a separate file on purpose. Agents load the index every session; they don't need 400 words written for a cold reader on top of it.</p>
+    <p>The test for a briefing is blunt. Paste it into a fresh chat with a different model and ask, “What should I do next, and why?” If the answer is useful with no follow-up questions, the briefing works. If the model asks what the project is, fix the briefing, not the model.</p>
+
+    <h2>The log, in a format a script could read</h2>
+    <p>The index says what is true. The log says how it got that way. <code>LOG.md</code> is append-only, and every entry has the same shape.</p>
+<pre><code>---
+
+## 2026-09-19 — Approve trades from the phone
+
+- Did: two-way Telegram approvals; heartbeat alert on silence.
+- Decided: approvals only from the chat that gets proposals,
+  because that chat is the only trusted identity.
+- Broke / found broken: proposals expired unapproved all week.
+- Left open: live trading stays switched off until the
+  go-live checklist is done.</code></pre>
+    <p>The fixed format matters more than it looks. “Read the last three entries” has to mean the same thing to every model, so each entry starts with a rule and a dated heading. And <strong>Decided</strong> asks for the reason, because the reason is the one thing git history can't give you back.</p>
+
+    <h2>The ritual</h2>
+    <p>Two slash commands, one at each end of a session.</p>
+    <h3>Start</h3>
+    <ol>
+      <li>Read the root rules, then the project's index and rules, then the last three log entries.</li>
+      <li>Say what you believe the current state is, in one sentence.</li>
+      <li>Wait for me to confirm or correct it.</li>
+    </ol>
+    <p>The one sentence is the important part. It costs me five seconds to read, and it catches stale context before any work happens, rather than an hour later.</p>
+    <h3>End</h3>
+    <ol>
+      <li>Append a log entry.</li>
+      <li>Rewrite State and Next 3.</li>
+      <li>Rewrite the briefing.</li>
+      <li>Update the date in the frontmatter.</li>
+      <li>Add any newly settled decision.</li>
+      <li>If files moved, note old and new paths in the workspace log.</li>
+    </ol>
+    <p>A session that skips this has failed, whatever else it produced, because the next session will start blind. A hook prints a reminder when an agent stops, in case it forgets.</p>
+
+    <h2>Light projects get a lighter version</h2>
+    <p>Not everything deserves four files. Ideas, frozen projects and small script folders get two: an index with short task and log sections inside it, and the briefing. When an idea turns into active work, it graduates to the full set.</p>
+
+    <h2>Spending context carefully</h2>
+    <ul>
+      <li><strong>Read the tail, not the log.</strong> My busiest project log is over 13,000 words. Agents read the last three entries, a few hundred.</li>
+      <li><strong>Keep binaries out.</strong> An ignore file stops agents opening PDFs, spreadsheets, databases and vendored code unless I ask.</li>
+      <li><strong>Point, don't paste.</strong> Rules link to design documents rather than repeating them.</li>
+    </ul>
+
+    <h2>Where it goes wrong</h2>
+    <p>Two failures show up again and again.</p>
+    <p><strong>The index swells.</strong> State is meant to be rewritten. Under time pressure, agents add “State (superseded)” sections below the current one instead, and an index that should be 400 words becomes 2,800. The fix is a word budget in the rules and moving old state into the log, where history belongs.</p>
+    <p><strong>Summaries go stale.</strong> A weekly “what's live” page is only useful if someone updates it weekly. Mine carries its own rule: if a line is stale two weeks running, demote it. Dating every claim (“as of 6 August”) at least makes the staleness visible.</p>
+
+    <hr>
+    <p>None of this needs special software. It's markdown in folders, opened in Obsidian, read by whichever model I'm using that day. That's the point: the context belongs to the project, not to the tool.</p>
+  </div>
+
+  <nav class="next-read" aria-label="More writing">
+    <p><span>Next</span><a href="memory.html">Memory that outlives the chat</a></p>
+    <p><span>Previously</span><a href="instruction-files.html">How I write instruction files for AI agents</a></p>
+  </nav>
+</main>
+
+<footer class="foot wrap">
+  <span>Sujith Benhur, 2026.</span>
+  <button type="button" data-theme-toggle>Switch to dark</button>
+</footer>
+<script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
+<script src="../assets/site.js?v=2" defer></script>
+</body>
+</html>

@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Memory that outlives the chat</title>
+<meta name="description" content="Where an AI agent's memory should live, what to keep and what to let go, and how mistakes become rules.">
+<meta name="theme-color" content="#F4F1EA" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#12130F" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F4D3A'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1EA'%3ES%3C/text%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Schibsted+Grotesk:wght@400..700&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=2">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="mark" href="../">Sujith Benhur</a>
+  <nav class="nav nav-article" aria-label="Site"><a href="../#writing">All writing</a><a href="../#contact">Contact</a></nav>
+</header>
+
+<main id="main" class="article wrap">
+  <header class="article-head">
+    <h1>Memory that outlives the chat</h1>
+    <p class="dek">Where an agent's memory should live, what to keep and what to let go, and how mistakes become rules.</p>
+    <p class="byline">October 2026. 8 minute read.</p>
+  </header>
+
+  <div class="prose">
+    <p>Most AI tools now offer memory: the model notes things about you and recalls them later. It's useful, and it has a catch. That memory lives inside one product. Switch models, or open the same project in a different app, and it's gone.</p>
+    <p>I work across several models and apps, so I treat built-in memory as a cache and keep the real memory where every model can read it: plain files inside each project.</p>
+
+    <h2>Four kinds of memory</h2>
+    <p>“Memory” covers several different things, and each needs a different home.</p>
+    <table>
+      <thead><tr><th>Kind</th><th>Answers</th><th>Lives in</th><th>Changes by</th></tr></thead>
+      <tbody>
+        <tr><td>State</td><td>What's true now?</td><td>The project index</td><td>Rewriting</td></tr>
+        <tr><td>History</td><td>What happened, and why?</td><td>The project log</td><td>Appending only</td></tr>
+        <tr><td>Decisions</td><td>What's settled?</td><td>The index, then a decisions file</td><td>Adding, rarely reopening</td></tr>
+        <tr><td>Rules</td><td>How should work be done here?</td><td>Instruction files</td><td>Deliberate edits</td></tr>
+      </tbody>
+    </table>
+    <p>Mixing them is the most common mistake I see, in my own files too. History written into state makes the index long and confusing. State written into rules makes rules go stale. Rules buried in a log never get read.</p>
+
+    <h2>Put memory where every model can read it</h2>
+    <p>My test for where a fact belongs: if I opened this project tomorrow in a different app, with a different model, would it need to know this? If yes, the fact goes in the project's own files. Tool memory is only for things that are genuinely about the tool, like “after logging in to this server, restart the session or the tools won't appear.”</p>
+    <p>Even then, I copy anything important into the project. Two copies of a fact drift apart, so the project file is the source and the tool memory just points at it.</p>
+
+    <h2>Decisions are the memory that saves the most time</h2>
+    <p>Models are agreeable and thorough. Ask one to improve a project and it will suggest the thing you ruled out last month, with good arguments. Without a written decision, you spend twenty minutes re-arguing it.</p>
+    <p>So every index ends with a list headed <em>Decisions (closed, do not reopen without cause)</em>. Each entry is one line plus its reason. “Static site over a framework: any agent can edit it, and there's nothing to keep updated.” The heading is an instruction, and models follow it.</p>
+    <p>Decisions older than six months move out of the index into a separate file. They're still on record, just not loaded every session.</p>
+
+    <h2>Mistakes become rules</h2>
+    <p>The best rules in my workspace each started as an incident.</p>
+    <p>When I reorganised the folders, a scheduled job kept pointing at the old path. It failed silently for nearly six days before I noticed. The same afternoon, a work tool's server registration broke for the same reason: a hard-coded absolute path.</p>
+    <p>The full story went in the log. The lesson went in the rules, in its general form:</p>
+    <blockquote>Prefer path-independence over path-fixing. Scripts work out their location from their own file. Before moving anything that runs, search for absolute paths in scheduled jobs, launch agents, environments and tool settings.</blockquote>
+    <p>And the job got a heartbeat that sends an alert when it goes quiet, so silence can't go unnoticed again. The pattern is the same every time: the story in history, the lesson in rules, and where it matters, a check in code.</p>
+
+    <h2>Forgetting on purpose</h2>
+    <p>A memory system that only adds things gets worse over time. Old facts crowd out current ones, and a model can't tell which is which. Three habits help.</p>
+    <ul>
+      <li><strong>Date every claim.</strong> “State as of 6 August” tells the reader how much to trust it.</li>
+      <li><strong>Rotate.</strong> Logs roll over each year. Old decisions move to their own file.</li>
+      <li><strong>Give summaries an expiry.</strong> My weekly “what's live” page says that a line stale for two weeks gets demoted.</li>
+    </ul>
+
+    <h2>Memory and privacy</h2>
+    <p>Some projects hold data that must never reach a hosted model: financial records, personal data about other people, an employer's internal datasets. Their memory files carry abstractions only. “Dining spend up about 15%,” not the statement rows.</p>
+    <p>That rule is easy to break by accident while writing a summary, so a hook checks it. Any write to those projects' summary files that contains a long run of digits is refused. It's a blunt check, and blunt is right for something this costly.</p>
+
+    <h2>What I'd tell someone starting</h2>
+    <ol>
+      <li>Keep one short state file per project, rewritten every session.</li>
+      <li>Keep an append-only log, and always write down why.</li>
+      <li>List settled decisions where the model will see them.</li>
+      <li>Turn every incident into a rule, and the important rules into checks.</li>
+      <li>Store memory in plain files you own, not inside one product.</li>
+      <li>Date things, and retire what has gone stale.</li>
+    </ol>
+  </div>
+
+  <nav class="next-read" aria-label="More writing">
+    <p><span>Start here</span><a href="instruction-files.html">How I write instruction files for AI agents</a></p>
+    <p><span>Previously</span><a href="context.html">One file to resume any project</a></p>
+  </nav>
+</main>
+
+<footer class="foot wrap">
+  <span>Sujith Benhur, 2026.</span>
+  <button type="button" data-theme-toggle>Switch to dark</button>
+</footer>
+<script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
+<script src="../assets/site.js?v=2" defer></script>
+</body>
+</html>
