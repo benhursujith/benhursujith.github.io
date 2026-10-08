@@ -344,189 +344,43 @@
   };
   htmlDemos['ads-phone'] = (container) => htmlDemos.ads(container, 390);
 
-  /* ---------- Showcase: a list of apps beside one device that plays them in turn ---------- */
-  function setupShowcase(sc) {
-    const items = $$('.sc-item', sc);
-    const stage = $('.sc-stage', sc);
-    if (!items.length || !stage) return;
-    const devices = Object.fromEntries($$('[data-device]', stage).map((d) => [d.dataset.device, d]));
-    const detail = $('[data-detail]', sc);
-    const built = {};
-    let idx = -1, visible = false, raf = 0, active = null;
-
-    // Lists advance on wide screens; on phones the chosen demo loops until another is tapped.
-    const autoAdvance = () => wide.matches;
-    const bar = (i, p) => $('.sc-bar i', items[i])?.style.setProperty('--p', p);
-    const usable = (i) => !items[i].classList.contains('is-missing');
-    const nextIndex = () => {
-      for (let k = 1; k <= items.length; k++) { const j = (idx + k) % items.length; if (usable(j)) return j; }
-      return -1;
-    };
-
-    function stop() {
-      cancelAnimationFrame(raf);
-      if (active?.video) active.video.pause();
-      if (active?.demo) active.demo.pause();
-    }
-
-    function play() {
-      if (!active || !visible) return;
-      cancelAnimationFrame(raf);
-      if (active.video) {
-        if (reduce) return;
-        active.video.play().catch(() => {});
-        const tick = () => {
-          const v = active?.video;
-          if (!v) return;
-          if (v.duration) bar(idx, clamp(v.currentTime / v.duration));
-          raf = requestAnimationFrame(tick);
-        };
-        raf = requestAnimationFrame(tick);
-      } else if (active.demo) {
-        const d = active.demo;
-        if (reduce) return d.still();
-        d.start(() => { if (autoAdvance()) advance(); else play(); });
-        const tick = () => { bar(idx, clamp(d.elapsed / d.duration)); raf = requestAnimationFrame(tick); };
-        raf = requestAnimationFrame(tick);
-      }
-    }
-
-    function advance() {
-      const j = nextIndex();
-      if (j < 0) return;
-      if (j !== idx) activate(j);
-      else { if (active?.video) active.video.currentTime = 0; play(); }
-    }
-
-    function activate(i) {
-      stop();
-      if (idx >= 0) bar(idx, 0);
-      idx = i;
-      const item = items[i];
-      items.forEach((it, k) => {
-        it.classList.toggle('is-active', k === i);
-        $('.sc-btn', it)?.setAttribute('aria-pressed', String(k === i));
-      });
-      const device = devices[item.dataset.frame || 'phone'];
-      Object.values(devices).forEach((d) => d.classList.toggle('is-on', d === device));
-      const label = item.dataset.title || $('.sc-name', item)?.textContent || '';
-      const t = $('[data-title]', device);
-      if (t) t.textContent = label;
-      if (detail) detail.innerHTML = $('.sc-detail p', item)?.innerHTML || '';
-
-      const video = $('.dv-video', device);
-      $$('.dv-html', device).forEach((h) => { h.hidden = h.dataset.html !== item.dataset.html; });
-      if (item.dataset.video) {
-        const src = MEDIA + item.dataset.video;
-        video.onended = () => advance();
-        video.onerror = () => { item.classList.add('is-missing'); if (idx === i) advance(); };
-        if (video.dataset.src !== src) {
-          video.dataset.src = src;
-          video.poster = `${src}.jpg`;
-          video.src = `${src}.mp4`;
-        } else {
-          try { video.currentTime = 0; } catch (e) { /* metadata not loaded yet */ }
-        }
-        video.hidden = false;
-        video.loop = !autoAdvance();
-        active = { video };
+  /* ---------- Rows: one product each; its demo plays (and loops) only while it's in view ---------- */
+  function setupRow(row) {
+    const players = new Map();
+    let cur = null;
+    // a row can hold a browser for wide screens and a phone-width version for phones; play whichever shows
+    const shown = () => $$('[data-play]', row).find((d) => d.offsetParent !== null);
+    function player(d) {
+      if (players.has(d)) return players.get(d);
+      let p;
+      if (d.dataset.play === 'video') {
+        const v = $('video', d);
+        const load = () => { if (!v.getAttribute('src')) { const src = MEDIA + d.dataset.src; v.poster = `${src}.jpg`; v.src = `${src}.mp4`; } };
+        p = { load, play() { load(); if (!reduce) v.play().catch(() => {}); }, pause() { v.pause(); } };
       } else {
-        if (video) { video.pause(); video.hidden = true; }
-        const key = item.dataset.html;
-        built[key] = built[key] || clock(htmlDemos[key]($(`.dv-html[data-html="${key}"]`, device)));
-        active = { demo: built[key] };
+        const c = clock(htmlDemos[d.dataset.html]($('.dv-html', d)));
+        const loop = () => c.start(loop);
+        let started = false;
+        p = {
+          load() {},
+          play() { if (reduce) return c.still(); if (started) c.resume(); else { started = true; c.start(loop); } },
+          pause() { c.pause(); },
+        };
       }
-      play();
+      players.set(d, p);
+      return p;
     }
-
-    items.forEach((it, i) => $('.sc-btn', it)?.addEventListener('click', () => {
-      if (i !== idx) return activate(i);
-      stop();
-      if (active?.video) active.video.currentTime = 0;
-      play();
-    }));
-    stage.addEventListener('click', () => {
-      if (!reduce || !active?.video) return;
-      active.video.paused ? active.video.play().catch(() => {}) : active.video.pause();
-    });
-    wide.addEventListener('change', () => { if (active?.video) active.video.loop = !autoAdvance(); });
-
-    onVisible(sc, () => {
-      visible = true;
-      if (idx < 0) activate(0); else play();
-    }, () => { visible = false; stop(); }, 0.3);
+    // load the poster a little before the row arrives, play once most of it is on screen
+    new IntersectionObserver(([e]) => { if (e.isIntersecting) { const d = shown(); if (d) player(d).load(); } }, { rootMargin: '600px 0px' }).observe(row);
+    onVisible(row, () => {
+      const d = shown();
+      if (!d) return;
+      if (cur && cur !== player(d)) cur.pause();
+      cur = player(d);
+      cur.play();
+    }, () => cur?.pause(), 0.35);
   }
-  $$('[data-showcase]').forEach(setupShowcase);
-
-  /* ---------- Slides: one product per slide, each with its own phone ---------- */
-  function setupSlides(el) {
-    const tabs = $$('.slides-tab', el);
-    const slides = $$('.slide', el);
-    const track = $('.slides-track', el);
-    let idx = 0, visible = false, started = false, raf = 0;
-    const videoOf = (i) => $('video', slides[i]);
-    const bar = (i, p) => $('.sc-bar i', tabs[i])?.style.setProperty('--p', p);
-
-    function stop() {
-      cancelAnimationFrame(raf);
-      slides.forEach((s, i) => videoOf(i)?.pause());
-    }
-    function load(i) {
-      const v = videoOf(i);
-      if (!v || v.dataset.src) return;
-      const src = MEDIA + slides[i].dataset.video;
-      v.dataset.src = src;
-      v.poster = `${src}.jpg`;
-      v.src = `${src}.mp4`;
-    }
-    function play() {
-      if (!visible || reduce) return;
-      const v = videoOf(idx);
-      if (!v) return;
-      v.loop = !wide.matches;
-      v.play().catch(() => {});
-      cancelAnimationFrame(raf);
-      const tick = () => { if (v.duration) bar(idx, clamp(v.currentTime / v.duration)); raf = requestAnimationFrame(tick); };
-      raf = requestAnimationFrame(tick);
-    }
-    function go(i) {
-      stop();
-      bar(idx, 0);
-      idx = (i + slides.length) % slides.length;
-      track.style.transform = `translateX(${-idx * 100}%)`;
-      tabs.forEach((t, k) => t.setAttribute('aria-selected', String(k === idx)));
-      slides.forEach((s, k) => { s.inert = k !== idx; });
-      load(idx);
-      load((idx + 1) % slides.length);
-      const v = videoOf(idx);
-      if (v) {
-        try { v.currentTime = 0; } catch (e) { /* not loaded yet */ }
-        v.onended = () => go(idx + 1);
-      }
-      el.dataset.sub = $('.sc-name', tabs[idx])?.textContent || '';
-      syncPins();
-      play();
-    }
-    tabs.forEach((t, i) => t.addEventListener('click', () => { started = true; go(i); }));
-    el.goTo = (i) => { started = true; go(i); };   // "Read the notes" from a story lands on its slide
-
-    // Swipe between slides on touch screens.
-    let x0 = null;
-    const vp = $('.slides-viewport', el);
-    vp.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') x0 = e.clientX; });
-    vp.addEventListener('pointerup', (e) => {
-      if (x0 === null) return;
-      const dx = e.clientX - x0;
-      x0 = null;
-      if (Math.abs(dx) > 50) { started = true; go(idx + (dx < 0 ? 1 : -1)); }
-    });
-
-    onVisible(el, () => {
-      visible = true;
-      if (!started) { started = true; go(0); } else play();
-    }, () => { visible = false; stop(); }, 0.3);
-  }
-  $$('[data-slides]').forEach(setupSlides);
+  $$('.row').forEach(setupRow);
 
   /* ---------- MIS: rounded running totals from the weekly MIS, March to September 2026 ---------- */
   const misStart = new Date(2026, 2, 2);
@@ -636,13 +490,14 @@
     const segs = $('.st-segs', land), chapterLabel = $('.st-chapter', land);
     const countEl = $('.nn-count', land), more = $('.nn-more', land);
     const mk = $('.mk', land), mkText = $('.mk span', land);
+    const tst = $('.tst', land), tstNum = $('.tst b', land), tstText = $('.tst span', land);
     const rings = $$('.ring', land);
     const ringName = Object.fromEntries(rings.map((r) => [r.dataset.go, $('.ring-name', r).textContent]));
     const order = [...new Set(notes.map((n) => n.dataset.chapter))];
     const layers = new Map();
     const seen = new Set();
     let idx = null, cur = null, raf = 0, visible = false, held = false, ended = false, segChapter = null;
-    let marks = [], markIdx = -1;
+    let marks = [], markIdx = -1, metric = false;
 
     $$('.card', land).forEach((c) => fit(c, 390));
     $$('.mk-arrow path', land).forEach((p) => p.setAttribute('pathLength', '1'));
@@ -712,6 +567,8 @@
         if (cur.card) cur.el.classList.remove('is-on');
       }
       cancelAnimationFrame(raf);
+      tst.classList.remove('on');
+      mk.classList.remove('on');
       idx = i;
       ended = false;
       land.classList.toggle('on-cover', i < 0);
@@ -741,7 +598,11 @@
       markIdx = -1;
       mk.classList.remove('on');
       more.setAttribute('href', n.dataset.more || '#work');
-      more.dataset.slide = n.dataset.slide || '';
+      // on phones the story's result shows as a toast for its first few seconds (cards carry their own)
+      tstNum.textContent = $('.note-stat', n)?.textContent || '';
+      tstText.textContent = $('.note-lab', n)?.textContent || '';
+      metric = !L.card && !!tstNum.textContent;
+      tst.classList.remove('on');
       seen.add(chapterOf(i));
       paint();
       sync();
@@ -773,8 +634,11 @@
       const t = cur.elapsed;
       const seg = $$('b', segs)[inChapter(chapterOf(idx)).indexOf(idx)];
       if (seg) seg.style.width = `${clamp(t / cur.duration) * 100}%`;
+      const showMetric = metric && !wide.matches && t >= 300 && t < 3400;
+      tst.classList.toggle('on', showMetric);
       let m = -1;
       marks.forEach((x, k) => { if (t >= x.at * 1000) m = k; });
+      if (m >= 0 && showMetric && marks[m].y >= 50) m = -1;   // the top of the screen is the result's, for now
       if (m === markIdx) return;
       markIdx = m;
       mk.classList.remove('on');
@@ -819,7 +683,6 @@
 
     $$('[data-go]', land).forEach((b) => b.addEventListener('click', () => { touched(); chapter(b.dataset.go); }));
     $$('.nn', land).forEach((b) => b.addEventListener('click', () => { touched(); if (+b.dataset.step > 0) next(); else prev(); }));
-    more.addEventListener('click', () => { if (more.dataset.slide) $('[data-slides]')?.goTo?.(+more.dataset.slide); });
 
     // Taps, holds and swipes. Links and buttons inside keep their own clicks.
     let down = null, holdTimer = 0;
