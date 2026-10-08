@@ -490,7 +490,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .row-copy {
   position: sticky;
   top: calc(var(--mast-h) + var(--pin-h) + 36px);
-  padding-top: 20px;
+  margin-top: -.12em;   /* the title's cap height lines up with the device's top edge */
   transition: top .6s var(--ease);
 }
 .ch-head + .row, .sub-head + .row { padding-top: clamp(40px, 6vh, 72px); }
@@ -504,10 +504,11 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .row-facts { display: flex; flex-wrap: wrap; gap: 14px 40px; margin: 24px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); }
 .row-facts dt { font-size: .84rem; color: var(--ink-2); }
 .row-facts dd { margin: 4px 0 0; font: 500 clamp(1.6rem, 1.3rem + .8vw, 2.1rem)/1 var(--display); letter-spacing: -.02em; }
-.row-how { margin-top: 26px; font-size: .95rem; font-weight: 600; }
-.row-tech { list-style: none; margin: 10px 0 0; padding: 0; display: grid; gap: 10px; max-width: 56ch; }
-.row-tech li { position: relative; padding-left: 20px; font-size: .95rem; color: var(--ink-2); }
-.row-tech li::before { content: ""; position: absolute; left: 0; top: .6em; width: 8px; height: 8px; border-radius: 50%; background: var(--clay); }
+.row-spec { margin: 26px 0 0; max-width: 60ch; border-top: 1px solid var(--rule); }
+.row-spec div { padding: 12px 0 13px; border-bottom: 1px solid var(--rule); }
+.row-spec dt { margin-bottom: 3px; font-size: .78rem; font-weight: 500; color: var(--ink-2); }
+.row-spec dd { margin: 0; font-size: .95rem; line-height: 1.5; }
+.row-spec .to { padding: 0 .15em; color: var(--clay); }
 .row-note { margin-top: 18px; font-size: .88rem; color: var(--stone); }
 .only-narrow { display: none; }
 

@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=14">
+<link rel="stylesheet" href="assets/site.css?v=17">
 </head>
 <body>
 <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -84,7 +84,7 @@
         <p class="note-kick">BorderPlus · Ask</p>
         <h2 class="note-title">Answers for nurses, in German and English.</h2>
         <p class="note-stat"><span class="marker">~1,400 nurses</span></p><p class="note-lab">use it, and 968 keep coming back</p>
-        <p class="note-text">Ask answers in a line, then opens the exact moment of the lesson film that covers it.</p>
+        <p class="note-text">Nurses ask in German or English and get the answer in both, with the words they need on the ward.</p>
         <ol class="note-marks" hidden><li data-at="0.3" data-y="32">ask in German or English</li><li data-at="3.8" data-y="40">an answer in a line, with sources</li><li data-at="5.2" data-y="58">→ straight into the lesson</li><li data-at="7.3" data-y="42">the same answer, in English</li><li data-at="10.3" data-y="64">tap a word for its card</li><li data-at="14.4" data-y="72">save it to a word list</li></ol>
       </article>
       <article class="note" data-chapter="borderplus" data-video="nurseplus-home" data-more="#learn">
@@ -267,14 +267,9 @@
     <div class="row-stage sc-stage"><div class="device phone is-on" data-play="video" data-src="nurseplus-ask"><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div></div>
     <div class="row-copy">
       <h3 class="row-name">Ask</h3>
-      <p class="row-lede">The assistant inside the NursePlus app. A nurse asks in German or English; Ask answers in a line, then opens the exact moment of the lesson film that covers it.</p>
-      <dl class="row-facts"><div><dt>Nurses using it</dt><dd>~1,400</dd></div><div><dt>Engaged users</dt><dd>968</dd></div><div><dt>Come back, using Ask and Learn</dt><dd>48% vs 14%</dd></div></dl>
-      <p class="row-how">How it works</p>
-      <ul class="row-tech">
-        <li>Every answer points into Learn, down to the second where the film covers it, because the data showed 88% of people who came in through Ask never found Learn.</li>
-        <li>Films carry German, English or both as subtitles, and end with a speaking exercise.</li>
-        <li>Outside the app, I annotate conversations with a small language model for my own analysis. It showed that 78% of nurses who got no answer never came back, so filling those gaps became its own workstream.</li>
-      </ul>
+      <p class="row-lede">The clinical, language and documentation assistant inside the NursePlus app. Nurses ask in German or English and get the answer in both, with the words they need on the ward.</p>
+      <dl class="row-facts"><div><dt>Nurses using it</dt><dd>~1,400</dd></div><div><dt>Engaged users</dt><dd>968</dd></div><div><dt>Acquisition segments</dt><dd>6</dd></div></dl>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Question in German or English <span class="to">→</span> answer in both <span class="to">→</span> the matching Learn lesson</dd></div><div><dt>Built with</dt><dd>An LLM assistant · a small language model that tags every conversation · React Native app · Firebase</dd></div><div><dt>My part</dt><dd>Own it end to end. Tags for need, gap and unanswered question set the roadmap, and lifted week-2 and week-3 retention ~5%.</dd></div></dl>
     </div>
   </article>
 
@@ -283,13 +278,8 @@
     <div class="row-copy">
       <h3 class="row-name">Learn</h3>
       <p class="row-lede">German for the job, as pathways of short episodes: a first call from the airport, a day on the ward, opening a bank account, finding a home. A phrase trainer keeps the words close.</p>
-      <dl class="row-facts"><div><dt>Week-2 and week-3 retention</dt><dd>up ~5%</dd></div><div><dt>Return rate with Ask and Learn together</dt><dd>48% vs 14%</dd></div></dl>
-      <p class="row-how">How it works</p>
-      <ul class="row-tech">
-        <li>Roleplay episodes with recurring characters, unit checks, streaks and daily goals.</li>
-        <li>Speaking practice is scored with Azure's pronunciation assessment.</li>
-        <li>A redesigned home, navigation and onboarding join Learn to Ask, so a question leads into a lesson.</li>
-      </ul>
+      <dl class="row-facts"><div><dt>Came in through Ask, never found Learn</dt><dd>88%</dd></div><div><dt>Return rate, using both</dt><dd>48% vs 14%</dd></div></dl>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Pathway <span class="to">→</span> roleplay episode <span class="to">→</span> unit check <span class="to">→</span> phrase trainer</dd></div><div><dt>Built with</dt><dd>React Native (Expo) · Firebase analytics</dd></div><div><dt>My part</dt><dd>Joined Learn to Ask: a new home, navigation, onboarding and cross-links.</dd></div></dl>
     </div>
   </article>
 
@@ -297,14 +287,9 @@
     <div class="row-stage sc-stage"><div class="device phone is-on" data-play="video" data-src="carepilot"><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div></div>
     <div class="row-copy">
       <h3 class="row-name">CarePilot</h3>
-      <p class="row-lede">Documentation for German care. A nurse picks the report, talks it through, checks the transcript, and gets a structured report with a quality score and the questions still open. Nurses had been writing these in unpaid overtime, and the records still failed audits.</p>
+      <p class="row-lede">Documentation for German care. A nurse picks the report, talks it through, checks the transcript, and gets a structured report with a quality score and the questions still open. Nurses had been writing these in unpaid overtime, and the records often failed compliance.</p>
       <dl class="row-facts"><div><dt>Documentation per shift</dt><dd>2.5 h to 30 min</dd></div><div><dt>Live care homes</dt><dd>3</dd></div></dl>
-      <p class="row-how">How it works</p>
-      <ul class="row-tech">
-        <li>A documentation model fine-tuned on German care records turns what the nurse said into the report's own structure.</li>
-        <li>An annotation tool and evaluation framework I built: more than 10,000 annotated reports define what a good, compliant record is, and every report is scored against it.</li>
-        <li>Gaps are asked about before saving, so records meet German long-term care rules (SGB XI) before anyone signs them.</li>
-      </ul>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Voice <span class="to">→</span> transcript <span class="to">→</span> structured report <span class="to">→</span> quality score <span class="to">→</span> open questions</dd></div><div><dt>Built with</dt><dd>A documentation model fine-tuned on German care records · SGB XI compliance rules</dd></div><div><dt>My part</dt><dd>The annotation tool and evaluation framework: 10,000+ annotated reports define a compliant record.</dd></div></dl>
     </div>
   </article>
 
@@ -343,6 +328,7 @@
     <div class="row-copy">
       <h3 class="row-name">Caregiver app</h3>
       <p class="row-lede">The day as routines, cards and checklists. A start-of-day check, then the day's routines for the child: each card holds its checklist, and parents see what's done.</p>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Start-of-day check <span class="to">→</span> routine cards <span class="to">→</span> checklists <span class="to">→</span> the parents' feed</dd></div><div><dt>Built with</dt><dd>HTML prototypes · the app in React Native and Expo</dd></div></dl>
     </div>
   </article>
 
@@ -350,7 +336,8 @@
     <div class="row-stage sc-stage"><div class="device phone is-on" data-play="video" data-src="zenea-parent"><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div></div>
     <div class="row-copy">
       <h3 class="row-name">Parent app</h3>
-      <p class="row-lede">Your child's day, moment by moment. Meals, naps, play and learning arrive as they happen, and growth is tracked against WHO ranges, so parents at work see the day instead of asking about it.</p>
+      <p class="row-lede">Your child's day, moment by moment. Meals, naps, play and learning arrive as they happen, so parents at work see the day instead of asking about it.</p>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Caregiver's logs <span class="to">→</span> the day as it happens <span class="to">→</span> growth against WHO ranges</dd></div></dl>
     </div>
   </article>
 
@@ -372,6 +359,7 @@
       <h3 class="row-name">Ads Agent</h3>
       <p class="row-lede">Ask the ad account, then act on the answer. Pixis' optimisation models, exposed to an agent as MCP tools.</p>
       <dl class="row-facts"><div><dt>A marketer's question</dt><dd>1–2 h to 10–15 min</dd></div></dl>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Question in chat <span class="to">→</span> models called as MCP tools <span class="to">→</span> answer with the numbers <span class="to">→</span> approve <span class="to">→</span> budget updated</dd></div><div><dt>Built with</dt><dd>MCP tool calling · regression and deep-learning optimisation models · Meta and Google Ads</dd></div></dl>
       <p class="row-note">Recreated here with invented campaigns.</p>
     </div>
   </article>
@@ -421,7 +409,8 @@
     <div class="row-stage sc-stage"><div class="device browser is-on only-wide" data-play="video" data-src="money-plan"><div class="browser-bar"><span class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="browser-title">Money Plan</span></div><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div><div class="device phone is-on only-narrow" data-play="video" data-src="money-plan-phone"><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div></div>
     <div class="row-copy">
       <h3 class="row-name">Money Plan</h3>
-      <p class="row-lede">A year of money, planned and tracked. Built from my bank and card statements: twelve months of rent, giving, cards, savings, debts and trips, and a tracker that forecasts from each balance check-in.</p>
+      <p class="row-lede">A year of money, planned and tracked: rent, giving, cards, savings, debts and trips, month by month.</p>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Bank and card statements <span class="to">→</span> a 12-month plan <span class="to">→</span> balance check-ins re-forecast the year</dd></div><div><dt>Built with</dt><dd>Local scripts for the statements · one HTML page, made as a Claude artifact · saved in the browser</dd></div></dl>
       <p class="row-note">Shown with made-up figures.</p>
     </div>
   </article>
@@ -430,9 +419,10 @@
     <div class="row-stage sc-stage"><div class="device phone is-on" data-play="html" data-html="trade"><div class="device-screen"><div class="dv-html" data-html="trade"></div></div></div></div>
     <div class="row-copy">
       <h3 class="row-name">Investment agent</h3>
-      <p class="row-lede">It proposes trades and waits for my yes. Every proposal reaches my phone and nothing happens without an approve. A phone can halt it, but only the laptop can restart it.</p>
+      <p class="row-lede">It proposes trades and waits for my yes. A phone can halt it; only the laptop can restart it.</p>
       <dl class="row-facts"><div><dt>Strategies backtested</dt><dd>4</dd></div><div><dt>Passed, now on paper</dt><dd>2</dd></div><div><dt>Automated tests</dt><dd>39</dd></div></dl>
-      <p class="row-note">In testing, with an alert if it ever goes quiet. Live trading is built but stays switched off. Recreated here with invented figures.</p>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Signal <span class="to">→</span> proposal on Telegram <span class="to">→</span> my approve <span class="to">→</span> paper trade with a stop <span class="to">→</span> an alert if it goes quiet</dd></div><div><dt>Built with</dt><dd>Python bots on a schedule · broker and exchange APIs · SQLite · Telegram</dd></div></dl>
+      <p class="row-note">Live trading is built but stays switched off. Recreated here with invented figures.</p>
     </div>
   </article>
 
@@ -440,7 +430,8 @@
     <div class="row-stage sc-stage"><div class="device phone is-on" data-play="video" data-src="eatouts-mumbai"><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div></div>
     <div class="row-copy">
       <h3 class="row-name">Eatouts Mumbai</h3>
-      <p class="row-lede">What to order at the city's favourite tables. Built from the Google reviews of 50 of Mumbai's most-reviewed restaurants and real Reddit threads: what each place is for, what to order by course, and what to watch out for.</p>
+      <p class="row-lede">What to order at Mumbai's favourite tables, from the Google reviews of 50 of its most-reviewed restaurants and real Reddit threads.</p>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>Google reviews and Reddit threads <span class="to">→</span> Claude reads them <span class="to">→</span> what to order by course, and what to skip</dd></div><div><dt>Built with</dt><dd>Next.js · TypeScript · SQLite · Claude API</dd></div></dl>
     </div>
   </article>
 
@@ -448,7 +439,8 @@
     <div class="row-stage sc-stage"><div class="device browser is-on only-wide" data-play="video" data-src="gbf-site"><div class="browser-bar"><span class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="browser-title">gbf-blr.com</span></div><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div><div class="device phone is-on only-narrow" data-play="video" data-src="gbf-site-phone"><div class="device-screen"><video class="dv-video" muted playsinline loop preload="none"></video></div></div></div>
     <div class="row-copy">
       <h3 class="row-name">Grace Bible Fellowship</h3>
-      <p class="row-lede">My church's website in Bangalore: service times, sermons pulled from YouTube, podcasts, and answers to what first-time visitors ask. <a href="https://www.gbf-blr.com" rel="noopener">gbf-blr.com</a></p>
+      <p class="row-lede">My church's website in Bangalore: service times, sermons, podcasts, and answers to what first-time visitors ask. <a href="https://www.gbf-blr.com" rel="noopener">gbf-blr.com</a></p>
+      <dl class="row-spec"><div><dt>Flow</dt><dd>The church's YouTube channel <span class="to">→</span> sermons and series on the site, always current</dd></div><div><dt>Built with</dt><dd>Next.js 14 · TypeScript · Tailwind · YouTube API · Vercel</dd></div></dl>
     </div>
   </article>
 
