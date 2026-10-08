@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=20">
+<link rel="stylesheet" href="assets/site.css?v=21">
 </head>
 <body>
 <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -54,19 +54,19 @@
   <div class="profile">
     <p class="me-hi">Hi, I'm Sujith.</p>
     <h1 class="me-title" data-write>I build AI that gives people their <span class="brush">hours back</span>.</h1>
-    <p class="me-role">Lead Product Manager for AI products at BorderPlus, in Mumbai. Five years taking products from first spec to scale, for nurses, parents and marketers.</p>
-    <dl class="me-stats">
-      <div><dt>nurses on the app</dt><dd>5,400+</dd></div>
-      <div><dt>brands on the ad engine</dt><dd>300+</dd></div>
-      <div><dt>people on my team</dt><dd>13</dd></div>
-    </dl>
+    <p class="me-role">Lead Product Manager for AI products at BorderPlus, in Mumbai. <span class="me-years">Five years taking products from first spec to scale.</span></p>
+    <ul class="me-domains" aria-label="Domains"><li>Healthcare &amp; workforce migration</li><li>AdTech &amp; MarTech</li><li>Agents &amp; developer tooling</li></ul>
     <nav class="rings" aria-label="Highlights">
-      <button class="ring" type="button" data-go="borderplus"><span class="ring-pic ring-logo"><img src="assets/brand/borderplus-mark.png" alt="" width="30" height="30"></span><span class="ring-name">BorderPlus</span></button>
-      <button class="ring" type="button" data-go="pixis"><span class="ring-pic ring-logo ring-logo--fill"><img src="assets/brand/pixis-mark.svg" alt="" width="56" height="56"></span><span class="ring-name">Pixis</span></button>
-      <button class="ring" type="button" data-go="personal"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.6 12 4.2l8.5 7.4"/><path d="M6.2 10v10h11.6V10"/><path d="M10.2 20v-5.4h3.6V20"/></svg></span><span class="ring-name">Personal</span></button>
-      <button class="ring" type="button" data-go="ai"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4c.7 4.3 2.3 6.5 7.4 8.4-5.1 1.9-6.7 4.1-7.4 8.4-.7-4.3-2.3-6.5-7.4-8.4 5.1-1.9 6.7-4.1 7.4-8.4z"/><path d="M19.2 3.2v3.2M17.6 4.8h3.2"/></svg></span><span class="ring-name">AI jobs</span></button>
-      <button class="ring" type="button" data-go="writing"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 19.8l1.1-4.4L16.4 4.3a1.9 1.9 0 0 1 2.7 0l.6.6a1.9 1.9 0 0 1 0 2.7L8.6 18.7z"/><path d="M14.4 6.3l3.3 3.3"/></svg></span><span class="ring-name">Writing</span></button>
-      <button class="ring" type="button" data-go="hi"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.2h14a1.5 1.5 0 0 1 1.5 1.5v8.6a1.5 1.5 0 0 1-1.5 1.5h-7.6l-4.3 3.4v-3.4H5a1.5 1.5 0 0 1-1.5-1.5V6.7A1.5 1.5 0 0 1 5 5.2z"/><path d="M8 10.2h8M8 13h5"/></svg></span><span class="ring-name">Say hi</span></button>
+      <div class="ring-row" role="group" aria-label="Work">
+        <button class="ring" type="button" data-go="borderplus"><span class="ring-pic ring-logo"><img src="assets/brand/borderplus-mark.png" alt="" width="30" height="30"></span><span class="ring-name">BorderPlus</span></button>
+        <button class="ring" type="button" data-go="pixis"><span class="ring-pic ring-logo ring-logo--fill"><img src="assets/brand/pixis-mark.svg" alt="" width="56" height="56"></span><span class="ring-name">Pixis</span></button>
+      </div>
+      <div class="ring-row" role="group" aria-label="More">
+        <button class="ring" type="button" data-go="personal"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.6 12 4.2l8.5 7.4"/><path d="M6.2 10v10h11.6V10"/><path d="M10.2 20v-5.4h3.6V20"/></svg></span><span class="ring-name">Personal</span></button>
+        <button class="ring" type="button" data-go="ai"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4c.7 4.3 2.3 6.5 7.4 8.4-5.1 1.9-6.7 4.1-7.4 8.4-.7-4.3-2.3-6.5-7.4-8.4 5.1-1.9 6.7-4.1 7.4-8.4z"/><path d="M19.2 3.2v3.2M17.6 4.8h3.2"/></svg></span><span class="ring-name">AI jobs</span></button>
+        <button class="ring" type="button" data-go="writing"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 19.8l1.1-4.4L16.4 4.3a1.9 1.9 0 0 1 2.7 0l.6.6a1.9 1.9 0 0 1 0 2.7L8.6 18.7z"/><path d="M14.4 6.3l3.3 3.3"/></svg></span><span class="ring-name">Writing</span></button>
+        <button class="ring" type="button" data-go="hi"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.2h14a1.5 1.5 0 0 1 1.5 1.5v8.6a1.5 1.5 0 0 1-1.5 1.5h-7.6l-4.3 3.4v-3.4H5a1.5 1.5 0 0 1-1.5-1.5V6.7A1.5 1.5 0 0 1 5 5.2z"/><path d="M8 10.2h8M8 13h5"/></svg></span><span class="ring-name">Say hi</span></button>
+      </div>
     </nav>
     <button class="me-go" type="button" data-go="borderplus">Watch my highlights <span aria-hidden="true">→</span></button>
     <p class="me-hint">or scroll for the full notes</p>
@@ -296,7 +296,7 @@
   <div class="mis wrap" id="mis" data-mis data-sub="Weekly MIS">
     <div class="mis-head">
       <h3 class="mis-title">What the weekly MIS shows</h3>
-      <p class="mis-intro">I set up NursePlus's product analytics from scratch: six automated pipelines from Firebase, BigQuery and the app's APIs feed a weekly MIS and the executive dashboard. Running totals, March to September 2026, rounded down.</p>
+      <p class="mis-intro">Six pipelines I set up from scratch, from Firebase and BigQuery, feed the weekly MIS. Running totals, March to September 2026, rounded down.</p>
     </div>
     <div class="mis-body">
       <figure class="mis-chart">
@@ -368,27 +368,20 @@
     <li>
       <p class="career-when">2024 to 2025</p>
       <h3 class="career-role">Senior AI Product Manager</h3>
-      <ul>
-        <li>Built the Ads Agent above: Pixis' optimisation models as MCP tools, cutting a marketer's turnaround from 1 to 2 hours to 10 to 15 minutes.</li>
-        <li>Scaled marketing automation tenfold across Meta and Google, to more than 300 brands.</li>
-        <li>Opened the Amazon Ads market through prototype-led discovery.</li>
-      </ul>
+      <p class="career-big">10×</p>
+      <p class="career-what">marketing automation, to 300+ brands. Opened Amazon Ads through prototypes.</p>
     </li>
     <li>
       <p class="career-when">2022 to 2024</p>
-      <h3 class="career-role">AI Product Manager, founding PM of optimisation</h3>
-      <ul>
-        <li>Shipped regression and deep-learning features for strategic and tactical campaign decisions.</li>
-        <li>The optimisation engine cut client ad spend by 5 to 15%, saving millions across Meta and Google, and raised marketer productivity by 50 to 60%.</li>
-        <li>Delivered ETL pipelines integrating four microservices.</li>
-      </ul>
+      <h3 class="career-role">Founding PM, optimisation</h3>
+      <p class="career-big">5–15%</p>
+      <p class="career-what">less ad spend for clients, and 50–60% more done by each marketer.</p>
     </li>
     <li>
       <p class="career-when">2020 to 2022</p>
       <h3 class="career-role">Associate Product Manager</h3>
-      <ul>
-        <li>Interviewed more than 70 marketers and turned what they said into the product roadmap.</li>
-      </ul>
+      <p class="career-big">70+</p>
+      <p class="career-what">marketers interviewed, turned into the product roadmap.</p>
     </li>
   </ol>
 </section>
@@ -453,34 +446,34 @@
     <p class="ch-where">At work and at home</p>
     <h2 class="ch-title" id="ai-title">The jobs I hand to <span class="marker">AI</span>.</h2>
     <div class="ch-side">
-      <p class="ch-intro">Models, agents and scripts do real work for me every week. These are the jobs, with where each one shows up.</p>
+      <p class="ch-intro">Models, agents and scripts do real work for me every week.</p>
     </div>
   </header>
   <div class="jobs wrap">
     <div class="jobs-col" data-sub="At work">
       <h3 class="jobs-h">At work</h3>
       <ul class="jobs-list">
-        <li><b>Business and product analytics</b><span>Six automated pipelines feed the weekly MIS and the executive dashboard; a root-cause analysis whenever a number moves.</span></li>
-        <li><b>Prototyping and requirements</b><span>Clickable prototypes and specs in days. Most of the screens on this page began that way.</span></li>
-        <li><b>Production-grade proofs of concept, with tests</b><span>POCs built to run like products: an MCP server over the app's data, learning-platform services, a migration portal.</span></li>
-        <li><b>Annotation and evaluation</b><span>Conversations labelled by need and gap with a small model I run for analysis, and the 10,000-report evaluation set behind CarePilot.</span></li>
-        <li><b>Research</b><span>Nurse recognition and migration rules across countries, and German care funding, with each claim tied to its source.</span></li>
-        <li><b>Paperwork</b><span>Recognition and visa applications drafted from a candidate's documents.</span></li>
-        <li><b>Curriculum</b><span>Zenea's learning plan: activities for each age and area, checked for safety and matched to a video.</span></li>
-        <li><b>Weekly reporting</b><span>The weekly update and executive brief drafted from the MIS, ready for me to review.</span></li>
+        <li><b>Analytics</b><span>six pipelines feed the weekly MIS</span></li>
+        <li><b>Prototypes and specs</b><span>clickable, in days</span></li>
+        <li><b>Proofs of concept</b><span>built to run like products, with tests</span></li>
+        <li><b>Annotation and evals</b><span>the 10,000-report set behind CarePilot</span></li>
+        <li><b>Research</b><span>recognition rules and care funding, each claim sourced</span></li>
+        <li><b>Paperwork</b><span>applications drafted from a candidate's documents</span></li>
+        <li><b>Curriculum</b><span>Zenea's activities by age, checked for safety</span></li>
+        <li><b>Weekly reporting</b><span>the update and brief, drafted from the MIS</span></li>
       </ul>
     </div>
     <div class="jobs-col" data-sub="In my own life">
       <h3 class="jobs-h">In my own life</h3>
       <ul class="jobs-list">
-        <li><b>Finding food</b><span>Eatouts Mumbai reads the reviews of the city's most-reviewed restaurants so I know what to order.</span></li>
-        <li><b>Money and taxes</b><span>A year plan and tracker built from my statements, with tax planned before it's due.</span></li>
-        <li><b>Investing</b><span>An agent that backtests, trades on paper, and asks me before it acts.</span></li>
-        <li><b>Websites for organisations</b><span>My church's website, and planning for its youth camp: minutes turned into a live task tracker.</span></li>
-        <li><b>Health</b><span>Lab reports turned into a plan and a daily coach.</span></li>
-        <li><b>Learning</b><span>A guitar course paced to me, and study notes for teaching the Bible.</span></li>
-        <li><b>Life admin</b><span>Scripts that handle utility bills, and an inbox that sorts itself, still in progress.</span></li>
-        <li><b>Remembering decisions</b><span>Meeting Memory, which will tell me when an idea on the table was already turned down, and why.</span></li>
+        <li><b>Finding food</b><span>Eatouts Mumbai reads the reviews</span></li>
+        <li><b>Money and taxes</b><span>a year plan built from my statements</span></li>
+        <li><b>Investing</b><span>an agent that asks before it acts</span></li>
+        <li><b>Websites</b><span>my church's site, and its youth camp's tracker</span></li>
+        <li><b>Health</b><span>lab reports turned into a daily plan</span></li>
+        <li><b>Learning</b><span>guitar and Bible study, paced to me</span></li>
+        <li><b>Life admin</b><span>bills, and an inbox that sorts itself</span></li>
+        <li><b>Remembering decisions</b><span>which ideas were turned down, and why</span></li>
       </ul>
     </div>
   </div>
@@ -528,6 +521,6 @@
 </footer>
 
 <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
-<script src="assets/site.js?v=14" defer></script>
+<script src="assets/site.js?v=15" defer></script>
 </body>
 </html>

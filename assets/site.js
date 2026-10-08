@@ -493,8 +493,8 @@
     const segs = $('.st-segs', land), chapterLabel = $('.st-chapter', land);
     const countEl = $('.nn-count', land), more = $('.nn-more', land);
     const mk = $('.mk', land), mkText = $('.mk span', land);
-    const intro = $('.intro', land);
-    const INTRO = 2800;   // ms the title card holds before a phone story's recording starts
+    const intro = $('.intro', land), introHome = intro.parentElement;
+    const INTRO = 2800;   // ms the title card holds before a recording starts
     const rings = $$('.ring', land);
     const ringName = Object.fromEntries(rings.map((r) => [r.dataset.go, $('.ring-name', r).textContent]));
     const order = [...new Set(notes.map((n) => n.dataset.chapter))];
@@ -562,13 +562,19 @@
       return L;
     }
     // A title card, then the layer: one player whose time covers both, so the story bar fills across the two.
+    // On wide screens the card opens inside the device's own screen; on phones it fills the story.
     function withIntro(L, n, stat) {
       $('.intro-kick', intro).textContent = $('.note-kick', n)?.textContent || '';
       $('.intro-title', intro).textContent = $('.note-title', n)?.textContent.trim().replace(/\s+/g, ' ') || '';
       $('.intro-stat .marker', intro).textContent = stat;
       $('.intro-lab', intro).textContent = $('.note-lab', n)?.textContent || '';
-      const tags = n.dataset.more ? $$(`${n.dataset.more} .row-tags li`) : [];
+      const tags = n.dataset.more ? $$(`${n.dataset.more} .row-tags li`).slice(0, 3) : [];
       $('.intro-tags', intro).innerHTML = tags.map((li) => `<li>${li.textContent}</li>`).join('');
+      const place = () => {
+        const host = wide.matches ? $('.device-screen', L.device) : introHome;
+        if (intro.parentElement !== host) host.append(intro);
+        host.classList.toggle('band-dark', theme() === 'dark');   // the status bar follows the card, not the last frame
+      };
       const card = clock({ duration: INTRO, steps: [], reset() {}, still() {} });
       let main = false;
       return {
@@ -578,12 +584,13 @@
         get media() { return main ? L.elapsed : -1; },
         start(onEnd) {
           main = false;
+          place();
           intro.classList.add('on');
           card.start(() => { main = true; intro.classList.remove('on'); L.start(onEnd); });
         },
         resume() { if (main) L.resume(); else card.resume(); },
         pause() { if (main) L.pause(); else card.pause(); },
-        still() { intro.classList.remove('on'); L.still(); },
+        still() { place(); intro.classList.add('on'); L.still(); },   // with motion off, the card is the still
       };
     }
     const load = (L) => { if (L.src && !L.el.getAttribute('src')) { L.el.poster = `${L.src}.jpg${MV}`; L.el.src = `${L.src}.mp4${MV}`; } };
@@ -607,9 +614,9 @@
 
       const n = notes[i];
       const L = layerFor(n);
-      // on phones a recording opens with a title card: the result and the tech, in the page's own type
+      // a recording opens with a title card: the result and the tech, in the page's own type
       const stat = $('.note-stat', n)?.textContent || '';
-      cur = (!wide.matches && !L.card && stat && !reduce) ? withIntro(L, n, stat) : L;
+      cur = (!L.card && stat) ? withIntro(L, n, stat) : L;
       cur.started = false;
       cur.running = false;
       Object.values(devices).forEach((d) => d.classList.toggle('is-on', d === L.device));
@@ -684,8 +691,8 @@
       if (segChapter !== ch) {
         segChapter = ch;
         segs.innerHTML = list.map(() => '<i><b></b></i>').join('');
-        chapterLabel.textContent = ringName[ch] || '';
       }
+      chapterLabel.textContent = $('.note-kick', notes[idx])?.textContent || ringName[ch] || '';
       $$('b', segs).forEach((b, k) => { b.style.width = k < pos ? '100%' : '0%'; });
       countEl.textContent = `${pos + 1} / ${list.length}`;
     }
