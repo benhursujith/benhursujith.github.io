@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,300..600;1,6..72,300..600&family=Schibsted+Grotesk:wght@400..700&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=2">
+<link rel="stylesheet" href="assets/site.css?v=6">
 </head>
 <body>
 <a class="skip" href="#main">Skip to content</a>
@@ -24,7 +24,7 @@
   <a class="mark" href="#top">Sujith Benhur</a>
   <nav class="nav" aria-label="Sections">
     <a href="#work">Work</a>
-    <a href="#builds">Builds</a>
+    <a href="#personal">Personal</a>
     <a href="#ai">AI</a>
     <a href="#writing">Writing</a>
     <a href="#contact">Contact</a>
@@ -34,7 +34,7 @@
 
 <nav class="menu" id="menu" aria-label="Sections">
   <a href="#work">Work</a>
-  <a href="#builds">Builds</a>
+  <a href="#personal">Personal</a>
   <a href="#ai">AI</a>
   <a href="#writing">Writing</a>
   <a href="#contact">Contact</a>
@@ -42,37 +42,52 @@
 
 <main id="main">
 
-<!-- ============ Hero: who, and the work playing beside it ============ -->
+<!-- ============ Hero ============ -->
 <section class="hero wrap" id="top">
   <div class="hero-copy">
     <h1 class="hero-title" data-split>I build AI that gives people their hours back.</h1>
-    <p class="hero-intro">Lead Product Manager for AI products at BorderPlus, in Mumbai. Five years taking products from first spec to scale, for nurses, parents, marketers and my church.</p>
+    <p class="hero-intro">Lead Product Manager for AI products at BorderPlus, in Mumbai. Five years taking products from first spec to scale, for nurses, parents and marketers, and a few for my own life.</p>
     <dl class="facts">
       <div><dt>Care records per shift</dt><dd>2.5 h to 30 min</dd></div>
       <div><dt>Brands on the ad engine</dt><dd>300+</dd></div>
       <div><dt>Nurses using Ask</dt><dd>~1,400</dd></div>
     </dl>
   </div>
-  <figure class="hero-stage" data-showcase data-hero>
+  <figure class="hero-stage">
     <div class="sc-stage">
-      <div class="device phone" data-device="phone">
-        <div class="device-screen"><video class="dv-video" muted playsinline preload="none"></video></div>
+      <div class="device phone is-on">
+        <div class="device-screen band-dark">
+          <div class="hl-wrap">
+            <div class="hl" data-highlights tabindex="0" role="region" aria-roledescription="carousel" aria-label="Highlights of my work">
+              <div class="hl-bars" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
+              <div class="hl-who"><span class="hl-avatar">SB</span><span>Sujith Benhur<small>Highlights</small></span></div>
+              <div class="hl-track">
+              <article class="hl-card" aria-label="1 of 8"><p class="hl-what"><i></i>CarePilot<span>BorderPlus</span></p><p class="hl-num">2.5 h to 30 min</p><p class="hl-text">of documentation per nurse, per shift, in three care homes.</p></article>
+              <article class="hl-card" aria-label="2 of 8"><p class="hl-what"><i></i>Ask<span>BorderPlus</span></p><p class="hl-num">~1,400</p><p class="hl-text">nurses use it, and 968 keep coming back.</p></article>
+              <article class="hl-card" aria-label="3 of 8"><p class="hl-what"><i></i>Ask and Learn<span>BorderPlus</span></p><p class="hl-num">48% vs 14%</p><p class="hl-text">come back when they use both, after the redesign that joined them.</p></article>
+              <article class="hl-card" aria-label="4 of 8"><p class="hl-what"><i></i>Evaluation<span>BorderPlus</span></p><p class="hl-num">10,000+</p><p class="hl-text">annotated care reports define what a compliant record is.</p></article>
+              <article class="hl-card" aria-label="5 of 8"><p class="hl-what"><i></i>Analytics<span>BorderPlus</span></p><p class="hl-num">6 pipelines</p><p class="hl-text">feed the weekly MIS and the executive dashboard the company runs on.</p></article>
+              <article class="hl-card" aria-label="6 of 8"><p class="hl-what"><i></i>Optimisation engine<span>Pixis</span></p><p class="hl-num">5 to 15%</p><p class="hl-text">less ad spend for clients, across more than 300 brands.</p></article>
+              <article class="hl-card" aria-label="7 of 8"><p class="hl-what"><i></i>Ads Agent<span>Pixis</span></p><p class="hl-num">10 to 15 min</p><p class="hl-text">to answer a marketer's question, down from 1 to 2 hours, with the models as MCP tools.</p></article>
+              <article class="hl-card" aria-label="8 of 8"><p class="hl-what"><i></i>Team<span>BorderPlus</span></p><p class="hl-num">13</p><p class="hl-text">engineers, designers and data scientists I lead.</p></article>
+              </div>
+              <p class="hl-hint">Tap or swipe</p>
+              <button class="hl-zone prev" type="button" aria-label="Previous highlight"></button>
+              <button class="hl-zone next" type="button" aria-label="Next highlight"></button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <ol class="sc-list sc-list-hidden" aria-hidden="true">
-      <li class="sc-item" data-video="zenea-caregiver" data-frame="phone" data-title="Zenea, the caregiver app"></li>
-      <li class="sc-item" data-video="nurseplus-ask" data-frame="phone" data-title="Ask, clinical German for nurses"></li>
-      <li class="sc-item" data-video="selah" data-frame="phone" data-title="Selah, Scripture for an honest day"></li>
-    </ol>
-    <figcaption class="hero-caption" data-caption></figcaption>
+    <figcaption class="hero-caption">Highlights. Tap, swipe or use the arrow keys.</figcaption>
   </figure>
 </section>
 
 <!-- ============ Work ============ -->
 <div id="work">
 
-<!-- Healthcare: BorderPlus -->
-<section class="chapter" aria-labelledby="bp-title">
+<!-- BorderPlus -->
+<section class="chapter" data-pin="BorderPlus" aria-labelledby="bp-title">
   <header class="ch-head wrap">
     <p class="ch-where">BorderPlus, since November 2025</p>
     <h2 class="ch-title" id="bp-title">Care, with less paperwork.</h2>
@@ -81,87 +96,120 @@
     </div>
   </header>
 
-  <div class="showcase wrap" data-showcase>
-    <div class="sc-copy">
-      <h3 class="sc-heading">For nurses at work</h3>
-      <ol class="sc-list">
-        <li class="sc-item" data-video="nurseplus-notes" data-frame="phone">
-          <button class="sc-btn" type="button"><span class="sc-name">CarePilot</span><span class="sc-line">Speak the shift; get a report that passes an audit.</span></button>
-          <div class="sc-detail"><p>A nurse talks through what happened. CarePilot transcribes it, asks what is missing, and writes a German care report with a quality score. Documentation fell from 2.5 hours to 30 minutes per shift in three care homes.</p></div>
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </li>
-        <li class="sc-item" data-video="nurseplus-home" data-frame="phone">
-          <button class="sc-btn" type="button"><span class="sc-name">NursePlus</span><span class="sc-line">Pathways, lessons and phrases in one home.</span></button>
-          <div class="sc-detail"><p>88% of people who came in through Ask never found the courses in Learn, and nurses who used both came back 48% of the time, against 14%. This home joins the two.</p></div>
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </li>
-        <li class="sc-item" data-video="nurseplus-ask" data-frame="phone">
-          <button class="sc-btn" type="button"><span class="sc-name">Ask</span><span class="sc-line">Clinical and language help, in German and English.</span></button>
-          <div class="sc-detail"><p>About 1,400 nurses use it and 968 keep coming back. A small model tags every conversation by need and by unanswered question, and those tags set the roadmap.</p></div>
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </li>
-      </ol>
+  <div class="slides wrap" data-slides data-sub="Ask">
+    <div class="slides-tabs" role="tablist" aria-label="BorderPlus products">
+      <button class="slides-tab" role="tab" type="button" aria-selected="true"><span class="sc-name">Ask</span><span class="sc-line">Answers for nurses, in German and English</span><span class="sc-bar" aria-hidden="true"><i></i></span></button>
+      <button class="slides-tab" role="tab" type="button" aria-selected="false"><span class="sc-name">Learn</span><span class="sc-line">Pathways of short lessons</span><span class="sc-bar" aria-hidden="true"><i></i></span></button>
+      <button class="slides-tab" role="tab" type="button" aria-selected="false"><span class="sc-name">CarePilot</span><span class="sc-line">Documentation for care homes</span><span class="sc-bar" aria-hidden="true"><i></i></span></button>
     </div>
-    <div class="sc-stage">
-      <div class="device phone" data-device="phone">
-        <div class="device-screen">
-          <video class="dv-video" muted playsinline preload="none"></video>
-        </div>
+    <div class="slides-viewport">
+      <div class="slides-track">
+
+        <article class="slide" data-video="nurseplus-ask" aria-label="Ask">
+          <div class="slide-stage sc-stage">
+            <div class="device phone is-on"><div class="device-screen"><video class="dv-video" muted playsinline preload="none"></video></div></div>
+          </div>
+          <div class="slide-copy">
+            <h3 class="slide-name">Ask</h3>
+            <p class="slide-lede">The assistant inside the NursePlus app. A nurse asks in German or English; Ask answers in a line, then opens the exact moment of the lesson film that covers it.</p>
+            <dl class="slide-facts">
+              <div><dt>Nurses using it</dt><dd>~1,400</dd></div>
+              <div><dt>Engaged users</dt><dd>968</dd></div>
+              <div><dt>Come back, using Ask and Learn</dt><dd>48% vs 14%</dd></div>
+            </dl>
+            <p class="slide-how">How it works</p>
+            <ul class="slide-tech">
+              <li>Every answer points into Learn, down to the second where the film covers it, because the data showed 88% of people who came in through Ask never found Learn.</li>
+              <li>Films carry German, English or both as subtitles, and end with a speaking exercise.</li>
+              <li>Outside the app, I annotate conversations with a small language model for my own analysis. It showed that 78% of nurses who got no answer never came back, so filling those gaps became its own workstream.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="slide" data-video="nurseplus-home" aria-label="Learn">
+          <div class="slide-stage sc-stage">
+            <div class="device phone is-on"><div class="device-screen"><video class="dv-video" muted playsinline preload="none"></video></div></div>
+          </div>
+          <div class="slide-copy">
+            <h3 class="slide-name">Learn</h3>
+            <p class="slide-lede">German for the job, as pathways of short episodes: a first call from the airport, a day on the ward, opening a bank account, finding a home. A phrase trainer keeps the words close.</p>
+            <dl class="slide-facts">
+              <div><dt>Week-2 and week-3 retention</dt><dd>up ~5%</dd></div>
+              <div><dt>Return rate with Ask and Learn together</dt><dd>48% vs 14%</dd></div>
+            </dl>
+            <p class="slide-how">How it works</p>
+            <ul class="slide-tech">
+              <li>Roleplay episodes with recurring characters, unit checks, streaks and daily goals.</li>
+              <li>Speaking practice is scored with Azure's pronunciation assessment.</li>
+              <li>A redesigned home, navigation and onboarding join Learn to Ask, so a question leads into a lesson.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="slide" data-video="carepilot" aria-label="CarePilot">
+          <div class="slide-stage sc-stage">
+            <div class="device phone is-on"><div class="device-screen"><video class="dv-video" muted playsinline preload="none"></video></div></div>
+          </div>
+          <div class="slide-copy">
+            <h3 class="slide-name">CarePilot</h3>
+            <p class="slide-lede">Documentation for German care. A nurse picks the report, talks it through, checks the transcript, and gets a structured report with a quality score and the questions still open. Nurses had been writing these in unpaid overtime, and the records still failed audits.</p>
+            <dl class="slide-facts">
+              <div><dt>Documentation per shift</dt><dd>2.5 h to 30 min</dd></div>
+              <div><dt>Live care homes</dt><dd>3</dd></div>
+            </dl>
+            <p class="slide-how">How it works</p>
+            <ul class="slide-tech">
+              <li>A documentation model fine-tuned on German care records turns what the nurse said into the report's own structure.</li>
+              <li>An annotation tool and evaluation framework I built: more than 10,000 annotated reports define what a good, compliant record is, and every report is scored against it.</li>
+              <li>Gaps are asked about before saving, so records meet German long-term care rules (SGB XI) before anyone signs them.</li>
+            </ul>
+          </div>
+        </article>
+
       </div>
     </div>
   </div>
 
-  <div class="showcase showcase--wide wrap" data-showcase>
-    <div class="sc-copy">
-      <h3 class="sc-heading">For nurses moving to Germany</h3>
-      <ol class="sc-list">
-        <li class="sc-item" data-video="migration-portal" data-frame="browser" data-title="Pathways">
-          <button class="sc-btn" type="button"><span class="sc-name">Pathways</span><span class="sc-line">Your route to a nursing job in Germany, step by step.</span></button>
-          <div class="sc-detail"><p>Type who you are and Pathways lays out the route to Germany step by step: placement, recognition, visa and arrival. The agentic version drafts the paperwork at each stage.</p></div>
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </li>
-        <li class="sc-item" data-video="maas-site" data-frame="browser" data-title="Migration-as-a-Service">
-          <button class="sc-btn" type="button"><span class="sc-name">Migration-as-a-Service</span><span class="sc-line">The offer to employers and partners, by country.</span></button>
-          <div class="sc-detail"><p>The public face of the migration platform, with a page for each destination and what it takes to get there.</p></div>
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </li>
-        <li class="sc-item" data-video="seaas-site" data-frame="browser" data-title="Settling-as-a-Service">
-          <button class="sc-btn" type="button"><span class="sc-name">Settling-as-a-Service</span><span class="sc-line">Help after landing: housing, bank, paperwork.</span></button>
-          <div class="sc-detail"><p>A landing page for settlement support, so a nurse's first weeks in Germany don't undo the year it took to get there.</p></div>
-          <span class="sc-bar" aria-hidden="true"><i></i></span>
-        </li>
-      </ol>
+  <div class="mis wrap" data-mis data-sub="Weekly MIS">
+    <div class="mis-head">
+      <h3 class="mis-title">What the weekly MIS shows</h3>
+      <p class="mis-intro">I set up NursePlus's product analytics from scratch: six automated pipelines from Firebase, BigQuery and the app's APIs feed a weekly MIS and the executive dashboard. Running totals, March to September 2026, rounded down.</p>
     </div>
-    <div class="sc-stage">
-      <div class="device browser" data-device="browser">
-        <div class="browser-bar"><span class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="browser-title" data-title></span></div>
-        <div class="device-screen"><video class="dv-video" muted playsinline preload="none"></video></div>
+    <div class="mis-body">
+      <figure class="mis-chart">
+        <figcaption class="mis-label">Nurses on the app</figcaption>
+        <div class="chart" data-chart="nurses" role="img" aria-label="Nurses on the app grew from about 100 in March to about 5,400 by late September 2026"></div>
+      </figure>
+      <div class="mis-tiles">
+        <div class="tile"><p class="tile-l">Nurses on the app</p><p class="tile-v">5,400+</p><p class="tile-n">from about 100 in March</p><div class="spark" data-spark="nurses" aria-hidden="true"></div></div>
+        <div class="tile"><p class="tile-l">Questions answered by Ask</p><p class="tile-v">14,800+</p><p class="tile-n">since Ask launched in April</p><div class="spark" data-spark="ask" aria-hidden="true"></div></div>
+        <div class="tile"><p class="tile-l">Learn episodes played</p><p class="tile-v">56,000+</p><p class="tile-n">running total</p><div class="spark" data-spark="learn" aria-hidden="true"></div></div>
       </div>
     </div>
-    <p class="sc-caption" data-detail></p>
+    <details class="mis-table">
+      <summary>See the numbers</summary>
+      <table>
+        <thead><tr><th>End of</th><th>Nurses on the app</th><th>Questions answered</th><th>Learn episodes</th></tr></thead>
+        <tbody data-mis-rows></tbody>
+      </table>
+    </details>
   </div>
-</section>
 
-<!-- Childcare: Zenea -->
-<section class="chapter" aria-labelledby="zn-title">
-  <header class="ch-head wrap">
-    <p class="ch-where">Zenea, a BorderPlus venture, 2026</p>
-    <h2 class="ch-title" id="zn-title">Childcare you can follow from work.</h2>
-    <div class="ch-side">
-      <p class="ch-intro">A subscription where a trained nurse lives with the family and cares for children up to five. I designed both apps: one for the caregiver who logs the day, one for the parents who follow it.</p>
-    </div>
-  </header>
+  <div class="sub-head wrap" data-sub="Zenea">
+    <h3 class="sub-title">Zenea, a BorderPlus venture</h3>
+    <p class="sub-intro">A childcare subscription: a trained nurse lives with the family and cares for children up to five. I shaped both apps, one for the caregiver and one for the parents.</p>
+  </div>
   <div class="showcase wrap" data-showcase>
     <div class="sc-copy">
       <ol class="sc-list">
         <li class="sc-item" data-video="zenea-caregiver" data-frame="phone">
-          <button class="sc-btn" type="button"><span class="sc-name">Caregiver app</span><span class="sc-line">Log the day, voice first.</span></button>
-          <div class="sc-detail"><p>A start-of-day check, the day's routines as cards with checklists, and a voice log that fills them in while her hands are busy.</p></div>
+          <button class="sc-btn" type="button"><span class="sc-name">Caregiver app</span><span class="sc-line">The day as routines, cards and checklists.</span></button>
+          <div class="sc-detail"><p>A start-of-day check, then the day's routines for the child: each card holds its checklist, and parents see what's done.</p></div>
           <span class="sc-bar" aria-hidden="true"><i></i></span>
         </li>
         <li class="sc-item" data-video="zenea-parent" data-frame="phone">
           <button class="sc-btn" type="button"><span class="sc-name">Parent app</span><span class="sc-line">Your child's day, moment by moment.</span></button>
-          <div class="sc-detail"><p>Meals, naps, play and learning arrive as they happen, so parents at work see the day instead of asking about it.</p></div>
+          <div class="sc-detail"><p>Meals, naps, play and learning arrive as they happen, and growth is tracked against WHO ranges, so parents at work see the day instead of asking about it.</p></div>
           <span class="sc-bar" aria-hidden="true"><i></i></span>
         </li>
       </ol>
@@ -174,16 +222,16 @@
   </div>
 </section>
 
-<!-- AdTech: Pixis -->
-<section class="chapter" aria-labelledby="px-title">
+<!-- Pixis -->
+<section class="chapter" data-pin="Pixis" aria-labelledby="px-title">
   <header class="ch-head wrap">
     <p class="ch-where">Pixis, 2020 to 2025</p>
     <h2 class="ch-title" id="px-title">Ad budgets you can talk to.</h2>
     <div class="ch-side">
-      <p class="ch-intro">From associate PM to founding PM of the optimisation engine, which cut client ad spend by 5 to 15% across Meta and Google for more than 300 brands. Then I put its models in a chat.</p>
+      <p class="ch-intro">Five years and three roles, from associate PM to founding PM of the optimisation engine, then senior AI PM for the agent that put its models in a chat.</p>
     </div>
   </header>
-  <div class="showcase showcase--wide wrap" data-showcase>
+  <div class="showcase showcase--wide wrap" data-showcase data-sub="Ads Agent">
     <div class="sc-copy">
       <ol class="sc-list">
         <li class="sc-item" data-html="ads" data-frame="browser" data-title="Ads Agent">
@@ -235,30 +283,63 @@
     </div>
     <p class="sc-caption" data-detail></p>
   </div>
+
+  <ol class="career wrap" aria-label="Roles at Pixis" data-sub="Three roles">
+    <li>
+      <p class="career-when">2024 to 2025</p>
+      <h3 class="career-role">Senior AI Product Manager</h3>
+      <ul>
+        <li>Built the Ads Agent above: Pixis' optimisation models as MCP tools, cutting a marketer's turnaround from 1 to 2 hours to 10 to 15 minutes.</li>
+        <li>Scaled marketing automation tenfold across Meta and Google, to more than 300 brands.</li>
+        <li>Opened the Amazon Ads market through prototype-led discovery.</li>
+      </ul>
+    </li>
+    <li>
+      <p class="career-when">2022 to 2024</p>
+      <h3 class="career-role">AI Product Manager, founding PM of optimisation</h3>
+      <ul>
+        <li>Shipped regression and deep-learning features for strategic and tactical campaign decisions.</li>
+        <li>The optimisation engine cut client ad spend by 5 to 15%, saving millions across Meta and Google, and raised marketer productivity by 50 to 60%.</li>
+        <li>Delivered ETL pipelines integrating four microservices.</li>
+      </ul>
+    </li>
+    <li>
+      <p class="career-when">2020 to 2022</p>
+      <h3 class="career-role">Associate Product Manager</h3>
+      <ul>
+        <li>Interviewed more than 70 marketers and turned what they said into the product roadmap.</li>
+      </ul>
+    </li>
+  </ol>
 </section>
 
 </div>
 
-<!-- ============ Builds ============ -->
-<section class="chapter" id="builds" aria-labelledby="builds-title">
+<!-- ============ Personal ============ -->
+<section class="chapter" id="personal" data-pin="Personal" aria-labelledby="personal-title">
   <header class="ch-head wrap">
     <p class="ch-where">Evenings and weekends</p>
-    <h2 class="ch-title" id="builds-title">Small products, built to learn fast.</h2>
+    <h2 class="ch-title" id="personal-title">Built for my own life, and my church.</h2>
     <div class="ch-side">
-      <p class="ch-intro">One for my church, one for friends who argue about where to eat, and one for the hardest kind of journaling.</p>
+      <p class="ch-intro">Small products where I'm the first user: money, investing, eating out in Mumbai, and a website for the church I belong to.</p>
     </div>
   </header>
   <div class="showcase wrap" data-showcase>
     <div class="sc-copy">
       <ol class="sc-list">
-        <li class="sc-item" data-video="selah" data-frame="phone">
-          <button class="sc-btn" type="button"><span class="sc-name">Selah</span><span class="sc-line">Write about your day; get Scripture back.</span></button>
-          <div class="sc-detail"><p>Answers an honest entry with Scripture, a prayer and three small things to do, then ends. Runs on a local model, with a safety check before anything is written back.</p></div>
+        <li class="sc-item" data-video="money-plan" data-frame="browser" data-title="Money Plan">
+          <button class="sc-btn" type="button"><span class="sc-name">Money Plan</span><span class="sc-line">A year of money, planned and tracked.</span></button>
+          <div class="sc-detail"><p>Built from my bank and card statements: twelve months of rent, giving, cards, savings, debts and trips, and a tracker that forecasts from each balance check-in. <em>Shown with made-up figures.</em></p></div>
           <span class="sc-bar" aria-hidden="true"><i></i></span>
         </li>
-        <li class="sc-item" data-video="revuwala" data-frame="phone">
-          <button class="sc-btn" type="button"><span class="sc-name">Revuwala</span><span class="sc-line">Where to eat in Mumbai, and what to order.</span></button>
-          <div class="sc-detail"><p>Built from the Google reviews of 50 of the city's most-reviewed restaurants and real Reddit threads. No invented quotes.</p></div>
+        <li class="sc-item" data-html="trade" data-frame="phone">
+          <button class="sc-btn" type="button"><span class="sc-name">Investment agent</span><span class="sc-line">It proposes trades and waits for my yes.</span></button>
+          <div class="sc-detail"><p>In testing: four strategies backtested, two passed and now run on paper. Every proposal reaches my phone and nothing happens without an approve. A phone can halt it, but only the laptop can restart it. 39 automated tests, and an alert if it ever goes quiet. Live trading is built but stays switched off. <em>Recreated here with invented figures.</em></p></div>
+          <span class="sc-bar" aria-hidden="true"><i></i></span>
+        </li>
+        <li class="sc-item" data-video="eatouts-mumbai" data-frame="phone">
+          <button class="sc-btn" type="button"><span class="sc-name">Eatouts Mumbai</span><span class="sc-line">What to order at the city's favourite tables.</span></button>
+          <div class="sc-detail"><p>Built from the Google reviews of 50 of Mumbai's most-reviewed restaurants and real Reddit threads: what each place is for, what to order by course, and what to watch out for.</p></div>
           <span class="sc-bar" aria-hidden="true"><i></i></span>
         </li>
         <li class="sc-item" data-video="gbf-site" data-frame="browser" data-title="gbf-blr.com">
@@ -267,11 +348,27 @@
           <span class="sc-bar" aria-hidden="true"><i></i></span>
         </li>
       </ol>
-      <p class="sc-also">Also in progress: an agent that finds and applies for jobs for internationally trained nurses, and Meeting Memory, which tells you when today's idea was already turned down, and why.</p>
     </div>
     <div class="sc-stage">
       <div class="device phone" data-device="phone">
-        <div class="device-screen"><video class="dv-video" muted playsinline preload="none"></video></div>
+        <div class="device-screen">
+          <video class="dv-video" muted playsinline preload="none"></video>
+          <div class="dv-html" data-html="trade" hidden>
+            <div class="trd" data-trd>
+              <div class="trd-head"><span class="trd-avatar">TL</span><span><b>Trading loop</b><small>bot</small></span></div>
+              <div class="trd-log">
+                <div class="trd-msg bot" data-step="1"><b>Proposal 41</b><br>SOL/USDT, daily breakout<br>Buy 0.8 at 142.10, stop 136.40<br>Risk 0.5% of the sleeve. Expires 15:30.</div>
+                <div class="trd-msg me" data-step="2">approve 41</div>
+                <div class="trd-msg bot" data-step="3">Approved 41. Paper fill at 142.08. Stop is live.</div>
+                <div class="trd-msg me" data-step="4">status</div>
+                <div class="trd-msg bot" data-step="5">4 strategies running. 1 open position. Last heartbeat 2 min ago.</div>
+                <div class="trd-msg me" data-step="6">kill crypto</div>
+                <div class="trd-msg bot" data-step="7">Crypto sleeve halted. Only the laptop can restart it.</div>
+              </div>
+              <div class="trd-input"><span data-trd-typed></span><i class="ads-caret"></i></div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="device browser" data-device="browser">
         <div class="browser-bar"><span class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="browser-title" data-title></span></div>
@@ -282,39 +379,46 @@
 </section>
 
 <!-- ============ AI ============ -->
-<section class="chapter" id="ai" aria-labelledby="ai-title">
+<section class="chapter" id="ai" data-pin="AI" aria-labelledby="ai-title">
   <header class="ch-head wrap">
-    <p class="ch-where">Across all of it</p>
-    <h2 class="ch-title" id="ai-title">What building with AI has taught me.</h2>
+    <p class="ch-where">At work and at home</p>
+    <h2 class="ch-title" id="ai-title">The jobs I hand to AI.</h2>
     <div class="ch-side">
-      <p class="ch-intro">The products above share a few habits. Here they are, with where each one shows up.</p>
+      <p class="ch-intro">Models, agents and scripts do real work for me every week. These are the jobs, with where each one shows up.</p>
     </div>
   </header>
-  <div class="ai wrap">
-    <ul class="skills">
-      <li><h3>Voice in, structured records out</h3><p>Speech is the fastest input for busy hands. The work is turning it into records that pass an audit.</p><p class="seen">CarePilot, the Zenea voice log</p></li>
-      <li><h3>Small models on real conversations</h3><p>A small model tags every conversation by need and by unanswered question. 78% of nurses who got no answer never came back, so filling gaps became a workstream.</p><p class="seen">Ask</p></li>
-      <li><h3>Defining good before tuning</h3><p>An annotation tool and an evaluation framework built on more than 10,000 care reports, so fine-tuning had a target.</p><p class="seen">CarePilot</p></li>
-      <li><h3>Agents with tools</h3><p>Existing models exposed as MCP tools, so an agent can answer and act in one conversation, with a person approving the action.</p><p class="seen">Ads Agent</p></li>
-      <li><h3>Local models for private words</h3><p>Some writing should never leave the device. Selah runs on a local model, with a deterministic safety check in front.</p><p class="seen">Selah</p></li>
-      <li><h3>Agents that remember</h3><p>Every project keeps its state in plain markdown, so any model can pick up where the last one stopped. <a href="#writing">I've written up how</a>.</p><p class="seen">This website, and a dozen other projects</p></li>
-    </ul>
-    <div class="ai-demo">
-      <p class="ai-demo-title">A small model tagging questions as they arrive</p>
-      <ul class="stream" data-stream aria-label="Incoming questions, tagged by the model"></ul>
-      <div class="tally" data-tally aria-label="Tags in this demo">
-        <div data-k="Language"><b>0</b>Language</div>
-        <div data-k="Clinical"><b>0</b>Clinical</div>
-        <div data-k="Paperwork"><b>0</b>Paperwork</div>
-        <div data-k="Recognition"><b>0</b>Recognition</div>
-        <div class="gap" data-k="Unanswered"><b>0</b>Unanswered</div>
-      </div>
+  <div class="jobs wrap">
+    <div class="jobs-col" data-sub="At work">
+      <h3 class="jobs-h">At work</h3>
+      <ul class="jobs-list">
+        <li><b>Business and product analytics</b><span>Six automated pipelines feed the weekly MIS and the executive dashboard; a root-cause analysis whenever a number moves.</span></li>
+        <li><b>Prototyping and requirements</b><span>Clickable prototypes and specs in days. Most of the screens on this page began that way.</span></li>
+        <li><b>Production-grade proofs of concept, with tests</b><span>POCs built to run like products: an MCP server over the app's data, learning-platform services, a migration portal.</span></li>
+        <li><b>Annotation and evaluation</b><span>Conversations labelled by need and gap with a small model I run for analysis, and the 10,000-report evaluation set behind CarePilot.</span></li>
+        <li><b>Research</b><span>Nurse recognition and migration rules across countries, and German care funding, with each claim tied to its source.</span></li>
+        <li><b>Paperwork</b><span>Recognition and visa applications drafted from a candidate's documents.</span></li>
+        <li><b>Curriculum</b><span>Zenea's learning plan: activities for each age and area, checked for safety and matched to a video.</span></li>
+        <li><b>Weekly reporting</b><span>The weekly update and executive brief drafted from the MIS, ready for me to review.</span></li>
+      </ul>
+    </div>
+    <div class="jobs-col" data-sub="In my own life">
+      <h3 class="jobs-h">In my own life</h3>
+      <ul class="jobs-list">
+        <li><b>Finding food</b><span>Eatouts Mumbai reads the reviews of the city's most-reviewed restaurants so I know what to order.</span></li>
+        <li><b>Money and taxes</b><span>A year plan and tracker built from my statements, with tax planned before it's due.</span></li>
+        <li><b>Investing</b><span>An agent that backtests, trades on paper, and asks me before it acts.</span></li>
+        <li><b>Websites for organisations</b><span>My church's website, and planning for its youth camp: minutes turned into a live task tracker.</span></li>
+        <li><b>Health</b><span>Lab reports turned into a plan and a daily coach.</span></li>
+        <li><b>Learning</b><span>A guitar course paced to me, and study notes for teaching the Bible.</span></li>
+        <li><b>Life admin</b><span>Scripts that handle utility bills, and an inbox that sorts itself, still in progress.</span></li>
+        <li><b>Remembering decisions</b><span>Meeting Memory, which will tell me when an idea on the table was already turned down, and why.</span></li>
+      </ul>
     </div>
   </div>
 </section>
 
 <!-- ============ Writing ============ -->
-<section class="chapter wrap" id="writing" aria-labelledby="writing-title">
+<section class="chapter wrap" id="writing" data-pin="Writing" aria-labelledby="writing-title">
   <header class="ch-head ch-head-plain">
     <h2 class="ch-title" id="writing-title">Notes on working with agents.</h2>
     <div class="ch-side"><p class="ch-intro">How I set up AI to work across a dozen projects without explaining everything again each session.</p></div>
@@ -350,11 +454,11 @@
 </main>
 
 <footer class="foot wrap">
-  <span>Sujith Benhur, 2026. Demos are recordings of working prototypes; the Ads Agent is a recreation with invented data.</span>
+  <span>Sujith Benhur, 2026. Demos are recordings of working prototypes. Ask is assembled from its prototypes in the app's own components; the Ads Agent and the investment agent are recreations, and the Money Plan shows made-up figures.</span>
   <button type="button" data-theme-toggle>Switch to dark</button>
 </footer>
 
 <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
-<script src="assets/site.js?v=2" defer></script>
+<script src="assets/site.js?v=6" defer></script>
 </body>
 </html>

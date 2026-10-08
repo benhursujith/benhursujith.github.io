@@ -7,6 +7,7 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const MEDIA = 'assets/media/demos/';
+  const wide = matchMedia('(min-width: 901px)');
 
   /* ---------- Theme ---------- */
   const themeBtn = $('[data-theme-toggle]');
@@ -63,24 +64,81 @@
   (document.fonts ? document.fonts.ready : Promise.resolve()).then(() => requestAnimationFrame(ready));
   setTimeout(ready, 1400);
 
-  /* ---------- Masthead + current section ---------- */
+  /* ---------- Masthead, current section, pinned headings ---------- */
   const mast = $('.masthead');
-  let lastY = scrollY;
+  let lastY = scrollY, mastH = 0, pinH = 0, mastShown = true;
   const navLinks = $$('.nav a[href^="#"]');
   const sections = navLinks.map((a) => $(a.getAttribute('href'))).filter(Boolean);
+
+  // While a chapter scrolls, a compact copy of its heading holds the top edge (sticky, so the next chapter
+  // pushes it out), with the part you're reading on the right and a line for how far through you are.
+  const pins = $$('[data-pin]').map((ch) => {
+    const pin = document.createElement('div');
+    pin.className = 'pin';
+    pin.setAttribute('aria-hidden', 'true');
+    pin.innerHTML = '<div class="pin-bar wrap"><span class="pin-name"></span><span class="pin-title"></span><span class="pin-sub"></span><span class="pin-line"><i></i></span></div>';
+    $('.pin-name', pin).textContent = ch.dataset.pin;
+    $('.pin-title', pin).textContent = $('.ch-title, h1', ch)?.textContent.trim() || '';
+    ch.prepend(pin);
+    return { ch, pin, head: $('.ch-head, .article-head', ch), subs: $$('[data-sub], .prose h2', ch),
+      sub: $('.pin-sub', pin), line: $('.pin-line i', pin), text: null, timer: 0 };
+  });
+  const setMastH = () => root.style.setProperty('--mast-h', `${mastShown ? mastH : 0}px`);
+  const measure = () => { mastH = mast?.offsetHeight || 0; pinH = pins[0]?.pin.offsetHeight || 0; setMastH(); };
+
+  function syncPins() {
+    if (!pins.length) return;
+    const edge = (mastShown ? mastH : 0) + pinH;
+    const reading = innerHeight * 0.45;
+    // Read every position first, then write, so the page lays out once per frame.
+    const states = pins.map(({ ch, head, subs }) => {
+      const box = ch.getBoundingClientRect();
+      if (box.bottom < 0 || box.top > innerHeight) return null;
+      const end = head.getBoundingClientRect().bottom;
+      let text = '', top = -Infinity;
+      subs.forEach((s) => {
+        const t = s.getBoundingClientRect().top;
+        if (t > reading) return;
+        if (Math.abs(t - top) < 2) text = '';          // side by side, like two columns: name neither
+        else { top = t; text = s.dataset.sub || s.textContent.trim(); }
+      });
+      return { on: end < edge, text, p: clamp((edge - end) / Math.max(1, box.bottom - end)) };
+    });
+    states.forEach((s, i) => {
+      if (!s) return;
+      const p = pins[i];
+      p.pin.classList.toggle('is-on', s.on);
+      p.line.style.setProperty('--p', s.p.toFixed(4));
+      if (s.text === p.text) return;
+      p.text = s.text;
+      clearTimeout(p.timer);
+      p.sub.style.opacity = 0;
+      p.timer = setTimeout(() => {
+        p.sub.textContent = p.text;
+        p.sub.style.opacity = 1;
+        p.pin.classList.toggle('has-sub', !!p.text);
+      }, p.sub.textContent ? 180 : 0);
+    });
+  }
+
   function onScroll() {
     const y = scrollY;
     mast?.classList.toggle('is-scrolled', y > 40);
     if (!root.classList.contains('menu-open')) mast?.classList.toggle('is-hidden', y > lastY && y > 480);
     lastY = y;
+    const shown = !mast?.classList.contains('is-hidden');
+    if (shown !== mastShown) { mastShown = shown; setMastH(); }
     let current = null;
     sections.forEach((s) => { if (s.getBoundingClientRect().top < innerHeight * 0.4) current = s.id; });
     navLinks.forEach((a) => {
       if (a.getAttribute('href') === `#${current}`) a.setAttribute('aria-current', 'true');
       else a.removeAttribute('aria-current');
     });
+    syncPins();
   }
   addEventListener('scroll', onScroll, { passive: true });
+  addEventListener('resize', () => { measure(); syncPins(); });
+  measure();
 
   /* ---------- Helpers ---------- */
   function onVisible(el, enter, leave, threshold = 0.35) {
@@ -94,14 +152,40 @@
     const timers = steps.map(([at, fn]) => setTimeout(fn, at));
     return () => timers.forEach(clearTimeout);
   }
-  // Scale a fixed-size virtual screen (1280 x 800) to its frame.
+  // Scale a fixed-size virtual screen (390 x 844 or 1280 x 800) to its frame.
   function fit(container, baseWidth) {
     const set = () => container.style.setProperty('--s', container.clientWidth / baseWidth);
     new ResizeObserver(set).observe(container);
     set();
   }
 
-  /* ---------- Recreated demo (time-based, like a video) ---------- */
+  /* ---------- Phone frames: one status bar and Dynamic Island for every screen ---------- */
+  const STATUS = `<div class="phone-status" aria-hidden="true"><span>9:41</span><span class="phone-icons">
+    <svg viewBox="0 0 18 12"><rect x="0" y="8" width="3" height="4" rx="1"/><rect x="5" y="5.5" width="3" height="6.5" rx="1"/><rect x="10" y="3" width="3" height="9" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+    <svg viewBox="0 0 16 12"><path d="M8 2.6c2.2 0 4.2.9 5.7 2.3l1.3-1.3A9.9 9.9 0 0 0 8 .8 9.9 9.9 0 0 0 1 3.6l1.3 1.3A8.1 8.1 0 0 1 8 2.6Zm0 3.6c1.2 0 2.3.5 3.1 1.3l1.3-1.3A6.2 6.2 0 0 0 8 4.4c-1.7 0-3.3.7-4.4 1.8l1.3 1.3c.8-.8 1.9-1.3 3.1-1.3Zm0 3.6c-.5 0-1 .2-1.3.6L8 11.7l1.3-1.3a1.9 1.9 0 0 0-1.3-.6Z"/></svg>
+    <svg viewBox="0 0 27 12"><rect x=".5" y=".5" width="23" height="11" rx="3.2" fill="none" stroke="currentColor" opacity=".4"/><rect x="2" y="2" width="20" height="8" rx="2"/><path d="M25 4v4a2 2 0 0 0 0-4Z" opacity=".45"/></svg>
+  </span></div><div class="phone-island" aria-hidden="true"></div><div class="phone-home" aria-hidden="true"></div>`;
+  $$('.device.phone .device-screen').forEach((s) => s.insertAdjacentHTML('beforeend', STATUS));
+  $$('.phone-icons svg').forEach((s) => s.setAttribute('fill', 'currentColor'));
+
+  // Keep the status bar readable: sample the top band of each playing phone video a few times a second
+  // and switch the status text between dark and light, the way iOS does over dark sheets.
+  const probe = document.createElement('canvas');
+  probe.width = probe.height = 1;
+  const pctx = probe.getContext('2d', { willReadFrequently: true });
+  setInterval(() => {
+    $$('.device.phone .dv-video').forEach((v) => {
+      if (v.hidden || v.paused || v.readyState < 2 || !v.videoWidth) return;
+      try {
+        pctx.drawImage(v, v.videoWidth * 0.5, v.videoHeight * 0.025, 4, 4, 0, 0, 1, 1);
+        const [r, g, b] = pctx.getImageData(0, 0, 1, 1).data;
+        const dark = (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.45;
+        v.closest('.device-screen')?.classList.toggle('band-dark', dark);
+      } catch (e) { /* frame not ready */ }
+    });
+  }, 300);
+
+  /* ---------- Recreated demos (time-based, like a video) ---------- */
   const htmlDemos = {
     ads(container) {
       const app = $('[data-ads]', container);
@@ -114,13 +198,8 @@
       let cancel = () => {};
       const DURATION = 13000;
       const show = (n) => turns.forEach((t) => { if (+t.dataset.step === n) t.classList.add('on'); });
-      const reset = () => {
-        turns.forEach((t) => t.classList.remove('on'));
-        typed.textContent = '';
-        move.classList.remove('is-press');
-        cursor.style.setProperty('--x', '1180px');
-        cursor.style.setProperty('--y', '840px');
-      };
+      const park = () => { cursor.style.setProperty('--x', '1180px'); cursor.style.setProperty('--y', '840px'); };
+      const reset = () => { turns.forEach((t) => t.classList.remove('on')); typed.textContent = ''; move.classList.remove('is-press'); park(); };
       const pointAt = (el) => {
         const s = parseFloat(container.style.getPropertyValue('--s')) || 1;
         const a = app.getBoundingClientRect(), r = el.getBoundingClientRect();
@@ -141,12 +220,7 @@
             [sent + 2200, () => show(4)],
             [sent + 4200, () => pointAt(move)],
             [sent + 5400, () => move.classList.add('is-press')],
-            [sent + 5700, () => {
-              move.classList.remove('is-press');
-              show(6);
-              cursor.style.setProperty('--x', '1180px');
-              cursor.style.setProperty('--y', '840px');
-            }],
+            [sent + 5700, () => { move.classList.remove('is-press'); show(6); park(); }],
             [sent + 6500, () => show(7)],
             [DURATION, () => onEnd && onEnd()],
           );
@@ -156,11 +230,44 @@
         still() { this.stop(); reset(); [1, 2, 3, 4].forEach(show); },
       };
     },
+
+    trade(container) {
+      const app = $('[data-trd]', container);
+      fit(container, 390);
+      const msgs = $$('[data-step]', app);
+      const typed = $('[data-trd-typed]', app);
+      let cancel = () => {};
+      const DURATION = 14000;
+      const show = (n) => msgs.forEach((m) => { if (+m.dataset.step === n) m.classList.add('on'); });
+      const reset = () => { msgs.forEach((m) => m.classList.remove('on')); typed.textContent = ''; };
+      // Type a reply into the input, then send it as message n.
+      const reply = (at, text, n) => [
+        ...[...text].map((ch, i) => [at + i * 70, () => { typed.textContent += ch; }]),
+        [at + text.length * 70 + 300, () => { typed.textContent = ''; show(n); }],
+      ];
+      return {
+        duration: DURATION,
+        play(onEnd) {
+          this.stop();
+          reset();
+          cancel = timeline([
+            [300, () => show(1)],
+            ...reply(1700, 'approve 41', 2),
+            [3900, () => show(3)],
+            ...reply(5300, 'status', 4),
+            [7100, () => show(5)],
+            ...reply(8500, 'kill crypto', 6),
+            [10800, () => show(7)],
+            [DURATION, () => onEnd && onEnd()],
+          ]);
+        },
+        stop() { cancel(); },
+        still() { this.stop(); reset(); msgs.forEach((m) => m.classList.add('on')); },
+      };
+    },
   };
 
   /* ---------- Showcase: a list of apps beside one device that plays them in turn ---------- */
-  const wide = matchMedia('(min-width: 901px)');
-
   function setupShowcase(sc) {
     const items = $$('.sc-item', sc);
     const stage = $('.sc-stage', sc);
@@ -281,43 +388,194 @@
   }
   $$('[data-showcase]').forEach(setupShowcase);
 
-  /* ---------- Tagging stream ---------- */
-  const stream = $('[data-stream]');
-  if (stream) {
-    const qs = [
-      ["What's the German word for a bedsore?", ['Language']],
-      ['Do I need B2 German for the knowledge exam in Bavaria?', ['Recognition', 'Language']],
-      ['How do I chart a fall that nobody saw?', ['Paperwork', 'Clinical']],
-      ['Can my husband join me on my work visa?', ['Recognition', 'Unanswered']],
-      ['What does Grundpflege cover, exactly?', ['Clinical', 'Language']],
-      ['How many hours can I work during the adaptation course?', ['Recognition']],
-      ['Can I refuse a second shift in a row?', ['Unanswered']],
-      ['How do I write the SIS for a new resident?', ['Paperwork']],
-      ['What do I say when a resident refuses their tablets?', ['Clinical', 'Language']],
-      ['Where do I find my recognition file number?', ['Recognition', 'Unanswered']],
-      ['How formal should I be with my ward manager?', ['Language']],
-      ['Who signs off the wound documentation, me or the doctor?', ['Paperwork', 'Clinical']],
-    ];
-    const tally = Object.fromEntries($$('[data-k]').map((d) => [d.dataset.k, $('b', d)]));
-    const counts = {};
-    let i = 0, timer = null;
-    const count = (tags) => tags.forEach((t) => {
-      counts[t] = (counts[t] || 0) + 1;
-      if (tally[t]) tally[t].textContent = counts[t];
+  /* ---------- Slides: one product per slide, each with its own phone ---------- */
+  function setupSlides(el) {
+    const tabs = $$('.slides-tab', el);
+    const slides = $$('.slide', el);
+    const track = $('.slides-track', el);
+    let idx = 0, visible = false, started = false, raf = 0;
+    const videoOf = (i) => $('video', slides[i]);
+    const bar = (i, p) => $('.sc-bar i', tabs[i])?.style.setProperty('--p', p);
+
+    function stop() {
+      cancelAnimationFrame(raf);
+      slides.forEach((s, i) => videoOf(i)?.pause());
+    }
+    function load(i) {
+      const v = videoOf(i);
+      if (!v || v.dataset.src) return;
+      const src = MEDIA + slides[i].dataset.video;
+      v.dataset.src = src;
+      v.poster = `${src}.jpg`;
+      v.src = `${src}.mp4`;
+    }
+    function play() {
+      if (!visible || reduce) return;
+      const v = videoOf(idx);
+      if (!v) return;
+      v.loop = !wide.matches;
+      v.play().catch(() => {});
+      cancelAnimationFrame(raf);
+      const tick = () => { if (v.duration) bar(idx, clamp(v.currentTime / v.duration)); raf = requestAnimationFrame(tick); };
+      raf = requestAnimationFrame(tick);
+    }
+    function go(i) {
+      stop();
+      bar(idx, 0);
+      idx = (i + slides.length) % slides.length;
+      track.style.transform = `translateX(${-idx * 100}%)`;
+      tabs.forEach((t, k) => t.setAttribute('aria-selected', String(k === idx)));
+      slides.forEach((s, k) => { s.inert = k !== idx; });
+      load(idx);
+      load((idx + 1) % slides.length);
+      const v = videoOf(idx);
+      if (v) {
+        try { v.currentTime = 0; } catch (e) { /* not loaded yet */ }
+        v.onended = () => go(idx + 1);
+      }
+      el.dataset.sub = $('.sc-name', tabs[idx])?.textContent || '';
+      syncPins();
+      play();
+    }
+    tabs.forEach((t, i) => t.addEventListener('click', () => { started = true; go(i); }));
+
+    // Swipe between slides on touch screens.
+    let x0 = null;
+    const vp = $('.slides-viewport', el);
+    vp.addEventListener('pointerdown', (e) => { if (e.pointerType !== 'mouse') x0 = e.clientX; });
+    vp.addEventListener('pointerup', (e) => {
+      if (x0 === null) return;
+      const dx = e.clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) > 50) { started = true; go(idx + (dx < 0 ? 1 : -1)); }
     });
-    const item = ([q, tags], animate) => {
-      const li = document.createElement('li');
-      li.innerHTML = `<span class="q">${q}</span><span class="tags">${tags.map((t) => `<span class="tag${t === 'Unanswered' ? ' gap' : ''}">${t === 'Unanswered' ? 'No answer found' : t}</span>`).join('')}</span>`;
-      if (animate) li.classList.add('enter');
-      stream.prepend(li);
-      const tagEls = $$('.tag', li);
-      if (!animate) tagEls.forEach((t) => t.classList.add('on'));
-      else tagEls.forEach((t, k) => setTimeout(() => t.classList.add('on'), 700 + k * 260));
-      while (stream.children.length > 5) stream.lastElementChild.remove();
+
+    onVisible(el, () => {
+      visible = true;
+      if (!started) { started = true; go(0); } else play();
+    }, () => { visible = false; stop(); }, 0.3);
+  }
+  $$('[data-slides]').forEach(setupSlides);
+
+  /* ---------- Hero highlights: story-style cards on the phone ---------- */
+  function setupHighlights(el) {
+    fit(el.parentElement, 390);
+    const cards = $$('.hl-card', el);
+    const bars = $$('.hl-bars i', el);
+    const track = $('.hl-track', el);
+    const DWELL = 4200;
+    let idx = 0, t0 = 0, raf = 0, visible = false;
+    const paint = () => {
+      bars.forEach((b, k) => {
+        b.classList.toggle('done', k < idx);
+        $('b', b).style.width = k === idx ? `${clamp((performance.now() - t0) / DWELL) * 100}%` : '';
+      });
     };
-    for (; i < 4; i++) { item(qs[i], false); count(qs[i][1]); }
-    const tick = () => { const q = qs[i++ % qs.length]; item(q, true); setTimeout(() => count(q[1]), 900); };
-    if (!reduce) onVisible(stream, () => { if (!timer) timer = setInterval(tick, 2600); }, () => { clearInterval(timer); timer = null; }, 0.2);
+    function go(i, user) {
+      idx = (i + cards.length) % cards.length;
+      track.style.transform = `translateX(${-idx * 100}%)`;
+      cards.forEach((c, k) => { c.classList.toggle('on', k === idx); c.setAttribute('aria-hidden', String(k !== idx)); });
+      if (user) el.classList.add('touched');
+      t0 = performance.now();
+      paint();
+    }
+    const tick = () => {
+      if (!visible) return;
+      if (!reduce && performance.now() - t0 >= DWELL) go(idx + 1);
+      paint();
+      raf = requestAnimationFrame(tick);
+    };
+    let swiped = false;   // a swipe ends with a click on a tap zone; don't count it twice
+    $('.hl-zone.next', el).addEventListener('click', () => { if (!swiped) go(idx + 1, true); swiped = false; });
+    $('.hl-zone.prev', el).addEventListener('click', () => { if (!swiped) go(idx - 1, true); swiped = false; });
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') { e.preventDefault(); go(idx + 1, true); }
+      if (e.key === 'ArrowLeft') { e.preventDefault(); go(idx - 1, true); }
+    });
+    let x0 = null;
+    el.addEventListener('pointerdown', (e) => { x0 = e.clientX; });
+    el.addEventListener('pointerup', (e) => {
+      if (x0 === null) return;
+      const dx = e.clientX - x0; x0 = null;
+      if (Math.abs(dx) > 40) { swiped = true; go(idx + (dx < 0 ? 1 : -1), true); setTimeout(() => { swiped = false; }, 400); }
+    });
+    go(0);
+    onVisible(el, () => { visible = true; t0 = performance.now(); cancelAnimationFrame(raf); raf = requestAnimationFrame(tick); },
+      () => { visible = false; cancelAnimationFrame(raf); }, 0.2);
+  }
+  $$('[data-highlights]').forEach(setupHighlights);
+
+  /* ---------- MIS: rounded running totals from the weekly MIS, March to September 2026 ---------- */
+  const mis = $('[data-mis]');
+  if (mis) {
+    const start = new Date(2026, 2, 2);
+    const weeks = Array.from({ length: 31 }, (_, i) => new Date(start.getTime() + i * 7 * 864e5));
+    const series = {
+      nurses: [100, 210, 340, 440, 520, 600, 730, 850, 1060, 1380, 1810, 2080, 2300, 2680, 2920, 3170, 3400, 3540, 3730, 3860, 4060, 4160, 4390, 4510, 4630, 4730, 4830, 4950, 5190, 5310, 5450],
+      ask: [0, 0, 0, 0, 0, 0, 10, 280, 720, 1240, 1960, 2870, 3780, 4590, 5330, 6330, 7200, 7780, 8580, 9230, 10210, 10650, 11140, 11680, 11990, 12380, 12730, 13050, 13660, 14210, 14820],
+      learn: [2320, 2840, 3380, 4240, 5410, 6950, 9140, 10820, 12810, 14840, 17320, 20050, 22980, 27430, 31350, 34980, 37920, 40180, 41770, 42860, 43930, 44610, 45690, 47400, 48910, 50390, 52010, 53050, 54290, 55340, 56260],
+    };
+    const num = (n) => n.toLocaleString('en-IN');
+    const day = (d) => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    const svgNS = 'http://www.w3.org/2000/svg';
+
+    // Main chart: one series, area wash, end label, crosshair tooltip.
+    const box = $('[data-chart="nurses"]', mis);
+    const data = series.nurses;
+    const W = 640, H = 300, L = 44, R = 56, T = 16, B = 28;
+    const max = 6000;
+    const x = (i) => L + (i / (data.length - 1)) * (W - L - R);
+    const y = (v) => T + (1 - v / max) * (H - T - B);
+    const pts = data.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
+    let g = '';
+    for (let v = 0; v <= max; v += 2000) {
+      g += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/>`;
+      g += `<text class="axis" x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${num(v)}</text>`;
+    }
+    weeks.forEach((d, i) => {
+      if (i > 0 && d.getMonth() === weeks[i - 1].getMonth()) return;
+      g += `<text class="axis" x="${x(i)}" y="${H - 8}" text-anchor="middle">${d.toLocaleDateString('en-GB', { month: 'short' })}</text>`;
+    });
+    g += `<path class="area" d="M${x(0)},${y(0)} L${pts.join(' L')} L${x(data.length - 1)},${y(0)} Z"/>`;
+    g += `<polyline class="line" points="${pts.join(' ')}"/>`;
+    const last = data.length - 1;
+    g += `<circle class="dot" cx="${x(last)}" cy="${y(data[last])}" r="4.5"/>`;
+    g += `<text class="end-label" x="${x(last) + 10}" y="${y(data[last]) + 4}">${num(data[last])}</text>`;
+    g += `<line class="cross" x1="0" x2="0" y1="${T}" y2="${H - B}" visibility="hidden"/>`;
+    g += `<circle class="dot hover" r="4.5" visibility="hidden"/>`;
+    g += `<rect class="hit" x="${L}" y="${T}" width="${W - L - R}" height="${H - T - B}" fill="transparent"/>`;
+    box.innerHTML = `<svg viewBox="0 0 ${W} ${H}" xmlns="${svgNS}">${g}</svg><div class="tip" hidden></div>`;
+    const svg = $('svg', box), tip = $('.tip', box), cross = $('.cross', svg), hdot = $('.hover', svg);
+    const showAt = (clientX) => {
+      const r = svg.getBoundingClientRect();
+      const sx = ((clientX - r.left) / r.width) * W;
+      const i = Math.round(clamp((sx - L) / (W - L - R)) * last);
+      cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i));
+      hdot.setAttribute('cx', x(i)); hdot.setAttribute('cy', y(data[i]));
+      cross.setAttribute('visibility', 'visible'); hdot.setAttribute('visibility', 'visible');
+      tip.hidden = false;
+      tip.innerHTML = `<b>${num(data[i])}</b> <span>nurses, week of ${day(weeks[i])}</span>`;
+      tip.style.left = `${(x(i) / W) * 100}%`;
+      tip.style.top = `${(y(data[i]) / H) * r.height}px`;
+    };
+    const hide = () => { cross.setAttribute('visibility', 'hidden'); hdot.setAttribute('visibility', 'hidden'); tip.hidden = true; };
+    svg.addEventListener('pointermove', (e) => showAt(e.clientX));
+    svg.addEventListener('pointerleave', hide);
+
+    // Sparklines in the tiles: same series, no axes.
+    $$('[data-spark]', mis).forEach((el) => {
+      const d = series[el.dataset.spark];
+      const top = Math.max(...d);
+      const sx = (i) => (i / (d.length - 1)) * 120, sy = (v) => 36 - (v / top) * 32;
+      const p = d.map((v, i) => `${sx(i).toFixed(1)},${sy(v).toFixed(1)}`).join(' ');
+      el.innerHTML = `<svg viewBox="0 0 120 40" xmlns="${svgNS}"><polyline points="${p}" fill="none" stroke="var(--green)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/><circle cx="120" cy="${sy(d[d.length - 1])}" r="3.5" fill="var(--green)" stroke="var(--paper)" stroke-width="2"/></svg>`;
+    });
+
+    // Table view: the last week of each month.
+    const rows = $('[data-mis-rows]', mis);
+    rows.innerHTML = weeks.map((d, i) => [d, i]).filter(([d, i]) => i === last || d.getMonth() !== weeks[i + 1].getMonth())
+      .map(([d, i]) => `<tr><td>${d.toLocaleDateString('en-GB', { month: 'long' })}</td><td>${num(series.nurses[i])}</td><td>${num(series.ask[i])}</td><td>${num(series.learn[i])}</td></tr>`)
+      .join('');
   }
 
   onScroll();
