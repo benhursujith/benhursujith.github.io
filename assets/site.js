@@ -393,6 +393,7 @@
     learn: [2320, 2840, 3380, 4240, 5410, 6950, 9140, 10820, 12810, 14840, 17320, 20050, 22980, 27430, 31350, 34980, 37920, 40180, 41770, 42860, 43930, 44610, 45690, 47400, 48910, 50390, 52010, 53050, 54290, 55340, 56260],
   };
   const num = (n) => n.toLocaleString('en-IN');
+  const EPISODE_MIN = 5;   // learning hours count each completed episode as five minutes
   const month = (d) => d.toLocaleDateString('en-GB', { month: 'short' });
 
   const mis = $('[data-mis]');
@@ -454,7 +455,7 @@
     // Table view: the last week of each month.
     const rows = $('[data-mis-rows]', mis);
     rows.innerHTML = weeks.map((d, i) => [d, i]).filter(([d, i]) => i === last || d.getMonth() !== weeks[i + 1].getMonth())
-      .map(([d, i]) => `<tr><td>${d.toLocaleDateString('en-GB', { month: 'long' })}</td><td>${num(series.nurses[i])}</td><td>${num(series.ask[i])}</td><td>${num(series.learn[i])}</td></tr>`)
+      .map(([d, i]) => `<tr><td>${d.toLocaleDateString('en-GB', { month: 'long' })}</td><td>${num(series.nurses[i])}</td><td>${num(series.ask[i])}</td><td>${num(Math.round(series.learn[i] * EPISODE_MIN / 60))}</td></tr>`)
       .join('');
   }
 
@@ -492,14 +493,15 @@
     const segs = $('.st-segs', land), chapterLabel = $('.st-chapter', land);
     const countEl = $('.nn-count', land), more = $('.nn-more', land);
     const mk = $('.mk', land), mkText = $('.mk span', land);
-    const tst = $('.tst', land), tstNum = $('.tst b', land), tstText = $('.tst span', land);
+    const intro = $('.intro', land);
+    const INTRO = 2800;   // ms the title card holds before a phone story's recording starts
     const rings = $$('.ring', land);
     const ringName = Object.fromEntries(rings.map((r) => [r.dataset.go, $('.ring-name', r).textContent]));
     const order = [...new Set(notes.map((n) => n.dataset.chapter))];
     const layers = new Map();
     const seen = new Set();
     let idx = null, cur = null, raf = 0, visible = false, held = false, ended = false, segChapter = null;
-    let marks = [], markIdx = -1, metric = false;
+    let marks = [], markIdx = -1;
 
     $$('.card', land).forEach((c) => fit(c, 390));
     $$('.mk-arrow path', land).forEach((p) => p.setAttribute('pathLength', '1'));
@@ -559,6 +561,31 @@
       layers.set(key, L);
       return L;
     }
+    // A title card, then the layer: one player whose time covers both, so the story bar fills across the two.
+    function withIntro(L, n, stat) {
+      $('.intro-kick', intro).textContent = $('.note-kick', n)?.textContent || '';
+      $('.intro-title', intro).textContent = $('.note-title', n)?.textContent.trim().replace(/\s+/g, ' ') || '';
+      $('.intro-stat .marker', intro).textContent = stat;
+      $('.intro-lab', intro).textContent = $('.note-lab', n)?.textContent || '';
+      const tags = n.dataset.more ? $$(`${n.dataset.more} .row-tags li`) : [];
+      $('.intro-tags', intro).innerHTML = tags.map((li) => `<li>${li.textContent}</li>`).join('');
+      const card = clock({ duration: INTRO, steps: [], reset() {}, still() {} });
+      let main = false;
+      return {
+        el: L.el, device: L.device, src: L.src,
+        get elapsed() { return main ? INTRO + L.elapsed : card.elapsed; },
+        get duration() { return INTRO + L.duration; },
+        get media() { return main ? L.elapsed : -1; },
+        start(onEnd) {
+          main = false;
+          intro.classList.add('on');
+          card.start(() => { main = true; intro.classList.remove('on'); L.start(onEnd); });
+        },
+        resume() { if (main) L.resume(); else card.resume(); },
+        pause() { if (main) L.pause(); else card.pause(); },
+        still() { intro.classList.remove('on'); L.still(); },
+      };
+    }
     const load = (L) => { if (L.src && !L.el.getAttribute('src')) { L.el.poster = `${L.src}.jpg${MV}`; L.el.src = `${L.src}.mp4${MV}`; } };
 
     function go(i) {
@@ -569,7 +596,7 @@
         if (cur.card) cur.el.classList.remove('is-on');
       }
       cancelAnimationFrame(raf);
-      tst.classList.remove('on');
+      intro.classList.remove('on');
       mk.classList.remove('on');
       idx = i;
       ended = false;
@@ -580,9 +607,11 @@
 
       const n = notes[i];
       const L = layerFor(n);
-      cur = L;
-      L.started = false;
-      L.running = false;
+      // on phones a recording opens with a title card: the result and the tech, in the page's own type
+      const stat = $('.note-stat', n)?.textContent || '';
+      cur = (!wide.matches && !L.card && stat && !reduce) ? withIntro(L, n, stat) : L;
+      cur.started = false;
+      cur.running = false;
       Object.values(devices).forEach((d) => d.classList.toggle('is-on', d === L.device));
       land.classList.toggle('is-browser', L.device === devices.browser);
       land.classList.toggle('is-card', !!L.card);
@@ -600,11 +629,6 @@
       markIdx = -1;
       mk.classList.remove('on');
       more.setAttribute('href', n.dataset.more || '#work');
-      // on phones the story's result shows as a toast for its first few seconds (cards carry their own)
-      tstNum.textContent = $('.note-stat', n)?.textContent || '';
-      tstText.textContent = $('.note-lab', n)?.textContent || '';
-      metric = !L.card && !!tstNum.textContent;
-      tst.classList.remove('on');
       seen.add(chapterOf(i));
       paint();
       sync();
@@ -636,11 +660,9 @@
       const t = cur.elapsed;
       const seg = $$('b', segs)[inChapter(chapterOf(idx)).indexOf(idx)];
       if (seg) seg.style.width = `${clamp(t / cur.duration) * 100}%`;
-      const showMetric = metric && !wide.matches && t >= 300 && t < 3400;
-      tst.classList.toggle('on', showMetric);
+      const tm = cur.media === undefined ? t : cur.media;   // notes follow the recording, not the title card
       let m = -1;
-      marks.forEach((x, k) => { if (t >= x.at * 1000) m = k; });
-      if (m >= 0 && showMetric && marks[m].y >= 50) m = -1;   // the top of the screen is the result's, for now
+      if (tm >= 0) marks.forEach((x, k) => { if (tm >= x.at * 1000) m = k; });
       if (m === markIdx) return;
       markIdx = m;
       mk.classList.remove('on');
