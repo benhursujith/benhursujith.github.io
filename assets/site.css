@@ -463,16 +463,26 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   .article > .pin .pin-sub { margin-left: 0; font: 500 1.05rem/1.2 var(--display); color: var(--ink); }
 }
 
-/* ---------- Rows: one product at a time, the device alternating sides ---------- */
+/* ---------- Rows: one product at a time, the device alternating sides ----------
+   Device and write-up start at the top of the row. On wide screens the write-up holds still under the pinned
+   heading while the device scrolls past it; the space under the device is the distance it holds for (a sticky
+   element stops at its row's content edge, so this has to be margin on the device, not padding on the row). */
 
 .row {
   display: grid;
   grid-template-columns: minmax(0, 5fr) minmax(0, 6fr);
   column-gap: clamp(48px, 7vw, 128px);
-  align-items: center;
-  margin-top: clamp(104px, 15vh, 176px);
+  align-items: start;
+  padding-top: clamp(52px, 8vh, 88px);
 }
-.ch-head + .row, .sub-head + .row { margin-top: clamp(56px, 8vh, 96px); }
+.row-stage { margin-bottom: clamp(120px, 22vh, 220px); }
+.row-copy {
+  position: sticky;
+  top: calc(var(--mast-h) + var(--pin-h) + 36px);
+  padding-top: 20px;
+  transition: top .6s var(--ease);
+}
+.ch-head + .row, .sub-head + .row { padding-top: clamp(40px, 6vh, 72px); }
 .row--flip { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); }
 .row--flip .row-stage { order: 2; }
 .row--wide { grid-template-columns: minmax(0, 7fr) minmax(0, 4fr); }
@@ -494,7 +504,9 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .sc-stage:not(:has(.phone)) { height: auto; }
 
 @media (max-width: 900px) {
-  .row, .row--flip, .row--wide, .row--wide.row--flip { grid-template-columns: minmax(0, 1fr); row-gap: 30px; margin-top: 96px; }
+  .row, .row--flip, .row--wide, .row--wide.row--flip { grid-template-columns: minmax(0, 1fr); row-gap: 30px; padding-block: 48px; }
+  .row-copy { position: static; padding-top: 0; }
+  .row-stage { margin-bottom: 0; }
   .row--flip .row-stage { order: 0; }
   .row .row-stage.sc-stage { height: auto; container-type: normal; }   /* beats .sc-stage:has(.phone), which would size it to nothing */
   .only-wide { display: none; }
@@ -657,7 +669,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 
 /* ---------- MIS ---------- */
 
-.mis { margin-top: clamp(96px, 14vh, 160px); }
+.mis { margin-top: clamp(24px, 4vh, 48px); }
 .mis-head, .sub-head { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); column-gap: clamp(32px, 5vw, 88px); row-gap: 10px; align-items: end; }
 .mis-title, .sub-title { font-size: clamp(1.9rem, 1.4rem + 1.4vw, 2.7rem); line-height: 1.04; letter-spacing: -.025em; }
 .mis-intro, .sub-intro { color: var(--ink-2); max-width: 56ch; }

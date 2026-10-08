@@ -7,6 +7,7 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const MEDIA = 'assets/media/demos/';
+  const MV = '?v=2';   // bump when any recording is re-made, so browsers don't keep the old clip
   const SVG = 'http://www.w3.org/2000/svg';
   const wide = matchMedia('(min-width: 901px)');
 
@@ -355,7 +356,7 @@
       let p;
       if (d.dataset.play === 'video') {
         const v = $('video', d);
-        const load = () => { if (!v.getAttribute('src')) { const src = MEDIA + d.dataset.src; v.poster = `${src}.jpg`; v.src = `${src}.mp4`; } };
+        const load = () => { if (!v.getAttribute('src')) { const src = MEDIA + d.dataset.src; v.poster = `${src}.jpg${MV}`; v.src = `${src}.mp4${MV}`; } };
         p = { load, play() { load(); if (!reduce) v.play().catch(() => {}); }, pause() { v.pause(); } };
       } else {
         const c = clock(htmlDemos[d.dataset.html]($('.dv-html', d)));
@@ -557,7 +558,7 @@
       layers.set(key, L);
       return L;
     }
-    const load = (L) => { if (L.src && !L.el.getAttribute('src')) { L.el.poster = `${L.src}.jpg`; L.el.src = `${L.src}.mp4`; } };
+    const load = (L) => { if (L.src && !L.el.getAttribute('src')) { L.el.poster = `${L.src}.jpg${MV}`; L.el.src = `${L.src}.mp4${MV}`; } };
 
     function go(i) {
       if (cur) {
