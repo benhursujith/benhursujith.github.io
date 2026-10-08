@@ -504,6 +504,9 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .row-facts { display: flex; flex-wrap: wrap; gap: 14px 40px; margin: 24px 0 0; padding-top: 18px; border-top: 1px solid var(--rule); }
 .row-facts dt { font-size: .84rem; color: var(--ink-2); }
 .row-facts dd { margin: 4px 0 0; font: 500 clamp(1.6rem, 1.3rem + .8vw, 2.1rem)/1 var(--display); letter-spacing: -.02em; }
+.row-tags-h { margin-top: 24px; font-size: .8rem; font-weight: 500; color: var(--ink-2); }
+.row-tags { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; max-width: 56ch; }
+.row-tags li { padding: 5px 12px 6px; border: 1px solid var(--rule); border-radius: 999px; font-size: .84rem; line-height: 1.3; }
 .row-note { margin-top: 16px; font-size: .85rem; color: var(--stone); }
 .only-narrow { display: none; }
 
