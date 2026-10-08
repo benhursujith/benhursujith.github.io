@@ -113,7 +113,8 @@
   function syncPins() {
     if (!pins.length) return;
     const edge = (mastShown ? mastH : 0) + pinH;
-    const reading = innerHeight * 0.45;
+    // wide screens name the part in view; phones name it once its title docks under the bar
+    const reading = wide.matches ? innerHeight * 0.45 : edge + 12;
     // Read every position first, then write, so the page lays out once per frame.
     const states = pins.map(({ ch, head, subs }) => {
       const box = ch.getBoundingClientRect();
@@ -121,7 +122,7 @@
       const end = head.getBoundingClientRect().bottom;
       let text = '', top = -Infinity;
       subs.forEach((s) => {
-        const t = s.getBoundingClientRect().top;
+        const t = ($('.row-name', s) || s).getBoundingClientRect().top;
         if (t > reading) return;
         if (Math.abs(t - top) < 2) text = '';          // side by side, like two columns: name neither
         else { top = t; text = s.dataset.sub || s.textContent.trim(); }

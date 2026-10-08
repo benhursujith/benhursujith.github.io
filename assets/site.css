@@ -153,7 +153,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   padding: 18px var(--gutter);
   transition: transform .6s var(--ease), background-color .3s;
 }
-.masthead.is-scrolled { background: color-mix(in srgb, var(--paper) 94%, transparent); }
+.masthead.is-scrolled { background: var(--paper); }
 .masthead.is-hidden { transform: translateY(-100%); }
 .mark { font: 500 1.3rem/1 var(--display); letter-spacing: -.01em; text-decoration: none; }
 .nav { display: flex; gap: clamp(18px, 2.6vw, 40px); font-size: .95rem; }
@@ -440,7 +440,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .pin {
   position: sticky; top: var(--mast-h); z-index: 30;
   height: var(--pin-h); margin-bottom: calc(-1 * var(--pin-h));
-  background: color-mix(in srgb, var(--paper) 94%, transparent);
+  background: var(--paper);
   pointer-events: none;
   opacity: 0; visibility: hidden; transform: translateY(-6px);
   transition: opacity .35s var(--ease), transform .35s var(--ease), visibility 0s .35s, top .6s var(--ease);
@@ -461,6 +461,9 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   .article > .pin .pin-title { display: block; font-size: 1.05rem; }
   .article > .pin.has-sub .pin-title { display: none; }
   .article > .pin .pin-sub { margin-left: 0; font: 500 1.05rem/1.2 var(--display); color: var(--ink); }
+  /* on phones the part you're in is the heading that stays up (Ask, Learn...), with its chapter small beside it */
+  .pin.has-sub .pin-sub { order: -1; margin-left: 0; font: 500 1.2rem/1.2 var(--display); letter-spacing: -.01em; color: var(--ink); }
+  .pin.has-sub .pin-name { order: 2; margin-left: auto; font: 500 .8rem/1.2 var(--text); letter-spacing: 0; color: var(--ink-2); }
 }
 
 /* ---------- Rows: one product at a time, the device alternating sides ----------
@@ -476,6 +479,9 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   padding-top: clamp(52px, 8vh, 88px);
 }
 .row-stage { margin-bottom: clamp(120px, 22vh, 220px); }
+/* a website row's stage is as tall as its window, which starts at the top like everything else */
+.row--wide .row-stage.sc-stage { height: auto; container-type: normal; }
+.row--wide .device.browser { position: relative; top: auto; transform: none; }
 .row-copy {
   position: sticky;
   top: calc(var(--mast-h) + var(--pin-h) + 36px);
@@ -504,9 +510,12 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .sc-stage:not(:has(.phone)) { height: auto; }
 
 @media (max-width: 900px) {
-  .row, .row--flip, .row--wide, .row--wide.row--flip { grid-template-columns: minmax(0, 1fr); row-gap: 30px; padding-block: 48px; }
-  .row-copy { position: static; padding-top: 0; }
-  .row-stage { margin-bottom: 0; }
+  .row, .row--flip, .row--wide, .row--wide.row--flip { grid-template-columns: minmax(0, 1fr); row-gap: 0; padding-block: 48px; }
+  /* title, then the screen, then the words: the title slides up and docks in the pinned bar */
+  .row-copy { display: contents; }
+  .row-name { order: -2; }
+  .row-stage, .row--flip .row-stage { order: -1; margin: 22px 0 26px; }
+  .row-lede { margin-top: 0; }
   .row--flip .row-stage { order: 0; }
   .row .row-stage.sc-stage { height: auto; container-type: normal; }   /* beats .sc-stage:has(.phone), which would size it to nothing */
   .only-wide { display: none; }
