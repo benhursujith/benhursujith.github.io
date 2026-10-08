@@ -6,3 +6,6 @@ assets/media/gbf.jpg
 assets/media/demos/nurseplus-nia.*
 
 .DS_Store
+
+# design lab pages, never published
+_lab/
