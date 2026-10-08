@@ -829,9 +829,18 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .post a:hover .post-title span, .post a:focus-visible .post-title span { background-size: 100% 6px; }
 .post-dek { grid-column: 8 / span 4; color: var(--ink-2); }
 .post-time { grid-column: 12; text-align: right; color: var(--ink-2); font-size: .88rem; white-space: nowrap; }
+/* the files behind the notes, to download */
+.writing-kit { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; align-items: center; gap: 6px 18px; margin-top: 40px; }
+.writing-kit-icon { width: 36px; height: 36px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: url(#ink); }
+.writing-kit p { color: var(--ink-2); }
+.writing-kit b { color: var(--ink); font-weight: 600; }
+.writing-kit-link { padding-bottom: 6px; font-weight: 600; text-decoration: none; white-space: nowrap; background: var(--brush) left bottom / 100% 5px no-repeat; }
+.writing-kit-link span { margin-left: 6px; font-size: .85rem; font-weight: 400; color: var(--ink-2); }
 @media (max-width: 900px) {
   .post-title, .post-dek { grid-column: 1 / -1; }
   .post-time { grid-column: 1 / -1; text-align: left; }
+  .writing-kit { grid-template-columns: 36px minmax(0, 1fr); align-items: start; }
+  .writing-kit-link { grid-column: 2; justify-self: start; margin-top: 4px; }
 }
 
 /* ---------- Contact & footer ---------- */

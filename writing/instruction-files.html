@@ -12,9 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=21">
+<link rel="stylesheet" href="../assets/site.css?v=22">
+<link rel="stylesheet" href="../assets/notes.css?v=1">
 </head>
 <body>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
+  </defs>
+</svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <a class="mark" href="../">Sujith Benhur</a>
@@ -25,7 +31,7 @@
   <header class="article-head">
     <h1>How I write instruction files for AI agents</h1>
     <p class="dek">A layered set of rules, one file per folder. What goes in them, what stays out, and when a rule needs a hook instead of a sentence.</p>
-    <p class="byline">October 2026. 9 minute read.</p>
+    <p class="byline">October 2026. 9 minute read. <a href="#kit">Get the files</a></p>
   </header>
 
   <div class="prose">
@@ -34,38 +40,80 @@
 
     <h2>Layers, and the nearest file wins</h2>
     <p>One instruction file for everything grows until nobody reads it, the model included. So I split it by scope, the way a company splits policy from team norms from a project brief.</p>
-    <table>
-      <thead><tr><th>Layer</th><th>Lives at</th><th>Holds</th></tr></thead>
-      <tbody>
-        <tr><td>Root</td><td>The top of the workspace</td><td>Principles, the file contract every project follows, privacy tiers, things that must never happen</td></tr>
-        <tr><td>Domain</td><td><code>work/</code>, <code>personal/</code></td><td>The default posture for that part of my life: tone, who reads the output, what may leave the machine</td></tr>
-        <tr><td>Project</td><td>Each project folder</td><td>Stack, commands, guardrails, and where the real thinking lives</td></tr>
-      </tbody>
-    </table>
+    <figure class="dg">
+      <div class="layer ink">
+        <p class="layer-h"><span class="dg-mono">workspace/</span><span class="layer-file">AGENTS.md</span></p>
+        <p class="layer-t"><b>Root, the floor.</b> Principles, the file contract every project follows, privacy tiers, what must never happen.</p>
+        <div class="layer layer--domain ink">
+          <p class="layer-h"><span class="dg-mono">work/</span><span class="layer-file">AGENTS.md</span></p>
+          <p class="layer-t"><b>Domain.</b> The default posture for that part of my life: tone, who reads the output, what may leave the machine.</p>
+          <div class="layer layer--project ink">
+            <p class="layer-h"><span class="dg-mono">a-project/</span><span class="layer-file">AGENTS.md</span><span class="layer-file">CLAUDE.md</span></p>
+            <p class="layer-t"><b>Project, the nearest file.</b> Stack, commands, guardrails, and where the real thinking lives.</p>
+          </div>
+        </div>
+      </div>
+      <figcaption>Three layers, nested like the folders they sit in. An agent working in a project reads all three.</figcaption>
+    </figure>
     <p>Two rules make the layers work. <strong>The root is the floor</strong>: a project can add rules, but never relax one. <strong>The nearest file wins</strong> on everything else, so a project can override a domain default when it has a reason.</p>
     <p>Next to each <code>AGENTS.md</code> sits a <code>CLAUDE.md</code> that contains a single line, <code>@AGENTS.md</code>. Claude Code loads <code>CLAUDE.md</code> automatically, and that import pulls in the shared file. Every other tool reads <code>AGENTS.md</code> directly. One source of truth, whichever model I open.</p>
+    <figure class="dg">
+      <div class="shim">
+        <div class="ink">
+          <p class="dg-h">Claude Code</p>
+          <p class="dg-t">loads <span class="dg-mono">CLAUDE.md</span>, which holds one line:</p>
+          <p><span class="shim-code">@AGENTS.md</span></p>
+        </div>
+        <svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg>
+        <div class="shim-main ink">
+          <p class="dg-mono">AGENTS.md</p>
+          <p class="dg-h">One set of rules</p>
+        </div>
+        <svg class="dg-arrow dg-arrow--back" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg>
+        <div class="ink">
+          <p class="dg-h">Every other tool</p>
+          <p class="dg-t">Codex, Cursor and most coding tools read <span class="dg-mono">AGENTS.md</span> directly.</p>
+        </div>
+      </div>
+      <figcaption>One source of truth, whichever model I open.</figcaption>
+    </figure>
 
     <h2>What goes in a project file</h2>
     <p>Every project file has the same three sections, from a template. Here is a real one, lightly trimmed.</p>
+    <figure class="dg">
+      <div class="anno">
+        <div class="anno-row">
 <pre><code># AGENTS.md: Selah
 
-Inherits the root AGENTS.md. Rules here add to it; they never relax it.
+Inherits the root AGENTS.md. Rules here add to it;
+they never relax it.
 
-Privacy: public. Hosted models are fine.
-
-## Stack
-Python and FastAPI. Vanilla HTML, CSS and JS. SQLite for Scripture.
-
-## Guardrails
+Privacy: public. Hosted models are fine.</code></pre>
+          <p class="anno-note">Points up to the root, and says what may leave the machine.</p>
+        </div>
+        <div class="anno-row">
+<pre><code>## Stack
+Python and FastAPI. Vanilla HTML, CSS and JS.
+SQLite for Scripture.</code></pre>
+          <p class="anno-note">Saves the first five minutes of every session.</p>
+        </div>
+        <div class="anno-row anno-row--key">
+<pre><code>## Guardrails
 - Don't change the interface rules in design.md.
 - lookup.py is the only source of Scripture text.
   The model never writes a verse.
 - Keep the deterministic safety gate. Never remove
-  the short-circuit for crisis detection.
-
-## Where the real thinking lives
+  the short-circuit for crisis detection.</code></pre>
+          <p class="anno-note"><b>The part that earns its keep:</b> real mistakes with real costs.</p>
+        </div>
+        <div class="anno-row">
+<pre><code>## Where the real thinking lives
 design.md, then implementation_plan.md.</code></pre>
-    <p><strong>Stack</strong>, with the commands to run it, saves the first five minutes of every session. <strong>Where the real thinking lives</strong> points at the design docs a cold session has to read before it touches anything.</p>
+          <p class="anno-note">What a cold session reads before it touches anything.</p>
+        </div>
+      </div>
+      <figcaption>A real project file, lightly trimmed. <a href="../kit/agent-files/project-template/AGENTS.md" download>Download the blank template</a></figcaption>
+    </figure>
     <p><strong>Guardrails are the part that earns its keep.</strong> Not style preferences, but the things a future session would plausibly get wrong, where the mistake costs something. My template says so in a comment, because the temptation is to fill the section with generic advice.</p>
 
     <h2>Guardrails for different kinds of work</h2>
@@ -87,6 +135,16 @@ design.md, then implementation_plan.md.</code></pre>
 
     <h2>When a sentence isn't enough</h2>
     <p>Prose is advice. Models follow it most of the time, and most of the time is fine for style. It's not fine for leaking an account number. For the handful of rules where one slip is unacceptable, I use the tool's own enforcement.</p>
+    <figure class="dg">
+      <ol class="ladder">
+        <li style="--i:1"><p class="dg-h">A sentence</p><p class="dg-t">Followed most of the time. Fine for style.</p><span class="step ink"></span></li>
+        <li style="--i:2"><p class="dg-h">A sentence with its reason</p><p class="dg-t">Covers the cases you never listed.</p><span class="step ink"></span></li>
+        <li style="--i:3"><p class="dg-h">A permission rule</p><p class="dg-t">The tool won't open what's denied.</p><span class="step ink"></span></li>
+        <li style="--i:4"><p class="dg-h">A hook</p><p class="dg-t">A script checks every write, and can refuse it.</p><span class="step ink"></span></li>
+      </ol>
+      <p class="axis"><span>Advice</span><span class="axis-line"><svg class="dg-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2.6 12.5 8 5 13.6"/></svg></span><span>Enforced</span></p>
+      <figcaption>The more one slip would cost, the stronger the rule has to be.</figcaption>
+    </figure>
     <ul>
       <li><strong>Permission rules</strong> deny reads of live login sessions and large binaries outright.</li>
       <li><strong>A pre-write hook</strong> refuses any write to a confidential project's summary files if it contains a run of six or more digits. It's crude, and it has caught real mistakes.</li>
@@ -112,6 +170,20 @@ design.md, then implementation_plan.md.</code></pre>
       <li>Is anything that must never happen enforced by the tool, not only written down?</li>
       <li>Is there one file, read by every model, rather than one per tool?</li>
     </ol>
+
+    <aside class="kit ink" id="kit" aria-label="Starter kit">
+      <svg class="kit-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5.5v19.5"/><path d="M12.5 18 20 25.5l7.5-7.5"/><path d="M7 26.5v5.8c0 1.5 1.2 2.7 2.7 2.7h20.6c1.5 0 2.7-1.2 2.7-2.7v-5.8"/></svg>
+      <p class="kit-h">Take the files</p>
+      <p class="kit-t">The instruction files, the index, briefing and log templates, two session commands and the hook from these notes, ready to fill in.</p>
+      <p><a class="kit-all" href="../kit/agent-files.zip" download>Download the starter kit <span>zip, 9 KB</span></a></p>
+      <ul class="kit-files">
+      <li><a href="../kit/agent-files/AGENTS.md" download>AGENTS.md</a></li>
+      <li><a href="../kit/agent-files/project-template/AGENTS.md" download>project AGENTS.md</a></li>
+      <li><a href="../kit/agent-files/CLAUDE.md" download>CLAUDE.md</a></li>
+      <li><a href="../kit/agent-files/.claude/settings.json" download>settings.json</a></li>
+      <li><a href="../kit/agent-files/.claude/hooks/no-long-numbers.py" download>no-long-numbers.py</a></li>
+      </ul>
+    </aside>
   </div>
 
   <nav class="next-read" aria-label="More writing">

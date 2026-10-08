@@ -12,9 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=21">
+<link rel="stylesheet" href="../assets/site.css?v=22">
+<link rel="stylesheet" href="../assets/notes.css?v=1">
 </head>
 <body>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
+  </defs>
+</svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <a class="mark" href="../">Sujith Benhur</a>
@@ -25,7 +31,7 @@
   <header class="article-head">
     <h1>One file to resume any project</h1>
     <p class="dek">Context management for AI agents: an index file, a paste-in briefing, an append-only log, and a two-minute ritual at each end of a session.</p>
-    <p class="byline">October 2026. 8 minute read.</p>
+    <p class="byline">October 2026. 8 minute read. <a href="#kit">Get the files</a></p>
   </header>
 
   <div class="prose">
@@ -33,37 +39,67 @@
     <p>My workspace is built around one idea instead:</p>
     <blockquote>Every project holds its own resumable state in plain markdown, in a fixed place, in a fixed shape, so any model in any app can be brought up to speed by reading one file.</blockquote>
     <p>Everything else in the setup exists to protect that.</p>
+    <figure class="dg">
+      <div class="readers">
+        <div class="folder ink">
+          <p class="dg-mono folder-h">a-project/</p>
+          <ul class="files">
+            <li data-r="agent"><span class="dg-mono">_index.md</span><span class="dg-t">State, Next 3, Decisions</span><span class="dg-dot"></span></li>
+            <li data-r="agent"><span class="dg-mono">AGENTS.md</span><span class="dg-t">How to work here</span><span class="dg-dot"></span></li>
+            <li data-r="agent"><span class="dg-mono">LOG.md</span><span class="dg-t">What happened; only the last three entries are read</span><span class="dg-dot"></span></li>
+            <li><span class="dg-mono">TASKS.md</span><span class="dg-t">Open work</span><span class="dg-dot"></span></li>
+            <li data-r="chat"><span class="dg-mono">PASTE-ME.md</span><span class="dg-t">A briefing under 400 words</span><span class="dg-dot"></span></li>
+          </ul>
+        </div>
+        <svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg>
+        <div class="who">
+          <div class="ink" data-r="agent"><p class="dg-h"><span class="dg-dot"></span>An agent in your editor</p><p class="dg-t">reads the index, the rules and the log's last three entries</p></div>
+          <div class="ink" data-r="chat"><p class="dg-h"><span class="dg-dot"></span>A chat in a browser</p><p class="dg-t">gets the briefing, pasted in</p></div>
+        </div>
+      </div>
+      <figcaption>The files every project keeps, and who reads which.</figcaption>
+    </figure>
 
     <h2>The index file</h2>
     <p>Each project has an <code>_index.md</code>. It's short, and it always has the same shape.</p>
+    <figure class="dg">
+      <div class="anno">
+        <div class="anno-row">
 <pre><code>---
 project: selah
-status: active          # active, paused, idea, shipped, frozen
-privacy: public         # public, private, confidential
+status: active      # active, paused, idea,
+                    # shipped, frozen
+privacy: public     # public, private, confidential
 updated: 2026-08-06
----
-
-# Selah
+---</code></pre>
+          <p class="anno-note"><b>Feeds a dashboard</b> across every project. The privacy tier tells an agent what it may send to a hosted model.</p>
+        </div>
+        <div class="anno-row anno-row--key">
+<pre><code># Selah
 
 ## State (as of 2026-08-06)
 Working: interface, pipeline, local generation.
 Stubbed: semantic retrieval (tag matching for now).
-README is stale; it still calls generation mocked.
-
-## Next 3
-1. Real semantic retrieval and a bigger knowledge base.
-2. Watch the pipeline for answers that are pastorally wrong.
-3. Fix the README.
-
-## Decisions (closed, do not reopen without cause)
+README is stale; it still calls generation mocked.</code></pre>
+          <p class="anno-note"><b>Rewritten every session,</b> never appended to. Dated, so a reader can tell how stale it is.</p>
+        </div>
+        <div class="anno-row">
+<pre><code>## Next 3
+1. Real semantic retrieval and a bigger
+   knowledge base.
+2. Watch the pipeline for answers that are
+   pastorally wrong.
+3. Fix the README.</code></pre>
+          <p class="anno-note"><b>The three smallest actions</b> that resume the work. A longer list is a backlog, and a backlog doesn't say where to begin.</p>
+        </div>
+        <div class="anno-row">
+<pre><code>## Decisions (closed, do not reopen without cause)
 - Architecture and design specs are final.</code></pre>
-    <p>Each section does one job.</p>
-    <ul>
-      <li><strong>State</strong> is rewritten every session, never appended to. It says what is true now, with a date, so a reader can tell how stale it is.</li>
-      <li><strong>Next 3</strong> is the three smallest actions that resume the work from a cold start. Three, because a longer list is a backlog, and a backlog doesn't tell you where to begin.</li>
-      <li><strong>Decisions</strong> is the list of things that are settled. Without it, every new model helpfully reopens the database question.</li>
-      <li><strong>The frontmatter</strong> feeds a dashboard. Status and privacy are queryable across every project, and the privacy tier tells an agent what it may send to a hosted model.</li>
-    </ul>
+          <p class="anno-note"><b>What's settled.</b> Without it, every new model helpfully reopens the database question.</p>
+        </div>
+      </div>
+      <figcaption>A real index: short, and always the same shape. <a href="../kit/agent-files/project-template/_index.md" download>Download the blank template</a></figcaption>
+    </figure>
 
     <h2>A briefing for chats that can't read files</h2>
     <p>Agents in an editor read the index. A chat in a browser can't. For those, each project keeps a <code>PASTE-ME.md</code>: under 400 words, self-contained, written to be pasted into any chat.</p>
@@ -86,26 +122,61 @@ README is stale; it still calls generation mocked.
 
     <h2>The ritual</h2>
     <p>Two slash commands, one at each end of a session.</p>
-    <h3>Start</h3>
-    <ol>
-      <li>Read the root rules, then the project's index and rules, then the last three log entries.</li>
-      <li>Say what you believe the current state is, in one sentence.</li>
-      <li>Wait for me to confirm or correct it.</li>
-    </ol>
+    <figure class="dg">
+      <div class="ritual">
+        <div class="ritual-start ink">
+          <p class="dg-h">Start <span class="dg-mono">/session-start</span></p>
+          <ol class="steps">
+            <li>Read the root rules</li>
+            <li>Read the project's index and rules</li>
+            <li>Read the last three log entries</li>
+            <li><b>Say the state in one sentence,</b> then wait for a yes or a correction</li>
+          </ol>
+        </div>
+        <div class="ritual-mid"><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg><span>the work</span></div>
+        <div class="ritual-end ink">
+          <p class="dg-h">End <span class="dg-mono">/session-end</span></p>
+          <ol class="steps">
+            <li>Append a log entry</li>
+            <li>Rewrite State and Next 3</li>
+            <li>Rewrite the briefing</li>
+            <li>Update the date</li>
+            <li>Add any settled decision</li>
+            <li>Note files that moved</li>
+          </ol>
+        </div>
+      </div>
+      <div class="back" aria-hidden="true"><span class="back-u"><svg class="dg-arrow" viewBox="0 0 16 16" aria-hidden="true"><path d="M5 2.6 12.5 8 5 13.6"/></svg></span></div>
+      <p class="back-label">The next session starts warm.</p>
+      <figcaption>Both commands are in the <a href="#kit">starter kit</a>.</figcaption>
+    </figure>
     <p>The one sentence is the important part. It costs me five seconds to read, and it catches stale context before any work happens, rather than an hour later.</p>
-    <h3>End</h3>
-    <ol>
-      <li>Append a log entry.</li>
-      <li>Rewrite State and Next 3.</li>
-      <li>Rewrite the briefing.</li>
-      <li>Update the date in the frontmatter.</li>
-      <li>Add any newly settled decision.</li>
-      <li>If files moved, note old and new paths in the workspace log.</li>
-    </ol>
     <p>A session that skips this has failed, whatever else it produced, because the next session will start blind. A hook prints a reminder when an agent stops, in case it forgets.</p>
 
     <h2>Light projects get a lighter version</h2>
     <p>Not everything deserves four files. Ideas, frozen projects and small script folders get two: an index with short task and log sections inside it, and the briefing. When an idea turns into active work, it graduates to the full set.</p>
+    <figure class="dg">
+      <div class="weights">
+        <div class="ink ink--soft">
+          <p class="dg-h">An idea or a small folder</p>
+          <ul>
+            <li><span class="dg-mono">_index.md</span><p class="dg-t">with short Tasks and Log sections inside</p></li>
+            <li><span class="dg-mono">PASTE-ME.md</span></li>
+          </ul>
+        </div>
+        <div class="weights-mid"><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg><span>graduates when it becomes active work</span></div>
+        <div class="weight-active ink">
+          <p class="dg-h">An active project</p>
+          <ul>
+            <li><span class="dg-mono">_index.md</span></li>
+            <li><span class="dg-mono">PASTE-ME.md</span></li>
+            <li><span class="dg-mono">LOG.md</span></li>
+            <li><span class="dg-mono">TASKS.md</span></li>
+          </ul>
+        </div>
+      </div>
+      <figcaption>Two files or four. Both kinds keep their <code>AGENTS.md</code> and <code>CLAUDE.md</code>.</figcaption>
+    </figure>
 
     <h2>Spending context carefully</h2>
     <ul>
@@ -121,6 +192,20 @@ README is stale; it still calls generation mocked.
 
     <hr>
     <p>None of this needs special software. It's markdown in folders, opened in Obsidian, read by whichever model I'm using that day. That's the point: the context belongs to the project, not to the tool.</p>
+
+    <aside class="kit ink" id="kit" aria-label="Starter kit">
+      <svg class="kit-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5.5v19.5"/><path d="M12.5 18 20 25.5l7.5-7.5"/><path d="M7 26.5v5.8c0 1.5 1.2 2.7 2.7 2.7h20.6c1.5 0 2.7-1.2 2.7-2.7v-5.8"/></svg>
+      <p class="kit-h">Take the files</p>
+      <p class="kit-t">The instruction files, the index, briefing and log templates, two session commands and the hook from these notes, ready to fill in.</p>
+      <p><a class="kit-all" href="../kit/agent-files.zip" download>Download the starter kit <span>zip, 9 KB</span></a></p>
+      <ul class="kit-files">
+      <li><a href="../kit/agent-files/project-template/_index.md" download>_index.md</a></li>
+      <li><a href="../kit/agent-files/project-template/PASTE-ME.md" download>PASTE-ME.md</a></li>
+      <li><a href="../kit/agent-files/project-template/LOG.md" download>LOG.md</a></li>
+      <li><a href="../kit/agent-files/.claude/commands/session-start.md" download>session-start.md</a></li>
+      <li><a href="../kit/agent-files/.claude/commands/session-end.md" download>session-end.md</a></li>
+      </ul>
+    </aside>
   </div>
 
   <nav class="next-read" aria-label="More writing">

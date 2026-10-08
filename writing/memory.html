@@ -12,9 +12,15 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=21">
+<link rel="stylesheet" href="../assets/site.css?v=22">
+<link rel="stylesheet" href="../assets/notes.css?v=1">
 </head>
 <body>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
+  </defs>
+</svg>
 <a class="skip" href="#main">Skip to content</a>
 <header class="masthead">
   <a class="mark" href="../">Sujith Benhur</a>
@@ -25,7 +31,7 @@
   <header class="article-head">
     <h1>Memory that outlives the chat</h1>
     <p class="dek">Where an agent's memory should live, what to keep and what to let go, and how mistakes become rules.</p>
-    <p class="byline">October 2026. 8 minute read.</p>
+    <p class="byline">October 2026. 8 minute read. <a href="#kit">Get the files</a></p>
   </header>
 
   <div class="prose">
@@ -34,19 +40,30 @@
 
     <h2>Four kinds of memory</h2>
     <p>“Memory” covers several different things, and each needs a different home.</p>
-    <table>
-      <thead><tr><th>Kind</th><th>Answers</th><th>Lives in</th><th>Changes by</th></tr></thead>
-      <tbody>
-        <tr><td>State</td><td>What's true now?</td><td>The project index</td><td>Rewriting</td></tr>
-        <tr><td>History</td><td>What happened, and why?</td><td>The project log</td><td>Appending only</td></tr>
-        <tr><td>Decisions</td><td>What's settled?</td><td>The index, then a decisions file</td><td>Adding, rarely reopening</td></tr>
-        <tr><td>Rules</td><td>How should work be done here?</td><td>Instruction files</td><td>Deliberate edits</td></tr>
-      </tbody>
-    </table>
+    <figure class="dg">
+      <ul class="kinds">
+        <li class="ink"><p class="dg-h">State</p><p class="kind-q">What's true now?</p><p class="kind-row"><span class="dg-mono">_index.md</span><span>rewritten each session</span></p></li>
+        <li class="ink"><p class="dg-h">History</p><p class="kind-q">What happened, and why?</p><p class="kind-row"><span class="dg-mono">LOG.md</span><span>appended, never edited</span></p></li>
+        <li class="ink"><p class="dg-h">Decisions</p><p class="kind-q">What's settled?</p><p class="kind-row"><span class="dg-mono">_index.md</span><span>added, rarely reopened; the old ones move to a decisions file</span></p></li>
+        <li class="ink"><p class="dg-h">Rules</p><p class="kind-q">How should work be done here?</p><p class="kind-row"><span class="dg-mono">AGENTS.md</span><span>edited on purpose</span></p></li>
+      </ul>
+      <figcaption>Four kinds of memory, each with its own home and its own way of changing.</figcaption>
+    </figure>
     <p>Mixing them is the most common mistake I see, in my own files too. History written into state makes the index long and confusing. State written into rules makes rules go stale. Rules buried in a log never get read.</p>
 
     <h2>Put memory where every model can read it</h2>
     <p>My test for where a fact belongs: if I opened this project tomorrow in a different app, with a different model, would it need to know this? If yes, the fact goes in the project's own files. Tool memory is only for things that are genuinely about the tool, like “after logging in to this server, restart the session or the tools won't appear.”</p>
+    <figure class="dg">
+      <p class="dg-t caches-label">Built-in memory: one per product</p>
+      <ul class="caches">
+        <li class="ink ink--dash"><p class="dg-h">Claude</p></li>
+        <li class="ink ink--dash"><p class="dg-h">ChatGPT</p></li>
+        <li class="ink ink--dash"><p class="dg-h">Gemini</p></li>
+      </ul>
+      <p class="cache-arrows" aria-hidden="true"><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg></p>
+      <div class="source ink"><p class="dg-mono">a-project/</p><p class="dg-h">The project's own files</p><p class="dg-t">the source every model and app can read</p></div>
+      <figcaption>Built-in memory is a cache inside one product. The real memory lives in the project, and the cache points at it.</figcaption>
+    </figure>
     <p>Even then, I copy anything important into the project. Two copies of a fact drift apart, so the project file is the source and the tool memory just points at it.</p>
 
     <h2>Decisions are the memory that saves the most time</h2>
@@ -60,6 +77,16 @@
     <p>The full story went in the log. The lesson went in the rules, in its general form:</p>
     <blockquote>Prefer path-independence over path-fixing. Scripts work out their location from their own file. Before moving anything that runs, search for absolute paths in scheduled jobs, launch agents, environments and tool settings.</blockquote>
     <p>And the job got a heartbeat that sends an alert when it goes quiet, so silence can't go unnoticed again. The pattern is the same every time: the story in history, the lesson in rules, and where it matters, a check in code.</p>
+    <figure class="dg">
+      <div class="lesson">
+        <div class="ink"><p class="lesson-k"><span class="dg-h">The story</span><span class="dg-mono">LOG.md</span></p><p class="dg-t">A scheduled job pointed at an old path and failed silently for six days.</p></div>
+        <svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg>
+        <div class="ink"><p class="lesson-k"><span class="dg-h">The lesson</span><span class="dg-mono">AGENTS.md</span></p><p class="dg-t">“Prefer path-independence over path-fixing.”</p></div>
+        <svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg>
+        <div class="ink"><p class="lesson-k"><span class="dg-h">The check</span><span class="dg-mono">code</span></p><p class="dg-t">A heartbeat sends an alert when the job goes quiet.</p></div>
+      </div>
+      <figcaption>One incident, three places.</figcaption>
+    </figure>
 
     <h2>Forgetting on purpose</h2>
     <p>A memory system that only adds things gets worse over time. Old facts crowd out current ones, and a model can't tell which is which. Three habits help.</p>
@@ -82,6 +109,19 @@
       <li>Store memory in plain files you own, not inside one product.</li>
       <li>Date things, and retire what has gone stale.</li>
     </ol>
+
+    <aside class="kit ink" id="kit" aria-label="Starter kit">
+      <svg class="kit-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5.5v19.5"/><path d="M12.5 18 20 25.5l7.5-7.5"/><path d="M7 26.5v5.8c0 1.5 1.2 2.7 2.7 2.7h20.6c1.5 0 2.7-1.2 2.7-2.7v-5.8"/></svg>
+      <p class="kit-h">Take the files</p>
+      <p class="kit-t">The instruction files, the index, briefing and log templates, two session commands and the hook from these notes, ready to fill in.</p>
+      <p><a class="kit-all" href="../kit/agent-files.zip" download>Download the starter kit <span>zip, 9 KB</span></a></p>
+      <ul class="kit-files">
+      <li><a href="../kit/agent-files/project-template/_index.md" download>_index.md</a></li>
+      <li><a href="../kit/agent-files/project-template/LOG.md" download>LOG.md</a></li>
+      <li><a href="../kit/agent-files/project-template/AGENTS.md" download>project AGENTS.md</a></li>
+      <li><a href="../kit/agent-files/.claude/hooks/no-long-numbers.py" download>no-long-numbers.py</a></li>
+      </ul>
+    </aside>
   </div>
 
   <nav class="next-read" aria-label="More writing">

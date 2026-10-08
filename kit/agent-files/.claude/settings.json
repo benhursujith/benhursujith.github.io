@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(**/*.pdf)",
+      "Read(**/*.zip)",
+      "Read(**/*.db)",
+      "Read(**/node_modules/**)",
+      "Read(**/.venv/**)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "python3 \"$CLAUDE_PROJECT_DIR/.claude/hooks/no-long-numbers.py\"" }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          { "type": "command", "command": "printf '\\n[session end] Before you stop: append to LOG.md, rewrite State and Next 3 in _index.md, refresh PASTE-ME.md, update the date.\\n' >&2" }
+        ]
+      }
+    ]
+  }
+}
