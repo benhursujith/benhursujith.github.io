@@ -358,7 +358,10 @@
       if (d.dataset.play === 'video') {
         const v = $('video', d);
         const load = () => { if (!v.getAttribute('src')) { const src = MEDIA + d.dataset.src; v.poster = `${src}.jpg${MV}`; v.src = `${src}.mp4${MV}`; } };
-        p = { load, play() { load(); if (!reduce) v.play().catch(() => {}); }, pause() { v.pause(); } };
+        // a seek to where it already is makes the browser draw the frame again (a video it suspended in a
+        // background tab otherwise stays blank)
+        const redraw = () => { if (v.readyState >= 1) v.currentTime = v.currentTime; };
+        p = { load, play() { load(); if (reduce) redraw(); else v.play().catch(redraw); }, pause() { v.pause(); } };
       } else {
         const c = clock(htmlDemos[d.dataset.html]($('.dv-html', d)));
         const loop = () => c.start(loop);
@@ -374,13 +377,20 @@
     }
     // load the poster a little before the row arrives, play once most of it is on screen
     new IntersectionObserver(([e]) => { if (e.isIntersecting) { const d = shown(); if (d) player(d).load(); } }, { rootMargin: '600px 0px' }).observe(row);
+    let inView = false;
     onVisible(row, () => {
       const d = shown();
       if (!d) return;
+      inView = true;
       if (cur && cur !== player(d)) cur.pause();
       cur = player(d);
       cur.play();
-    }, () => cur?.pause(), 0.35);
+    }, () => { inView = false; cur?.pause(); }, 0.35);
+    // Browsers suspend video in a background tab; coming back, the row on screen plays (and repaints) again.
+    document.addEventListener('visibilitychange', () => {
+      if (!cur || !inView) return;
+      if (document.hidden) cur.pause(); else cur.play();
+    });
   }
   $$('.row').forEach(setupRow);
 
