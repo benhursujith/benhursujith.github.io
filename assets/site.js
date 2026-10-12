@@ -7,7 +7,7 @@
   const $ = (s, el = document) => el.querySelector(s);
   const $$ = (s, el = document) => [...el.querySelectorAll(s)];
   const MEDIA = 'assets/media/demos/';
-  const MV = '?v=2';   // bump when any recording is re-made, so browsers don't keep the old clip
+  const MV = '?v=3';   // bump when any recording is re-made, so browsers don't keep the old clip
   const SVG = 'http://www.w3.org/2000/svg';
   const wide = matchMedia('(min-width: 901px)');
 
