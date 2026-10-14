@@ -773,17 +773,62 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .career-what { margin-top: 8px; max-width: 34ch; font-size: .95rem; color: var(--ink-2); }
 @media (max-width: 900px) { .career { grid-template-columns: 1fr; } }
 
-/* ---------- Jobs I hand to AI ---------- */
+/* ---------- How I work with AI: the harness, in numbers, a trimmed folder tree, four parts and the honest lists ---------- */
 
-.jobs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(32px, 5vw, 88px); row-gap: 48px; margin-top: clamp(40px, 7vh, 72px); }
-.jobs-h { font-size: 1.5rem; margin-bottom: 12px; }
-.jobs-list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--rule); }
-/* one line a job: the job, then where it shows up */
-.jobs-list li { position: relative; display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; padding: 12px 0 12px 38px; border-bottom: 1px solid var(--rule); }
-.jobs-list li::before { content: ""; position: absolute; left: 0; top: 14px; width: 24px; height: 20px; background: var(--ink); -webkit-mask: var(--tick) center / contain no-repeat; mask: var(--tick) center / contain no-repeat; }
-.jobs-list b { font: 500 clamp(1.1rem, 1.02rem + .25vw, 1.25rem)/1.25 var(--display); letter-spacing: -.01em; }
-.jobs-list span { font-size: .92rem; color: var(--ink-2); }
-@media (max-width: 900px) { .jobs { grid-template-columns: 1fr; } }
+.hx { margin-top: clamp(40px, 7vh, 72px); }
+.hx-stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 18px 28px; margin: 0; padding-top: 22px; border-top: 1px solid var(--rule); }
+.hx-stats div { display: flex; flex-direction: column-reverse; justify-content: flex-end; }
+.hx-stats dd { margin: 0; font: 500 clamp(2rem, 1.5rem + 1.6vw, 3rem)/1 var(--display); letter-spacing: -.025em; }
+.hx-stats dt { margin-top: 8px; font-size: .88rem; color: var(--ink-2); }
+
+/* the folder, as a tree: paths in mono, what each holds beside it */
+.hx-tree { margin: clamp(40px, 6vh, 56px) 0 0; padding: 22px 26px 20px; border-radius: 16px; background: var(--panel); }
+.hx-tree ul { margin: 0; padding: 0; list-style: none; }
+.hx-tree li { display: grid; grid-template-columns: minmax(0, 23rem) minmax(0, 1fr); column-gap: 24px; align-items: baseline; padding: 1px 0; }
+.hx-path { font-family: var(--mono); font-size: .8rem; white-space: pre; }
+.hx-say { font-size: .86rem; color: var(--ink-2); }
+.hx-tree figcaption { margin-top: 14px; font-size: .8rem; color: var(--stone); }
+
+/* four parts, each led by a small ink drawing */
+.hx-parts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 44px clamp(32px, 5vw, 80px); margin: clamp(48px, 8vh, 80px) 0 0; padding: 0; list-style: none; }
+.hx-fig { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; min-height: 64px; }
+.hx-fig .dg-arrow { width: 34px; }
+.hx-node { padding: 6px 12px 7px; font-family: var(--mono); font-size: .76rem; font-weight: 600; }
+.hx-node--key { --w: var(--sage); }
+.hx-fan { display: flex; flex-wrap: wrap; gap: 6px; }
+.hx-chip { padding: 4px 10px 5px; font-size: .78rem; font-weight: 500; }
+.hx-chip::before, .hx-nest::before { border-width: 1.5px !important; }
+.hx-nest { display: inline-flex; align-items: center; gap: 9px; padding: 7px 9px 7px 11px; font-family: var(--mono); font-size: .74rem; font-weight: 600; }
+.hx-nest--key { --w: var(--sage); padding-right: 11px; }
+.hx-fig--bar { gap: 14px; }
+.hx-bar { display: block; flex: 1; max-width: 300px; height: 28px; }
+.hx-bar-read { position: absolute; left: 6px; top: 6px; bottom: 6px; width: 3px; border-radius: 2px; background: var(--clay); }
+.hx-bar-l { font-size: .82rem; font-weight: 600; color: var(--ink-2); }
+.hx-h { margin-top: 18px; font-size: clamp(1.3rem, 1.15rem + .45vw, 1.6rem); line-height: 1.15; }
+.hx-p { margin-top: 10px; max-width: 48ch; font-size: .97rem; line-height: 1.55; color: var(--ink-2); }
+.hx-r { display: flex; gap: 10px; margin-top: 12px; font-size: .9rem; font-weight: 500; }
+.hx-r::before { content: ""; flex: none; width: 7px; height: 7px; margin-top: .5em; border-radius: 50%; background: var(--clay); }
+.hx-r a { text-decoration-color: var(--clay); }
+
+/* this site as the worked example */
+.hx-receipt { max-width: 64ch; margin-top: clamp(48px, 8vh, 72px); padding-left: 20px; border-left: 3px solid var(--clay); font: 400 clamp(1.05rem, 1rem + .25vw, 1.2rem)/1.55 var(--display); color: var(--ink); }
+
+/* uses outside work, and what isn't working yet */
+.hx-lists { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 40px clamp(32px, 5vw, 80px); margin-top: clamp(48px, 8vh, 72px); }
+.hx-lh { font-size: 1.4rem; margin-bottom: 10px; }
+.hx-list { margin: 0; padding: 0; list-style: none; border-top: 1px solid var(--rule); }
+.hx-list li { position: relative; padding: 12px 0 12px 34px; border-bottom: 1px solid var(--rule); font-size: .95rem; line-height: 1.5; }
+.hx-list li::before { content: ""; position: absolute; left: 0; top: 14px; width: 22px; height: 18px; background: var(--ink); -webkit-mask: var(--tick) center / contain no-repeat; mask: var(--tick) center / contain no-repeat; }
+.hx-list--open li::before { left: 4px; top: 19px; width: 12px; height: 12px; border-radius: 50%; background: none; box-shadow: inset 0 0 0 1.5px var(--clay); -webkit-mask: none; mask: none; }
+
+@media (max-width: 900px) {
+  .hx-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hx-tree { padding: 18px 16px 16px; }
+  .hx-tree li { display: block; padding: 3px 0; }
+  .hx-say { display: block; padding-left: 2.6em; font-size: .8rem; }
+  .hx-path { font-size: .74rem; }
+  .hx-parts, .hx-lists { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* ---------- Investment agent, recreated (390 x 844 virtual screen) ---------- */
 
@@ -894,6 +939,29 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .next-read { margin-top: clamp(80px, 14vh, 140px); padding-top: 28px; border-top: 1px solid var(--rule); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 20px; }
 .next-read a { font: 500 clamp(1.3rem, 1.1rem + .6vw, 1.7rem)/1.2 var(--display); letter-spacing: -.015em; text-decoration-color: var(--rule); }
 .next-read span { display: block; font-size: .85rem; color: var(--ink-2); margin-bottom: 6px; }
+
+/* ---------- Ink drawings, shared by the home page and the articles ----------
+   Built from HTML so their words stay readable at any width. Only lines wobble: the #ink filter sits on a box's
+   ::before (fill and line together) and on the arrow SVGs, never on text. */
+
+/* deeper versions of two washes, for small marks that have to be told apart */
+:root { --sage-deep: #5F8F78; --lilac-deep: #7F70BF; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sage-deep: #8FBCA5; --lilac-deep: #ADA0E6; } }
+:root[data-theme="dark"] { --sage-deep: #8FBCA5; --lilac-deep: #ADA0E6; }
+
+/* the fill and the line are one filtered layer under the content, so they wobble together */
+.ink { position: relative; isolation: isolate; border-radius: 14px; }
+.ink::before { content: ""; position: absolute; inset: 0; z-index: -1; border: 2.5px solid var(--ink); border-radius: inherit; background: var(--w, transparent); filter: url(#ink); pointer-events: none; }
+.ink--soft::before { border-width: 1.5px; border-color: color-mix(in srgb, var(--ink) 50%, transparent); }
+.ink--dash::before { border-style: dashed; border-width: 1.5px; }
+.dg-mono { font-family: var(--mono); font-size: .76rem; font-weight: 600; letter-spacing: -.01em; }
+.dg-h { font: 500 1.05rem/1.2 var(--display); letter-spacing: -.01em; }
+.dg-t { margin-top: 4px; color: var(--ink-2); }
+.dg-arrow { display: block; flex: none; width: 48px; height: 16px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: url(#ink); overflow: visible; }
+.dg-arrow--back { transform: scaleX(-1); }
+.dg-note { display: flex; gap: 10px; font-weight: 500; }
+.dg-note::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: .48em; border-radius: 50%; background: var(--clay); }
+.dg-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--dot); }
 
 /* ---------- Reduced motion ---------- */
 

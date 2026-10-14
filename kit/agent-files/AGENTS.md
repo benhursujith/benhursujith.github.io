@@ -10,6 +10,8 @@ in a fixed place and a fixed shape, and any model in any app catches up by readi
 
 ## Principles
 
+Adapted from the Karpathy-inspired guidelines at https://github.com/multica-ai/andrej-karpathy-skills.
+
 - Think before changing anything. Don't assume; say what the trade-offs are.
 - Simplicity first: the least that solves the problem.
 - Surgical changes: touch only what the request is about.

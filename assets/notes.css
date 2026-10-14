@@ -1,12 +1,7 @@
-/* deeper versions of two washes, for small marks that have to be told apart */
-:root { --sage-deep: #5F8F78; --lilac-deep: #7F70BF; }
-@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --sage-deep: #8FBCA5; --lilac-deep: #ADA0E6; } }
-:root[data-theme="dark"] { --sage-deep: #8FBCA5; --lilac-deep: #ADA0E6; }
-
 /* ---------- Drawings in the writing ----------
    Ink drawings built from HTML, so the words in them stay readable at any width and screen readers get the
    text. Only the lines wobble: the #ink filter sits on a box's ::before and on the arrow SVGs, never on text.
-   Loaded by the articles only. */
+   Loaded by the articles only; the pieces they share with the home page (.ink, .dg-arrow…) live in site.css. */
 
 .prose .dg { margin: 2.4em 0 2.6em; font-family: var(--text); font-size: .9rem; line-height: 1.45; }
 .prose .dg + * { margin-top: 2.2em; }
@@ -16,20 +11,6 @@
 .dg figcaption { margin-top: 18px; font-size: .84rem; line-height: 1.5; color: var(--ink-2); }
 .dg figcaption a { color: var(--ink); text-decoration-color: var(--clay); }
 
-/* the pieces */
-/* the fill and the line are one filtered layer under the content, so they wobble together */
-.ink { position: relative; isolation: isolate; border-radius: 14px; }
-.ink::before { content: ""; position: absolute; inset: 0; z-index: -1; border: 2.5px solid var(--ink); border-radius: inherit; background: var(--w, transparent); filter: url(#ink); pointer-events: none; }
-.ink--soft::before { border-width: 1.5px; border-color: color-mix(in srgb, var(--ink) 50%, transparent); }
-.ink--dash::before { border-style: dashed; border-width: 1.5px; }
-.dg-mono { font-family: var(--mono); font-size: .76rem; font-weight: 600; letter-spacing: -.01em; }
-.dg-h { font: 500 1.05rem/1.2 var(--display); letter-spacing: -.01em; }
-.dg-t { margin-top: 4px; color: var(--ink-2); }
-.dg-arrow { display: block; flex: none; width: 48px; height: 16px; fill: none; stroke: var(--ink); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; filter: url(#ink); overflow: visible; }
-.dg-arrow--back { transform: scaleX(-1); }
-.dg-note { display: flex; gap: 10px; font-weight: 500; }
-.dg-note::before { content: ""; flex: none; width: 8px; height: 8px; margin-top: .48em; border-radius: 50%; background: var(--clay); }
-.dg-dot { flex: none; width: 10px; height: 10px; border-radius: 50%; background: var(--dot); }
 
 /* Instruction files: three layers, nested like the folders they sit in */
 .layer { padding: 16px 18px 18px; }
