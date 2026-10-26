@@ -1704,7 +1704,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   .pocket .phone-status, .pocket .phone-island, .pocket .phone-home { display: none; }
   .ig { --ig-top: env(safe-area-inset-top, 0px); --ig-bot: env(safe-area-inset-bottom, 0px); --pt: 1px; }
   /* the app has its own way back to the laptop, so the site's masthead steps aside while the phone is up */
-  body:has(.desk.is-phone) .masthead { transform: translateY(-110%); visibility: hidden; }
+  body:has(.desk:not(.on-cover)) .masthead { transform: translateY(-110%); visibility: hidden; transition: transform .3s var(--ease), visibility 0s .3s; }
   .desk-nav { display: none; }
   .igs, .ig-sheet { position: fixed; z-index: 70; }
   .igs .dv-html > .trd { position: absolute; left: 0; bottom: 0; transform-origin: 0 100%; }
@@ -2274,3 +2274,22 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
 
 /* inside a story the timed notes sit low, clear of the header and the honesty pill */
 .igs .mk.mk--pill, .igs .mk.mk--pill.mk-top { top: auto; bottom: calc(var(--ig-bot, 0px) + 28px); }
+
+/* ---------- Phones: native snapping between the cover, the desktop and the phone; only GPU work while moving ---------- */
+.desk-snap { display: none; }
+@media (max-width: 900px) {
+  html { scroll-snap-type: y mandatory; }
+  .desk-snap {
+    display: block;
+    position: absolute; left: 0; width: 1px; height: 1px;
+    scroll-snap-align: start; scroll-snap-stop: always;
+    pointer-events: none;
+  }
+  .foot { scroll-snap-align: end; }
+  .mac, .m-screen, .pocket { will-change: transform, opacity; }
+  .mac { transition: none; }
+  .desk.is-phone .mac, .desk.is-phone .mac:hover { filter: none; }
+  /* seen edge-on or from the front, the keyboard, trackpad and grilles never show on a phone */
+  .mac-keys, .mac-pad, .mac-deck::before, .mac-deck::after { display: none; }
+  .mac-shadow { filter: blur(14px); }
+}

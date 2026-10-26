@@ -589,6 +589,7 @@
     let H = innerHeight, stageW = innerWidth, W = 840, Hl = 548;
     let a1 = 500, b0 = 800, b1 = 1500, end = 1800, deskTop = 0;
     let open = 0, push = 0, aside = 0, atDesk = false, atPhone = false, inStage = true;
+    const snapMarks = [0, 1, 2].map(() => { const m = document.createElement('i'); m.className = 'desk-snap'; m.setAttribute('aria-hidden', 'true'); desk.prepend(m); return m; });
     let lastScrollY = scrollY, scrollDir = 1, snapTimer = 0, snapping = false, pointerDown = false;
     let nudgeDeg = 0, interacted = false;
     let wins = [], zCounter = 10, cascadeIdx = 0;
@@ -611,11 +612,13 @@
       b1 = Math.round(b0 + 0.8 * H);
       end = Math.round(b1 + 0.35 * H);
       desk.style.height = `${H + end}px`;
+      // phones snap natively (CSS scroll-snap) to the cover, the desktop and the phone
+      snapMarks.forEach((m, i) => { m.style.top = `${[0, a1, b1][i]}px`; });
 
       if (wide.matches) {
         W = Math.round(Math.min(0.72 * stageW, (H - 136) / 0.652, 1120));
       } else {
-        W = Math.round(Math.min(0.88 * stageW, 370));
+        W = Math.round(Math.min(0.94 * stageW, 440));
       }
       Hl = Math.round(0.652 * W);
       mac.style.setProperty('--W', `${W}px`);
@@ -710,37 +713,32 @@
         pocket.style.setProperty('--pk-y', `${((1 - pkProg) * 32).toFixed(2)}%`);
         pocket.style.setProperty('--pk-op', pkProg.toFixed(3));
       } else {
-        mac.style.setProperty('--rx', '0deg');
-        mac.style.setProperty('--ry', '0deg');
-        mac.style.setProperty('--rz', '0deg');
+        // Phones: the closed laptop sits in the space under the words, tilted toward you; opening it, the camera
+        // zooms into its screen (transform only, so it stays on the GPU) and the real desktop fades in over it.
         const ep = smoothstep(0, 1, push);
         const meBottom = deskMe.offsetTop + deskMe.offsetHeight;
+        const room = Math.max(0, H - meBottom);
         const x0 = (stageW - W) * 0.5;
-        const y0 = Math.min(H - Hl - 48, meBottom - Hl + 32);
-        const x1 = (stageW - W) * 0.5;
+        const y0 = meBottom + room * 0.5 - Hl * 1.5;
         const y1 = (H - Hl) * 0.44;
-        const mx = x0 + (x1 - x0) * eo - stageW * 0.92 * ea;
-        const my = y0 + (y1 - y0) * eo;
-        const ms = 1 + 0.32 * ep * (1 - ea);
+        const zoom = Math.max(stageW / (W * 0.94), H / (Hl * 0.9)) * 1.04;
+        const ms = 1 + (zoom - 1) * ep * ep;
+        const yz = H * 0.5 - Hl * 0.5 + Hl * 0.03 * ms;
+        const mx = x0 - stageW * 0.92 * ea;
+        const my = y0 + (y1 - y0) * eo + (yz - y1) * ep;
+        mac.style.setProperty('--rx', `${(-22 * (1 - eo)).toFixed(2)}deg`);
+        mac.style.setProperty('--ry', '0deg');
+        mac.style.setProperty('--rz', '0deg');
         mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
-        mac.style.opacity = (1 - smoothstep(0.55, 0.95, ep) * (1 - ea) - 0.3 * ea).toFixed(3);
+        mac.style.opacity = (1 - smoothstep(0.82, 1, ep) * (1 - ea)).toFixed(3);
 
-        if (push <= 0.01) {
-          mScreen.style.opacity = '0';
-          mScreen.style.clipPath = 'inset(40% 10% 40% 10% round 12px)';
-          mScreen.style.transform = 'none';
-        } else if (push < 0.98 && aside <= 0.01) {
-          const tIn = Math.max(0, y1 * (1 - ep));
-          const bIn = Math.max(0, (H - (y1 + Hl)) * (1 - ep));
-          const sIn = Math.max(0, x1 * (1 - ep));
-          const rad = Math.round(12 * (1 - ep));
-          mScreen.style.opacity = smoothstep(0.02, 0.25, ep).toFixed(3);
-          mScreen.style.clipPath = `inset(${tIn.toFixed(0)}px ${sIn.toFixed(0)}px ${bIn.toFixed(0)}px ${sIn.toFixed(0)}px round ${rad}px)`;
-          mScreen.style.transform = 'none';
+        mScreen.style.clipPath = 'none';
+        if (aside <= 0.01) {
+          mScreen.style.opacity = smoothstep(0.72, 0.95, ep).toFixed(3);
+          mScreen.style.transform = `scale(${(1.06 - 0.06 * smoothstep(0.62, 1, ep)).toFixed(4)})`;
         } else {
-          mScreen.style.clipPath = 'none';
           mScreen.style.opacity = (1 - smoothstep(0, 0.85, ea)).toFixed(3);
-          mScreen.style.transform = ea > 0 ? `translateX(${(-ea * 100).toFixed(1)}%)` : 'none';
+          mScreen.style.transform = `translate3d(${(-ea * 100).toFixed(2)}%, 0, 0)`;
         }
 
         pocket.style.setProperty('--pk-x', `${((1 - ea) * 102).toFixed(2)}%`);
@@ -761,11 +759,13 @@
       }
       snapping = true;
       clearTimeout(snapTimer);
-      if (lenis) lenis.scrollTo(top, { duration: 0.9 });
+      if (lenis && wide.matches) lenis.scrollTo(top, { duration: 0.9 });
       else window.scrollTo({ top, behavior: 'smooth' });
       setTimeout(() => {
-        if (lenis) lenis.scrollTo(top, { immediate: true });
-        else window.scrollTo(0, top);
+        if (wide.matches) {
+          if (lenis) lenis.scrollTo(top, { immediate: true });
+          else window.scrollTo(0, top);
+        }
         snapping = false;
         frame();
       }, 920);
@@ -773,7 +773,7 @@
 
     // Direction-aware snap after ~160ms idle
     function checkSnap() {
-      if (reduce || snapping || pointerDown) return;
+      if (!wide.matches || reduce || snapping || pointerDown) return;
       const rect = desk.getBoundingClientRect();
       const y = -rect.top;
       if (y <= 2 || y >= end - 2) return;
