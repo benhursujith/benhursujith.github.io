@@ -591,7 +591,7 @@
     let open = 0, push = 0, aside = 0, atDesk = false, atPhone = false, inStage = true;
     // Phones don't scroll the page: the scene has three states (cover, desktop, phone) and a swipe or a button plays
     // an eased transition between them, so it can never stop half way (iOS Safari's momentum and toolbar did that).
-    let vY = 0, tweenRaf = 0, tweening = false;
+    let vP = 0, tweenRaf = 0, tweening = false, igOrigin = [innerWidth / 2, innerHeight * 0.6];
     let lastScrollY = scrollY, scrollDir = 1, snapTimer = 0, snapping = false, pointerDown = false;
     let nudgeDeg = 0, interacted = false;
     let wins = [], zCounter = 10, cascadeIdx = 0;
@@ -614,7 +614,7 @@
       b1 = Math.round(b0 + 0.8 * H);
       end = Math.round(b1 + 0.35 * H);
       desk.style.height = wide.matches ? `${H + end}px` : `${H}px`;
-      if (!wide.matches) vY = [0, a1, b1][stateOf(vY)];
+      if (!wide.matches) vP = Math.round(vP);
 
       if (wide.matches) {
         W = Math.round(Math.min(0.72 * stageW, (H - 136) / 0.652, 1120));
@@ -631,7 +631,7 @@
       const rect = desk.getBoundingClientRect();
       deskTop = scrollY + rect.top;
       inStage = rect.bottom > 80 && rect.top < H * 0.85;
-      const y = wide.matches ? clamp(-rect.top, 0, end) : vY;
+      const y = wide.matches ? clamp(-rect.top, 0, end) : yOf(vP);
       if (!wide.matches) inStage = true;
 
       if (reduce) {
@@ -738,43 +738,55 @@
           mScreen.style.opacity = smoothstep(0.72, 0.95, ep).toFixed(3);
           mScreen.style.transform = `scale(${(1.06 - 0.06 * smoothstep(0.62, 1, ep)).toFixed(4)})`;
         } else {
-          mScreen.style.opacity = (1 - smoothstep(0, 0.85, ea)).toFixed(3);
-          mScreen.style.transform = `translate3d(${(-ea * 100).toFixed(2)}%, 0, 0)`;
+          // opening Instagram: the desktop sinks back while the app grows out of its icon
+          mScreen.style.opacity = (1 - smoothstep(0.3, 0.9, ea)).toFixed(3);
+          mScreen.style.transform = `scale(${(1 - 0.07 * ea).toFixed(4)})`;
         }
-
-        pocket.style.setProperty('--pk-x', `${((1 - ea) * 102).toFixed(2)}%`);
+        if (aside <= 0.01) {
+          const ic = $('[data-ig-app-icon]', desktop)?.getBoundingClientRect();
+          if (ic && ic.width) igOrigin = [ic.left + ic.width / 2, ic.top + ic.height / 2];
+        }
+        pocket.style.setProperty('--pk-ox', `${igOrigin[0].toFixed(0)}px`);
+        pocket.style.setProperty('--pk-oy', `${igOrigin[1].toFixed(0)}px`);
+        pocket.style.setProperty('--pk-s', (0.16 + 0.84 * ea).toFixed(4));
+        pocket.style.setProperty('--pk-o', smoothstep(0, 0.22, ea).toFixed(3));
+        pocket.style.setProperty('--pk-r', `${((1 - ea) * 46).toFixed(1)}px`);
       }
 
       syncPlayers();
     }
 
-    // Phones: which of the three states a position belongs to, and an eased tween between states
-    function stateOf(y) { return y < a1 * 0.5 ? 0 : y < (a1 + b1) * 0.5 ? 1 : 2; }
+    // Phones: progress runs 0 (cover) → 1 (desktop) → 2 (phone) with no dead zones, mapped onto the same scene positions
+    const yOf = (p) => (p <= 1 ? a1 * p : b0 + (b1 - b0) * (p - 1));
+    const pOf = (y) => (y <= a1 ? y / a1 : 1 + clamp((y - b0) / (b1 - b0)));
     function tweenTo(target, immediate = false) {
       cancelAnimationFrame(tweenRaf);
-      const from = vY;
-      if (immediate || reduce || from === target) { vY = target; tweening = false; frame(); return; }
-      // the lid and the zoom get room to breathe; the slide to the phone is quicker
-      const dur = Math.abs(target - from) > (b1 - a1) * 1.2 ? 1900 : (target > a1 || from > a1) ? 950 : 1500;
+      const from = vP;
+      if (immediate || reduce || from === target) { vP = target; tweening = false; frame(); return; }
+      // the lid and the zoom get room to breathe; opening Instagram is quicker
+      const span = Math.abs(target - from);
+      const dur = span > 1.5 ? 2200 : Math.min(from, target) >= 1 ? 900 * span : 1600 * span;
       const t0 = performance.now();
-      const ease = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+      // opening Instagram eases out (moves on the tap, settles softly, like iOS); the lid and the zoom ease in and out
+      const appOpen = Math.min(from, target) >= 1;
+      const ease = appOpen ? (p) => 1 - Math.pow(1 - p, 3) : (p) => 0.5 - Math.cos(Math.PI * p) / 2;
       tweening = true;
       const step = (now) => {
         const p = clamp((now - t0) / dur);
-        vY = from + (target - from) * ease(p);
+        vP = from + (target - from) * ease(p);
         frame();
         if (p < 1) tweenRaf = requestAnimationFrame(step);
-        else { vY = target; tweening = false; frame(); }
+        else { vP = target; tweening = false; frame(); }
       };
       tweenRaf = requestAnimationFrame(step);
     }
     function stepState(dir) {
       if (tweening) return;
-      const next = clamp(stateOf(vY) + dir, 0, 2);
-      if (next === stateOf(vY)) return;
+      const next = clamp(Math.round(vP) + dir, 0, 2);
+      if (next === Math.round(vP)) return;
       if (next < 2) closeStory(true);
       if (next !== 1) closeAllWins(true);
-      tweenTo([0, a1, b1][next]);
+      tweenTo(next);
     }
     // a vertical swipe anywhere outside the scrolling parts (the feed, a story, an open window) changes state
     const SCROLLERS = '.ig-views, .igs, .ig-sheet, .win, .dt-wins, input, textarea, [data-slide-file]';
@@ -805,7 +817,7 @@
     // Scroll to a target offset inside section.desk
     function scrollToDesk(targetY, immediate = false) {
       interacted = true;
-      if (!wide.matches) { tweenTo(clamp(targetY, 0, b1), immediate); return; }
+      if (!wide.matches) { tweenTo(Math.round(pOf(clamp(targetY, 0, b1))), immediate); return; }
       const top = deskTop + targetY;
       if (immediate || reduce) {
         if (lenis) lenis.scrollTo(top, { immediate: true });

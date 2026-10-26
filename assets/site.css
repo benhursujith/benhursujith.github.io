@@ -1649,17 +1649,25 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
     width: auto; margin: 22px 4px 0;
     font-size: 13px;
   }
+  /* On a phone the Mac desktop holds an Instagram icon; tapping it opens the app out of the icon */
   .dt-phone-btn {
     order: 3; align-self: center;
-    margin-top: 18px; padding: 8px 24px;
-    border: 1px solid #1A4F9C; border-radius: 999px;
-    background: linear-gradient(180deg, #B3D4F8 0%, #77ACEE 50%, #4E8FE5 51%, #92C3F8 100%);
-    box-shadow: 0 2px 7px rgba(0, 0, 0, .5), inset 0 1px 0 rgba(255, 255, 255, .6);
-    color: #06224A;
-    font: 700 14px/1.2 var(--aqua);
-    text-shadow: 0 1px 0 rgba(255, 255, 255, .5);
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    margin-top: 22px; padding: 0; border: 0; background: none;
     cursor: pointer;
   }
+  .ig-app-icon {
+    display: grid; place-items: center;
+    width: 66px; height: 66px;
+    border-radius: 23%;
+    background: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
+    box-shadow: 0 10px 22px -6px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .35);
+    animation: ig-app-nudge 2.6s cubic-bezier(.4, 0, .2, 1) infinite;
+  }
+  .ig-app-icon svg { width: 62%; height: 62%; fill: none; stroke: #fff; stroke-width: 1.9; }
+  .ig-app-icon svg circle:last-child { fill: #fff; stroke: none; }
+  .dt-phone-btn:active .ig-app-icon { transform: scale(.9); animation: none; }
+  @keyframes ig-app-nudge { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(-6px); } 90% { transform: translateY(0); } }
   .m-screen .dt-dock { position: relative; left: auto; bottom: auto; order: 4; align-self: center; margin-top: auto; transform: none; padding: 0 10px; }
   .m-screen .dt-icon { width: 42px; height: 42px; }
   .m-screen .dt-apps > li { margin: 0 2px; }
@@ -1691,8 +1699,11 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   /* Full-bleed Instagram on phones (no drawn phone frame, no fake status bar) */
   .pocket {
     top: 0; left: 0; right: 0; bottom: 0;
-    transform: translateX(var(--pk-x, 100%));
-    opacity: 1;
+    transform: scale(var(--pk-s, .12));
+    transform-origin: var(--pk-ox, 50%) var(--pk-oy, 70%);
+    opacity: var(--pk-o, 0);
+    border-radius: var(--pk-r, 0px);
+    overflow: hidden;
   }
   .pk-stage { width: 100%; height: 100%; container-type: normal; }
   .pk-hint { display: none; }
