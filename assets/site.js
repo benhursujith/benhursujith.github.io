@@ -92,6 +92,31 @@
   }), { rootMargin: '0px 0px -18% 0px' });
   $$('.marker').forEach((m) => { if (!m.closest('.note, .card')) marker.observe(m); });
 
+  /* ---------- The visitor's name: a blank on the cover, used on the laptop and the phone. Kept in this browser only. ---------- */
+  const visitor = $('[data-visitor]');
+  if (visitor) {
+    const sizer = $('[data-visitor-sizer]');
+    const useName = () => {
+      const first = visitor.value.trim().split(/\s+/)[0] || '';
+      sizer.textContent = visitor.value || visitor.placeholder;
+      $$('[data-visitor-cta]').forEach((el) => { el.textContent = first ? `Open my laptop, ${first}` : 'Open my laptop'; });
+      const hi = $('[data-visitor-hi]');
+      if (hi) { hi.hidden = !first; hi.textContent = first ? `Hi ${first}!` : ''; }
+      const talk = $('[data-visitor-talk]');
+      if (talk) talk.textContent = first ? `Let's talk, ${first}.` : "Let's talk.";
+      root.classList.toggle('has-visitor', !!first);
+    };
+    try { visitor.value = localStorage.getItem('visitor') || ''; } catch (e) {}
+    visitor.addEventListener('input', () => { useName(); try { localStorage.setItem('visitor', visitor.value.trim()); } catch (e) {} });
+    visitor.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter') return;
+      e.preventDefault();
+      visitor.blur();
+      $('.me-open')?.click();
+    });
+    useName();
+  }
+
   /* ---------- Masthead, current section, pinned headings ---------- */
   const mast = $('.masthead');
   let lastY = scrollY, mastH = 0, pinH = 0, mastShown = true;
@@ -228,7 +253,7 @@
   const pctx = probe.getContext('2d', { willReadFrequently: true });
   setInterval(() => {
     $$('.device.phone .dv-video').forEach((v) => {
-      if (v.hidden || v.paused || v.readyState < 2 || !v.videoWidth) return;
+      if (v.hidden || v.paused || v.readyState < 2 || !v.videoWidth || v.closest('.ig')) return;
       try {
         pctx.drawImage(v, v.videoWidth * 0.5, v.videoHeight * 0.025, 4, 4, 0, 0, 1, 1);
         const [r, g, b] = pctx.getImageData(0, 0, 1, 1).data;
@@ -402,13 +427,13 @@
   }
   $$('.row').forEach(setupRow);
 
-  /* ---------- MIS: rounded running totals from the weekly MIS, March to September 2026 ---------- */
+  /* ---------- MIS: rounded running totals from the weekly MIS, March to October 2026 ---------- */
   const misStart = new Date(2026, 2, 2);
-  const weeks = Array.from({ length: 31 }, (_, i) => new Date(misStart.getTime() + i * 7 * 864e5));
+  const weeks = Array.from({ length: 34 }, (_, i) => new Date(misStart.getTime() + i * 7 * 864e5));
   const series = {
-    nurses: [100, 210, 340, 440, 520, 600, 730, 850, 1060, 1380, 1810, 2080, 2300, 2680, 2920, 3170, 3400, 3540, 3730, 3860, 4060, 4160, 4390, 4510, 4630, 4730, 4830, 4950, 5190, 5310, 5450],
-    ask: [0, 0, 0, 0, 0, 0, 10, 280, 720, 1240, 1960, 2870, 3780, 4590, 5330, 6330, 7200, 7780, 8580, 9230, 10210, 10650, 11140, 11680, 11990, 12380, 12730, 13050, 13660, 14210, 14820],
-    learn: [2320, 2840, 3380, 4240, 5410, 6950, 9140, 10820, 12810, 14840, 17320, 20050, 22980, 27430, 31350, 34980, 37920, 40180, 41770, 42860, 43930, 44610, 45690, 47400, 48910, 50390, 52010, 53050, 54290, 55340, 56260],
+    nurses: [100, 210, 340, 440, 520, 600, 730, 850, 1060, 1380, 1810, 2080, 2300, 2680, 2920, 3170, 3400, 3540, 3730, 3860, 4060, 4160, 4390, 4510, 4630, 4730, 4830, 4950, 5190, 5310, 5450, 5660, 5810, 5930],
+    ask: [0, 0, 0, 0, 0, 0, 10, 280, 720, 1240, 1960, 2870, 3780, 4590, 5330, 6330, 7200, 7780, 8580, 9230, 10210, 10650, 11140, 11680, 11990, 12380, 12730, 13050, 13660, 14210, 14820, 15520, 16070, 16570],
+    learn: [2320, 2840, 3380, 4240, 5410, 6950, 9140, 10820, 12810, 14840, 17320, 20050, 22980, 27430, 31350, 34980, 37920, 40180, 41770, 42860, 43930, 44610, 45690, 47400, 48910, 50390, 52010, 53050, 54290, 55340, 56260, 57640, 59160, 61970],
   };
   const num = (n) => n.toLocaleString('en-IN');
   const EPISODE_MIN = 5;   // learning hours count each completed episode as five minutes
@@ -519,33 +544,43 @@
     const pkPhone = $('[data-pk-phone]', desk);
     const pkScreen = $('.device-screen', pkPhone);
     const pkStatusTime = $('.phone-status span', pkPhone);
-    const pkApp = $('[data-pk-app]', desk);
-    const pkTitle = $('[data-pk-title]', pkApp);
-    const pkMore = $('[data-pk-more]', pkApp);
-    const pkVideo = $('[data-pk-video]', pkApp);
-    const pkIntro = $('[data-pk-intro]', pkApp);
-    const stickiesBox = $('[data-stickies]', desk);
-    const stickies = $$('.sticky', stickiesBox);
     const mk = $('[data-mk]', desk), mkText = $('span', mk);
     const notesByKey = Object.fromEntries($$('.desk-data .note', desk).map((n) => [n.dataset.key, n]));
     const tpls = Object.fromEntries($$('.desk-data template[data-tpl]', desk).map((t) => [t.dataset.tpl, t]));
-    const phoneAppOrder = ['carepilot', 'ask', 'zenea-caregiver', 'zenea-parent', 'learn', 'trade', 'eatouts'];
     const INTRO = 2800;
 
     const smoothstep = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
     const tintFor = (ch) => (ch === 'pixis' ? 'var(--lilac)' : (ch === 'personal' || ch === 'hi') ? 'var(--blush)' : ch === 'ai' ? 'var(--sand)' : 'var(--sage)');
 
     $$('.card', desk).forEach((c) => fit(c, 390));
-    stickies.forEach((s, i) => s.style.setProperty('--si', i));
+
+    // The unibody keyboard: black keys set into the aluminium, one row at a time (width in key units).
+    const KEYS = [
+      [['esc', 1.4], ...'F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12'.split(' ').map((k) => [k, 1]), ['⏏', 1]],
+      [...'` 1 2 3 4 5 6 7 8 9 0 - ='.split(' ').map((k) => [k, 1]), ['delete', 1.5]],
+      [['tab', 1.5], ...'Q W E R T Y U I O P [ ] \\'.split(' ').map((k) => [k, 1])],
+      [['caps lock', 1.8], ...'A S D F G H J K L ; \''.split(' ').map((k) => [k, 1]), ['return', 1.7]],
+      [['shift', 2.3], ...'Z X C V B N M , . /'.split(' ').map((k) => [k, 1]), ['shift', 2.2]],
+      [['fn', 1], ['control', 1], ['option', 1], ['⌘', 1.3], ['', 5.2], ['⌘', 1.3], ['option', 1], ['←', 1], ['↑↓', 1], ['→', 1]],
+    ];
+    const keyWell = $('.mac-keys', mac);
+    if (keyWell) keyWell.innerHTML = KEYS.map((row, r) => `<div class="mk-row${r === 0 ? ' mk-row--fn' : ''}">${row
+      .map(([k, w]) => `<i style="--kw:${w}"${k.length > 2 ? ' class="mk-w"' : ''}>${k === '↑↓' ? '<b>↑</b><b>↓</b>' : k}</i>`).join('')}</div>`).join('');
 
     // Live Mumbai clock in the laptop's menu bar and the phone's status bar.
-    const fmtMenu = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+    const fmtMenu = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
     const fmtPhone = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false });
     const tickClock = () => {
       const now = new Date();
       const parts = Object.fromEntries(fmtMenu.formatToParts(now).map((p) => [p.type, p.value]));
-      if (dtClock) dtClock.textContent = `Mumbai · ${parts.weekday} ${parts.hour}:${parts.minute}`;
+      if (dtClock) { dtClock.textContent = `${parts.weekday} ${parts.hour}:${parts.minute} ${parts.dayPeriod}`; dtClock.title = 'Mumbai time'; }
       if (pkStatusTime) pkStatusTime.textContent = fmtPhone.format(now);
+      // iCal's Dock icon always showed today's date
+      const cal = $('.dt-icon--cal', desktop);
+      if (cal) {
+        $('b', cal).textContent = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', month: 'short' }).format(now).toUpperCase();
+        $('i', cal).textContent = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', day: 'numeric' }).format(now);
+      }
     };
     tickClock();
     setInterval(tickClock, 20000);
@@ -559,22 +594,13 @@
     let wins = [], zCounter = 10, cascadeIdx = 0;
     let curPk = null, mkTimer = 0, activeMarks = [], activeMarkIdx = -1, activePlayer = null, activeMkHost = null;
 
-    // Re-parent desktop and stickies when crossing the 900px breakpoint.
+    // Re-parent the desktop when crossing the 900px breakpoint.
     function syncBreakpoint() {
       closeAllWins(true);
-      closeApp(true);
+      closeStory(true);
       if (wide.matches) {
         if (desktop.parentElement !== macScreen) macScreen.prepend(desktop);
-        stickies.forEach((s) => { if (s.parentElement !== stickiesBox) stickiesBox.append(s); });
-      } else {
-        if (desktop.parentElement !== mScreen) mScreen.append(desktop);
-        stickies.forEach((s) => {
-          s.style.left = '';
-          s.style.top = '';
-          const cell = $(`.home-cell[data-cell="${s.dataset.for}"]`, pocket);
-          if (cell && s.parentElement !== cell) cell.append(s);
-        });
-      }
+      } else if (desktop.parentElement !== mScreen) mScreen.append(desktop);
     }
 
     function measure() {
@@ -595,40 +621,6 @@
       mac.style.setProperty('--W', `${W}px`);
       deskTop = scrollY + desk.getBoundingClientRect().top;
       frame();
-      if (wide.matches) requestAnimationFrame(placeStickies);
-    }
-
-    // Position the six labeled result cards around the wide-screen phone (no arrows).
-    function placeStickies() {
-      if (!wide.matches) return;
-      const stBox = stage.getBoundingClientRect();
-      const phBox = pkPhone.getBoundingClientRect();
-      if (!phBox.width) return;
-      const pkBox = pocket.getBoundingClientRect();
-      const dyPk = (pkBox.top + pkBox.height * 0.5) - (stBox.top + H * 0.5);
-      const phLeft = phBox.left - stBox.left;
-      const phRight = phBox.right - stBox.left;
-      const phTop = phBox.top - stBox.top - dyPk;
-      const phBot = phBox.bottom - stBox.top - dyPk;
-
-      const layoutSide = (list, side) => {
-        const w = list[0]?.offsetWidth || 190;
-        const x = side === 'left'
-          ? Math.max(16, phLeft - w - 34)
-          : Math.min(stageW - w - 16, phRight + 34);
-        const spanTop = Math.max(108, phTop + 92);
-        const spanBot = Math.min(H - 96, phBot - 96);
-        const step = (spanBot - spanTop) / Math.max(1, list.length - 1);
-        list.forEach((s, idx) => {
-          const h = s.offsetHeight || 104;
-          const cy = clamp(spanTop + idx * step, 84 + h * 0.5, H - 44 - h * 0.5);
-          s.style.left = `${Math.round(x)}px`;
-          s.style.top = `${Math.round(cy - h * 0.5)}px`;
-        });
-      };
-
-      layoutSide(stickies.filter((s) => s.dataset.side === 'left'), 'left');
-      layoutSide(stickies.filter((s) => s.dataset.side === 'right'), 'right');
     }
 
     function frame() {
@@ -660,7 +652,6 @@
       desk.classList.toggle('is-phone', atPhone);
       desktop.inert = !atDesk;
       pocket.inert = !atPhone;
-      stickiesBox.inert = !atPhone;
 
       // Identity copy fade
       const meOp = 1 - smoothstep(0.02, 0.46, open);
@@ -675,7 +666,7 @@
       macLid.style.setProperty('--lid', `${lidDeg.toFixed(2)}deg`);
       mac.style.setProperty('--deck-op', smoothstep(0.05, 0.35, open).toFixed(3));
       const darkOp = 1 - smoothstep(0.48, 0.88, open);
-      macDark.style.setProperty('--dark', darkOp.toFixed(3));
+      mac.style.setProperty('--dark', darkOp.toFixed(3));
       const sheenX = -34 + eo * 66;
       const sheenOp = Math.sin(eo * Math.PI) * 0.85 + 0.12;
       mac.style.setProperty('--sheen', `${sheenX.toFixed(1)}%`);
@@ -819,17 +810,20 @@
     addEventListener('pointercancel', endPointer, { passive: true });
 
     // Shortcuts & lid drag
-    $$('[data-desk-open]', desk).forEach((b) => b.addEventListener('click', () => {
+    // The masthead's Laptop and Phone links are shortcuts too.
+    const shortcut = (sel, fn) => $$(sel).forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); setMenu(false); fn(); }));
+    shortcut('[data-desk-open]', () => {
+      closeStory(true);
       scrollToDesk(a1);
       setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
-    }));
-    $$('[data-desk-phone]', desk).forEach((b) => b.addEventListener('click', () => {
+    });
+    shortcut('[data-desk-phone]', () => {
       closeAllWins(true);
       scrollToDesk(b1);
-      setTimeout(() => $('.home-widget, .home-app', pocket)?.focus({ preventScroll: true }), reduce ? 20 : 940);
-    }));
+      setTimeout(() => $('.ig-ring', pocket)?.focus({ preventScroll: true }), reduce ? 20 : 940);
+    });
     $$('[data-desk-laptop]', desk).forEach((b) => b.addEventListener('click', () => {
-      closeApp(true);
+      closeStory(true);
       scrollToDesk(b0);
       setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
     }));
@@ -915,32 +909,44 @@
       return L;
     }
 
-    function titled(L, note, introEl) {
+    // What I did, in a few lines: the kicker, headline, result, up to two more numbers and three "Worked with" tags.
+    const INTRO_HTML = '<p class="intro-kick"></p><p class="intro-title"></p><p class="intro-stat"><span class="marker"></span></p><p class="intro-lab"></p><ul class="intro-m"></ul><ul class="row-tags intro-tags"></ul>';
+    function fillIntro(note, introEl) {
       const stat = $('.note-stat', note)?.textContent || '';
-      if (!L || !stat) return L;
+      if (!stat) return false;
       $('.intro-kick', introEl).textContent = $('.note-kick', note)?.textContent || '';
       $('.intro-title', introEl).textContent = $('.note-title', note)?.textContent.trim().replace(/\s+/g, ' ') || '';
       $('.intro-stat .marker', introEl).textContent = stat;
       $('.intro-lab', introEl).textContent = $('.note-lab', note)?.textContent || '';
-      const tags = note.dataset.more ? $$(`${note.dataset.more} .row-tags li`).slice(0, 3) : [];
-      $('.intro-tags', introEl).innerHTML = tags.map((li) => `<li>${li.textContent}</li>`).join('');
+      const facts = (note.dataset.facts || '').split('|').filter(Boolean).slice(0, 2).map((f) => f.split(': '));
+      $('.intro-m', introEl).innerHTML = facts.map(([l, v]) => `<li><b>${v}</b>${l}</li>`).join('');
+      const tags = (note.dataset.tags || '').split('|').filter(Boolean).slice(0, 3);
+      $('.intro-tags', introEl).innerHTML = tags.map((t) => `<li>${t}</li>`).join('');
       introEl.style.setProperty('--tint', tintFor(note.dataset.chapter));
+      return true;
+    }
 
-      const card = clock({ duration: INTRO, steps: [], reset() {}, still() {} });
-      let main = false;
+    // On the laptop the demo starts at once and the summary floats over it until it's closed (or after a few seconds).
+    const POP_MS = 7000;
+    function summarised(L, note, introEl) {
+      if (!L || !fillIntro(note, introEl)) return L;
+      let timer = 0;
+      const hide = () => { clearTimeout(timer); introEl.classList.remove('on'); };
+      $('.intro-x', introEl)?.addEventListener('click', (e) => { e.stopPropagation(); hide(); });
+      introEl.addEventListener('click', (e) => { if (e.target === introEl) hide(); });
       return {
         el: L.el,
-        get elapsed() { return main ? INTRO + L.elapsed : card.elapsed; },
-        get duration() { return INTRO + L.duration; },
-        get media() { return main ? L.elapsed : -1; },
+        get elapsed() { return L.elapsed; },
+        get duration() { return L.duration; },
+        get media() { return L.elapsed; },
         start(onEnd) {
-          main = false;
-          L.load?.();
+          L.start(onEnd);
           introEl.classList.add('on');
-          card.start(() => { main = true; introEl.classList.remove('on'); L.start(onEnd); });
+          clearTimeout(timer);
+          if (!reduce) timer = setTimeout(hide, POP_MS);
         },
-        resume() { if (main) L.resume(); else card.resume(); },
-        pause() { if (main) L.pause(); else card.pause(); },
+        resume() { L.resume(); },
+        pause() { L.pause(); },
         still() { L.still(); introEl.classList.add('on'); },
       };
     }
@@ -1034,7 +1040,7 @@
           curPk.running = true;
           curPk.player.running = true;
           if (curPk.started) curPk.player.resume();
-          else { curPk.started = true; curPk.player.start(() => closeApp()); }
+          else { curPk.started = true; curPk.player.start(() => storyStep(1)); }
         } else if ((!wantPk || reduce) && curPk.running) {
           curPk.running = false;
           curPk.player.running = false;
@@ -1047,17 +1053,24 @@
         setActiveInk(frontWin.player, frontWin.note, frontWin.body, !wide.matches);
         if (frontWin.running) mkTimer = requestAnimationFrame(tickInk);
       } else if (atPhone && curPk?.player) {
-        setActiveInk(curPk.player, curPk.note, pkApp, !wide.matches);
+        setActiveInk(curPk.player, curPk.note, story, !wide.matches);
         if (curPk.running) mkTimer = requestAnimationFrame(tickInk);
       } else {
         setActiveInk(null, null, null, false);
       }
     }
 
+    // say-hi.txt opens by the visitor's name when they gave one on the cover
+    function greetTxt(el) {
+      const first = ($('[data-visitor]')?.value || '').trim().split(/\s+/)[0];
+      const line = $('[data-txt-hi]', el);
+      if (line) line.textContent = first ? `Hi ${first},` : 'Hi,';
+    }
+
     /* ---------- Window Manager (Desktop Apps & Files) ---------- */
 
     function winSizeFor(key) {
-      if (key === 'ads' || key === 'money-plan' || key === 'gbf') return { w: 0.64, aspect: 1.6 };
+      if (key === 'ads' || key === 'money-plan' || key === 'gbf' || key === 'pathways') return { w: 0.64, aspect: 1.6 };
       if (key === 'mis' || key === 'ai') return { w: 0.64, h: 0.72 };
       if (key.startsWith('writing-')) return { w: 0.62, h: 0.76 };
       if (key === 'kit') return { w: 0.48, h: 0.66 };
@@ -1068,36 +1081,20 @@
     function populateWinBody(key, note, body) {
       if (note?.dataset.video || note?.dataset.html) {
         const introEl = document.createElement('div');
-        introEl.className = 'intro';
-        introEl.setAttribute('aria-hidden', 'true');
-        introEl.innerHTML = '<p class="intro-kick"></p><p class="intro-title"></p><p class="intro-stat"><span class="marker"></span></p><p class="intro-lab"></p><ul class="row-tags intro-tags"></ul>';
+        introEl.className = 'intro intro--pop';
+        introEl.innerHTML = `<div class="intro-card" role="note">${INTRO_HTML}<button class="intro-x" type="button" aria-label="Close the summary">×</button></div>`;
         body.append(introEl);
         const raw = makePlayer(note, body, !wide.matches);
-        return titled(raw, note, introEl);
+        return summarised(raw, note, introEl);
       }
       body.classList.add('win-body--scroll');
       if (key === 'mis') {
         body.append(tpls.mis.content.cloneNode(true));
         $$('[data-sketch]', body).forEach((el) => sketch(el, series[el.dataset.sketch], { w: 460, h: 200, labels: true }));
         $$('[data-sketch-spark]', body).forEach((el) => sketch(el, series[el.dataset.sketchSpark], { w: 116, h: 42, labels: false }));
-      } else if (key === 'ai') {
-        const wrap = document.createElement('div');
-        wrap.className = 'win-pad win-ai';
-        const stats = $('#ai .hx-stats')?.cloneNode(true);
-        const tree = $('#ai .hx-tree')?.cloneNode(true);
-        if (stats) wrap.append(stats);
-        if (tree) wrap.append(tree);
-        body.append(wrap);
-      } else if (key === 'pixis') {
-        const wrap = document.createElement('div');
-        wrap.className = 'win-pad win-pixis';
-        const roles = $('#pixis-roles')?.cloneNode(true);
-        if (roles) { roles.removeAttribute('id'); wrap.append(roles); }
-        body.append(wrap);
-      } else if (key === 'kit') {
-        body.append(tpls.kit.content.cloneNode(true));
-      } else if (key === 'hi') {
-        body.append(tpls.hi.content.cloneNode(true));
+      } else if (tpls[key]) {
+        body.append(tpls[key].content.cloneNode(true));
+        if (key === 'hi') greetTxt(body);
       } else if (note?.dataset.article) {
         body.classList.remove('win-body--scroll');
         const iframe = document.createElement('iframe');
@@ -1105,7 +1102,7 @@
         iframe.src = `${note.dataset.article}?embed=1`;
         iframe.title = note.dataset.title || 'Article';
         iframe.addEventListener('load', () => {
-          try { if (iframe.contentDocument) iframe.contentDocument.documentElement.dataset.theme = theme(); } catch (e) {}
+          try { if (iframe.contentDocument) iframe.contentDocument.documentElement.dataset.theme = 'light'; } catch (e) {}
         });
         body.append(iframe);
       }
@@ -1121,7 +1118,7 @@
         item.el.style.zIndex = String(++zCounter);
         item.el.classList.toggle('is-front', i === wins.length - 1);
       });
-      if (dtFront) dtFront.textContent = (w.note?.dataset.title || '').split('·')[0].trim();
+      if (dtFront) dtFront.textContent = (w.note?.dataset.title || '').split('·')[0].trim() || 'Finder';
       syncPlayers();
     }
 
@@ -1277,7 +1274,8 @@
       let extLink = '';
       if (note?.dataset.article) extLink = `<a class="win-ext" href="${note.dataset.article}">Full page ↗</a>`;
       else if (key === 'gbf') extLink = '<a class="win-ext" href="https://www.gbf-blr.com" target="_blank" rel="noopener">Visit ↗</a>';
-      else if (note?.dataset.more) extLink = `<a class="win-ext" href="${note.dataset.more}" data-win-jump>Read the notes ↓</a>`;
+      else if (key === 'money-plan') extLink = '<a class="win-ext" href="runway/" target="_blank" rel="noopener">Visit ↗</a>';
+      else if (key === 'pathways') extLink = '<a class="win-ext" href="https://pathways.borderplus.co" target="_blank" rel="noopener">Visit ↗</a>';
 
       el.innerHTML = `<div class="win-bar"><div class="win-lights"><button class="win-dot win-dot--close" type="button" data-win-close aria-label="Close ${titleText}">×</button><button class="win-dot win-dot--min" type="button" data-win-mode="window" aria-label="Toggle windowed mode">–</button><button class="win-dot win-dot--full" type="button" data-win-mode="theater" aria-label="Toggle full screen">+</button></div><span class="win-title">${titleText}</span><div class="win-actions"><button class="win-fs" type="button" data-win-fs>Windowed</button>${extLink}</div></div><div class="win-body"></div>`;
       dtWins.append(el);
@@ -1303,15 +1301,6 @@
         e.stopPropagation();
         if (w.theater) toggleWinTheater(w, false);
         else toggleWinMax(w);
-      });
-      $('[data-win-jump]', el)?.addEventListener('click', (e) => {
-        const href = e.currentTarget.getAttribute('href');
-        const target = $(href);
-        if (!target) return;
-        e.preventDefault();
-        closeAllWins(true);
-        if (lenis) lenis.scrollTo(target, { offset: -10, duration: 1.2 });
-        else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
       });
       el.addEventListener('pointerdown', () => focusWin(w));
 
@@ -1378,7 +1367,7 @@
       const finish = () => {
         w.el.remove();
         if (!wins.length) {
-          if (dtFront) dtFront.textContent = '';
+          if (dtFront) dtFront.textContent = 'Finder';
           if (!wide.matches && !curPk) { root.classList.remove('sheet-open'); lenis?.start(); }
         } else {
           focusWin(wins[wins.length - 1]);
@@ -1396,7 +1385,15 @@
 
     // Desktop apps: click opens
     $$('.dt-app', desktop).forEach((btn) => {
-      btn.addEventListener('click', () => openWin(btn.dataset.open, btn));
+      btn.addEventListener('click', () => {
+        const launching = !wins.some((x) => x.key === btn.dataset.open);
+        if (launching && !reduce && wide.matches) {
+          btn.classList.remove('is-launching');
+          void btn.offsetWidth;
+          btn.classList.add('is-launching');
+          setTimeout(() => { btn.classList.remove('is-launching'); openWin(btn.dataset.open, btn); }, 520);
+        } else openWin(btn.dataset.open, btn);
+      });
     });
 
     // Files: click, Enter, or slide/drag to open (§6 & §8)
@@ -1441,141 +1438,318 @@
       });
     });
 
-    /* ---------- Phone Home Screen & Apps ---------- */
+    /* ---------- Phone: my work as Instagram (stories, a feed of metric cards, search, results, profile) ----------
+       Every product is one post and one story segment. A post is its numbers, set as a card, with Watch; stories
+       play the same recordings and recreations as the laptop, through makePlayer + titled. */
 
-    function openApp(key, fromEl) {
+    const ig = $('[data-ig]', pocket);
+    const igViews = $('[data-ig-views]', ig);
+    const igTitle = $('[data-ig-title]', ig);
+    const story = $('[data-story]', ig);
+    const stBars = $('[data-story-bars]', story);
+    const stAv = $('[data-story-av]', story), stUser = $('[data-story-user]', story), stSub = $('[data-story-sub]', story);
+    const stMedia = $('[data-story-media]', story), stCard = $('[data-story-card]', story);
+    const stIntro = $('[data-story-intro]', story), stNote = $('[data-story-note]', story);
+    const sheet = $('[data-ig-sheet]', ig);
+    stIntro.innerHTML = INTRO_HTML;
+
+    // a logo either fills its circle, or (a mark drawn to its edges) sits inside it with room around it
+    const mark = (src, inset) => `<img src="assets/brand/${src}" alt="" width="40" height="40"${inset ? ' class="is-mark"' : ''}>`;
+    const STORIES = [
+      { label: 'Pixis', av: mark('pixis-mark.svg'), when: '2020–25', keys: ['ads', 'pixis'] },
+      { label: 'BorderPlus', av: mark('borderplus-mark.png'), when: '2026', keys: ['carepilot', 'ask', 'learn', 'mis', 'pathways'] },
+      { label: 'Zenea', av: mark('zenea-mark.svg', true), when: '2026', keys: ['zenea-caregiver', 'zenea-parent'] },
+      { label: 'Personal', av: '<span>S</span>', me: true, when: '2026', keys: ['money-plan', 'trade', 'eatouts'] },
+      { label: 'Church', av: mark('gbf-icon.png'), when: '2026', keys: ['gbf'] },
+      { label: 'Say hi', av: '<span>Hi</span>', me: true, when: 'Oct 2026', keys: ['kit', 'hi'] },
+    ];
+    const FEED = ['ads', 'pixis', 'mis', 'carepilot', 'ask', 'learn', 'pathways', 'zenea-caregiver', 'zenea-parent', 'trade', 'eatouts', 'money-plan', 'gbf'];
+    const TINT = { borderplus: '#E4EEE8', pixis: '#E9E6F6', personal: '#F7E9E1', ai: '#F3ECDA' };
+    const where = (key) => STORIES.findIndex((st) => st.keys.includes(key));
+    // A story's cards: a playable product gets its summary, then its demo as the next card; the rest are one card.
+    const segs = (i) => STORIES[i].keys.flatMap((k) => (playable(notesByKey[k]) ? [{ key: k, part: 'sum' }, { key: k, part: 'demo' }] : [{ key: k, part: 'card' }]));
+    const segAt = (i, key) => Math.max(0, segs(i).findIndex((g) => g.key === key));
+    const product = (note) => (note.dataset.title || '').split('·')[0].trim();
+    const txt = (note, sel) => $(sel, note)?.textContent.trim().replace(/\s+/g, ' ') || '';
+    const playable = (note) => !!(note.dataset.video || note.dataset.html);
+    const metrics = (note) => (note.dataset.facts || '').split('|').filter(Boolean).map((f) => f.split(': ')).slice(0, 2);
+    const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
+
+    // A post's square: its numbers, set as a card. Big for the feed; the grids reuse it, smaller.
+    function card(key) {
       const note = notesByKey[key];
-      if (!note) return;
-      if (curPk) closeApp(true);
+      const m = metrics(note);
+      return `<span class="ig-card" style="--w:${TINT[note.dataset.chapter] || TINT.borderplus}">
+        <span class="ig-card-k">${txt(note, '.note-kick')}</span>
+        <span class="ig-card-t">${txt(note, '.note-title')}</span>
+        <span class="ig-card-big">${txt(note, '.note-stat')}</span>
+        <span class="ig-card-l">${txt(note, '.note-lab')}</span>
+        ${m.length ? `<span class="ig-card-m">${m.map(([l, v]) => `<span><b>${v}</b>${l}</span>`).join('')}</span>` : ''}
+        <span class="ig-watch">${playIcon}${playable(note) ? 'Watch' : 'View'}</span>
+      </span>`;
+    }
 
-      const appBtn = $(`.home-app[data-app="${key}"]`, pocket) || fromEl;
-      appBtn?.classList.add('is-opened');
+    // Stories tray, and the same rings as profile highlights
+    const rings = STORIES.map((st, i) =>
+      `<li><button class="ig-ring" type="button" data-story-open="${i}"><span class="ig-av${st.me ? ' ig-av--me' : ''}">${st.av}</span><span class="ig-ring-l">${st.label}</span></button></li>`).join('');
+    $('[data-ig-stories]', ig).innerHTML = rings;
+    $('[data-ig-highlights]', ig).innerHTML = rings;
 
-      // Compute origin from the icon inside .device-screen
-      const scRect = pkScreen.getBoundingClientRect();
-      const icEl = $('.home-icon', appBtn) || appBtn;
-      if (icEl && scRect.width) {
-        const ir = icEl.getBoundingClientRect();
-        const ox = clamp(((ir.left + ir.width * 0.5 - scRect.left) / scRect.width) * 100, 10, 90);
-        const oy = clamp(((ir.top + ir.height * 0.5 - scRect.top) / scRect.height) * 100, 10, 90);
-        pkApp.style.setProperty('--ox', `${ox.toFixed(1)}%`);
-        pkApp.style.setProperty('--oy', `${oy.toFixed(1)}%`);
-      }
+    // Feed
+    const icon = {
+      heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3S3.6 15.2 3.6 9.1A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8.4 2.1c0 6.1-8.4 11.2-8.4 11.2z"/></svg>',
+      chat: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.5-4.4a8.4 8.4 0 1 1 15.5-4.5z"/></svg>',
+      send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3.5 3.5 10.3l6.6 2.6L21 3.5zM10.1 12.9l2.6 7.6L21 3.5"/></svg>',
+      save: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 20.5 12 15.6l-6.5 4.9V4.3a.8.8 0 0 1 .8-.8h11.4a.8.8 0 0 1 .8.8z"/></svg>',
+    };
+    $('[data-ig-feed]', ig).innerHTML = FEED.map((key) => {
+      const note = notesByKey[key];
+      const st = STORIES[where(key)];
+      const tags = (note.dataset.tags || '').split('|').filter(Boolean);
+      return `<article class="ig-post" data-post="${key}">
+        <header class="ig-ph"><span class="ig-av ig-av--me"><span>S</span></span><span class="ig-ph-who"><b>sujithbenhur</b><span>${txt(note, '.note-kick')}</span></span><span class="ig-ph-time">${st.when}</span></header>
+        <button class="ig-pm" type="button" data-post-media="${key}" aria-label="${playable(note) ? 'Watch' : 'View'} ${product(note)}">${card(key)}<span class="ig-burst" aria-hidden="true">${icon.heart}</span></button>
+        <div class="ig-pb">
+          <div class="ig-acts"><button class="ig-act" type="button" data-like aria-label="Like">${icon.heart}</button><button class="ig-act" type="button" data-post-media="${key}" aria-label="Watch">${icon.chat}</button><button class="ig-act" type="button" data-ig-hi aria-label="Say hi">${icon.send}</button><span class="ig-act ig-act--save" aria-hidden="true">${icon.save}</span></div>
+          ${tags.length ? `<p class="ig-cap"><b>sujithbenhur</b> Built with ${tags.join(', ')}.</p>` : ''}
+          ${note.dataset.honest ? `<p class="ig-honest">${note.dataset.honest}</p>` : ''}
+        </div>
+      </article>`;
+    }).join('');
 
-      pkTitle.textContent = note.dataset.title || '';
-      pkMore.setAttribute('href', note.dataset.more || '#work');
-      $$('.dv-video, .dv-html, .card', pkApp).forEach((el) => { el.hidden = true; el.classList.remove('is-on'); });
-      pkIntro.classList.remove('on');
+    // Search and profile grids
+    $$('[data-ig-grid]', ig).forEach((g) => {
+      g.innerHTML = FEED.map((key) => `<button class="ig-cell" type="button" data-post-media="${key}" aria-label="${product(notesByKey[key])}">${card(key)}</button>`).join('');
+    });
 
-      let player = null;
-      if (note.dataset.card === 'mis') {
-        const cardEl = $('.card[data-card="mis"]', pkApp);
+    // Results: each headline number and fact, one line each
+    $('[data-ig-news]', ig).innerHTML = FEED.flatMap((key) => {
+      const note = notesByKey[key];
+      const st = STORIES[where(key)];
+      const row = (html) => `<li><span class="ig-av${st.me ? ' ig-av--me' : ''}">${st.av}</span><p>${html}</p><button class="ig-news-th" type="button" data-post-media="${key}" aria-label="${playable(note) ? 'Watch' : 'View'} ${product(note)}">${playIcon}</button></li>`;
+      return [row(`<b>${product(note)}</b> <b>${txt(note, '.note-stat')}</b> ${txt(note, '.note-lab')}`),
+        ...metrics(note).map(([l, v]) => row(`<b>${product(note)}</b> ${l}: <b>${v}</b>`))];
+    }).join('');
+
+    $('[data-ig-stats]', ig).innerHTML = [[FEED.length, 'posts'], ['5,900+', 'nurses'], ['300+', 'brands']]
+      .map(([n, l]) => `<div><dt>${l}</dt><dd>${n}</dd></div>`).join('');
+
+    // Tabs: Reels plays every story from the start
+    const TITLES = { search: 'Search', activity: 'Results', profile: 'sujithbenhur' };
+    function setTab(name) {
+      if (name === 'reels') { openStory(0, 0, $('[data-tab="reels"]', ig)); return; }
+      const view = $(`.ig-view[data-view="${name}"]`, ig);
+      if (view.classList.contains('is-on')) { igViews.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); return; }
+      $$('.ig-view', ig).forEach((v) => v.classList.toggle('is-on', v === view));
+      $$('.ig-tab', ig).forEach((t) => t.classList.toggle('is-on', t.dataset.tab === name));
+      igTitle.innerHTML = TITLES[name] ? `<span class="ig-title-t">${TITLES[name]}</span>` : '<span class="ig-logo">Instagram</span>';
+      igViews.scrollTop = 0;
+      if (!reduce) { view.classList.remove('is-in'); void view.offsetWidth; view.classList.add('is-in'); }
+    }
+    $$('[data-tab]', ig).forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
+
+    function openSheet() {
+      sheet.hidden = false;
+      requestAnimationFrame(() => sheet.classList.add('is-on'));
+      $('.ig-sbtn', sheet)?.focus({ preventScroll: true });
+    }
+    function closeSheet() {
+      if (sheet.hidden) return;
+      sheet.classList.remove('is-on');
+      setTimeout(() => { sheet.hidden = true; }, reduce ? 0 : 300);
+    }
+    $('[data-sheet-close]', sheet).addEventListener('click', closeSheet);
+    sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
+
+    // A post: one tap opens its story, a double tap likes it
+    let tapTimer = 0, tapKey = null;
+    function like(post) {
+      if (!post) return;
+      post.classList.add('is-liked');
+      const burst = $('.ig-burst', post);
+      burst.classList.remove('on');
+      void burst.offsetWidth;
+      burst.classList.add('on');
+    }
+    ig.addEventListener('click', (e) => {
+      if (e.target.closest('[data-ig-hi]')) { openSheet(); return; }
+      const ring = e.target.closest('[data-story-open]');
+      if (ring) { openStory(+ring.dataset.storyOpen, 0, ring); return; }
+      const likeBtn = e.target.closest('[data-like]');
+      if (likeBtn) { const post = likeBtn.closest('.ig-post'); post.classList.contains('is-liked') ? post.classList.remove('is-liked') : like(post); return; }
+      const m = e.target.closest('[data-post-media]');
+      if (!m) return;
+      const key = m.dataset.postMedia;
+      const post = m.classList.contains('ig-pm') ? m.closest('.ig-post') : null;
+      if (post && tapKey === key) { clearTimeout(tapTimer); tapKey = null; like(post); return; }
+      const go = () => { tapKey = null; const si = where(key); openStory(si, segAt(si, key), m); };
+      if (!post) { go(); return; }
+      tapKey = key;
+      tapTimer = setTimeout(go, 260);
+    });
+
+    /* Story viewer */
+    let stI = 0, stSeg = 0, barRaf = 0, held = false, holdTimer = 0, stFrom = null;
+    const still = (ms) => {
+      const c = clock({ duration: ms, steps: [], reset() {}, still() {} });
+      return { el: null, get elapsed() { return c.elapsed; }, get duration() { return ms; }, start: (onEnd) => c.start(onEnd), resume: () => c.resume(), pause: () => c.pause(), still() {} };
+    };
+
+    function tickBars() {
+      cancelAnimationFrame(barRaf);
+      if (story.hidden) return;
+      const p = curPk?.player;
+      const fill = p && p.duration ? clamp(p.elapsed / p.duration) : 0;
+      $$('i', stBars).forEach((b, i) => b.style.setProperty('--p', i < stSeg ? 1 : i === stSeg ? fill.toFixed(4) : 0));
+      barRaf = requestAnimationFrame(tickBars);
+    }
+
+    function showSeg() {
+      const st = STORIES[stI];
+      const sg = segs(stI)[stSeg];
+      const key = sg.key;
+      const note = notesByKey[key];
+      if (curPk?.player) curPk.player.pause();
+      stVideoReset();
+      stAv.innerHTML = st.av;
+      stAv.classList.toggle('ig-av--me', !!st.me);
+      stUser.textContent = st.label;
+      stSub.textContent = `${product(note)} · ${st.when}`;
+      $$('.dv-video, .dv-html, .card, .igs-card', stMedia).forEach((el) => { el.hidden = true; el.classList.remove('is-on'); });
+      stIntro.classList.remove('on');
+      let player;
+      if (sg.part === 'sum') {
+        fillIntro(note, stIntro);
+        stIntro.classList.add('on');
+        player = still(6000);
+      } else if (sg.part === 'demo') {
+        player = makePlayer(note, stMedia, true);
+      } else if (key === 'mis') {
+        const cardEl = $('.card[data-card="mis"]', stMedia);
         cardEl.hidden = false;
         void cardEl.offsetWidth;
         cardEl.classList.add('is-on');
-        syncCards();
+        player = still(7000);
       } else {
-        const raw = makePlayer(note, pkApp, !wide.matches);
-        player = titled(raw, note, pkIntro);
+        stCard.innerHTML = '';
+        stCard.append(tpls[key].content.cloneNode(true));
+        if (key === 'hi') greetTxt(stCard);
+        stCard.hidden = false;
+        stCard.scrollTop = 0;
+        player = still(key === 'hi' ? 6000 : 9000);
       }
-
-      curPk = { key, note, player, fromEl: appBtn, started: false, running: false };
-      desk.classList.add('has-pk-app');
-      pkApp.hidden = false;
-      if (!reduce) {
-        pkApp.classList.add('is-opening');
-        requestAnimationFrame(() => pkApp.classList.remove('is-opening'));
-      }
-      if (!wide.matches) {
-        root.classList.add('sheet-open');
-        lenis?.stop();
-      }
+      stNote.textContent = note.dataset.honest || '';
+      story.classList.toggle('is-card', sg.part === 'card');
+      story.classList.toggle('is-wide', 'wide' in note.dataset && !note.dataset.mVideo);
+      curPk = { key, note: sg.part === 'demo' ? note : null, player, started: false, running: false };
+      $('.ig-ring', $$('[data-ig-stories] li', ig)[stI])?.classList.add('is-seen');
       syncPlayers();
-      $('.pk-close', pkApp)?.focus({ preventScroll: true });
+      tickBars();
+    }
+    function stVideoReset() {
+      const v = $('video', stMedia);
+      if (v) v.pause();
     }
 
-    function closeApp(immediate = false) {
-      if (!curPk) return;
-      const prev = curPk;
+    function openStory(i, seg = 0, fromEl = null) {
+      if (!STORIES[i]) return;
+      closeSheet();
+      stI = i;
+      stSeg = Math.max(0, seg);
+      if (fromEl) {
+        stFrom = fromEl;
+        // grow the story out of whatever was tapped
+        const ir = ig.getBoundingClientRect(), fr = fromEl.getBoundingClientRect();
+        if (ir.width) {
+          story.style.setProperty('--ox', `${(((fr.left + fr.width / 2) - ir.left) / ir.width * 100).toFixed(1)}%`);
+          story.style.setProperty('--oy', `${(((fr.top + fr.height / 2) - ir.top) / ir.height * 100).toFixed(1)}%`);
+        }
+      }
+      stBars.innerHTML = segs(i).map(() => '<i></i>').join('');
+      const wasHidden = story.hidden;
+      story.hidden = false;
+      desk.classList.add('has-story');
+      pkScreen.classList.add('band-dark');
+      if (wasHidden && !reduce) {
+        story.classList.add('is-opening');
+        requestAnimationFrame(() => requestAnimationFrame(() => story.classList.remove('is-opening')));
+      }
+      if (!wide.matches) { root.classList.add('sheet-open'); lenis?.stop(); }
+      showSeg();
+      $('.igs-close', story)?.focus({ preventScroll: true });
+    }
+
+    function storyStep(dir) {
+      if (story.hidden) return;
+      const count = segs(stI).length;
+      if (stSeg + dir >= 0 && stSeg + dir < count) { stSeg += dir; showSeg(); return; }
+      const next = stI + dir;
+      if (next < 0) { stSeg = 0; showSeg(); return; }
+      if (next >= STORIES.length) { closeStory(); return; }
+      openStory(next, dir < 0 ? segs(next).length - 1 : 0);
+    }
+
+    function closeStory(immediate = false) {
+      if (story.hidden) return;
+      if (curPk?.player) curPk.player.pause();
+      stVideoReset();
       curPk = null;
-      if (prev.player) { prev.player.pause(); prev.running = false; }
-      pkVideo.pause();
-      pkIntro.classList.remove('on');
-      desk.classList.remove('has-pk-app');
-      pkApp.hidden = true;
+      cancelAnimationFrame(barRaf);
+      stIntro.classList.remove('on');
+      story.hidden = true;
+      story.classList.remove('is-held');
+      desk.classList.remove('has-story');
       pkScreen.classList.remove('band-dark');
-      if (!wide.matches && !wins.length) {
-        root.classList.remove('sheet-open');
-        lenis?.start();
-      }
+      if (!wide.matches && !wins.length) { root.classList.remove('sheet-open'); lenis?.start(); }
       syncPlayers();
-      if (!immediate) prev.fromEl?.focus({ preventScroll: true });
+      if (!immediate) stFrom?.focus({ preventScroll: true });
     }
 
-    function stepPhoneApp(dir) {
-      if (!curPk) return;
-      const idx = phoneAppOrder.indexOf(curPk.key);
-      if (idx < 0) return;
-      const nextKey = phoneAppOrder[(idx + dir + phoneAppOrder.length) % phoneAppOrder.length];
-      openApp(nextKey, $(`.home-app[data-app="${nextKey}"]`, pocket));
-    }
+    $('[data-story-close]', story).addEventListener('click', () => closeStory());
+    // Tap the left third for back, the rest for next; hold to pause; swipe down to close.
+    let stTouch = null;
+    story.addEventListener('pointerdown', (e) => {
+      if (e.button > 0 || e.target.closest('.igs-close, .igs-card a')) return;
+      stTouch = { id: e.pointerId, sx: e.clientX, sy: e.clientY };
+      held = false;
+      clearTimeout(holdTimer);
+      holdTimer = setTimeout(() => {
+        held = true;
+        story.classList.add('is-held');
+        curPk?.player?.pause();
+      }, 240);
+    });
+    const endTouch = (e) => {
+      clearTimeout(holdTimer);
+      if (!stTouch || e.pointerId !== stTouch.id) return;
+      const dx = e.clientX - stTouch.sx, dy = e.clientY - stTouch.sy;
+      stTouch = null;
+      if (held) {
+        story.classList.remove('is-held');
+        if (curPk?.running) curPk.player.resume();
+      }
+      if (dy > 80 && Math.abs(dy) > Math.abs(dx) && !(stCard.scrollTop > 0)) { held = true; closeStory(); }
+      else if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) { held = true; storyStep(dx < 0 ? 1 : -1); }
+    };
+    story.addEventListener('pointerup', endTouch);
+    story.addEventListener('pointercancel', endTouch);
+    $('[data-story-prev]', story).addEventListener('click', () => { if (!held) storyStep(-1); held = false; });
+    $('[data-story-next]', story).addEventListener('click', () => { if (!held) storyStep(1); held = false; });
 
-    $$('[data-app]', pocket).forEach((btn) => {
-      btn.addEventListener('click', () => openApp(btn.dataset.app, btn));
-    });
-    stickies.forEach((s) => {
-      const setTarget = (on) => {
-        [s.dataset.for, s.dataset.for2].filter(Boolean).forEach((k) => {
-          $(`.home-app[data-app="${k}"]`, pocket)?.classList.toggle('is-target', on);
-        });
-      };
-      s.addEventListener('pointerenter', () => setTarget(true));
-      s.addEventListener('pointerleave', () => setTarget(false));
-      s.addEventListener('focusin', () => setTarget(true));
-      s.addEventListener('focusout', () => setTarget(false));
-      s.addEventListener('click', (e) => {
-        e.stopPropagation();
-        setTarget(false);
-        openApp(s.dataset.for, $(`.home-app[data-app="${s.dataset.for}"]`, pocket));
-      });
-    });
-    $$('[data-pk-close]', pkApp).forEach((b) => b.addEventListener('click', () => closeApp()));
-    pkMore.addEventListener('click', (e) => {
-      const target = $(pkMore.getAttribute('href'));
-      if (!target) return;
-      e.preventDefault();
-      closeApp(true);
-      if (lenis) lenis.scrollTo(target, { offset: -10, duration: 1.2 });
-      else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
-    });
-
-    // Swipe down on narrow phone app sheet to close; swipe left/right for neighbouring app
-    let pkTouch = null;
-    pkApp.addEventListener('pointerdown', (e) => {
-      if (e.button > 0 || e.target.closest('button, a')) return;
-      pkTouch = { id: e.pointerId, sx: e.clientX, sy: e.clientY };
-    });
-    pkApp.addEventListener('pointerup', (e) => {
-      if (!pkTouch || e.pointerId !== pkTouch.id) return;
-      const dx = e.clientX - pkTouch.sx, dy = e.clientY - pkTouch.sy;
-      pkTouch = null;
-      if (dy > 80 && Math.abs(dy) > Math.abs(dx)) closeApp();
-      else if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) stepPhoneApp(dx < 0 ? 1 : -1);
-    });
-
-    // Keyboard controls: Esc exits theater or closes front window / phone app; ArrowLeft/Right step phone apps
+    // Keyboard controls: Esc closes the story, sheet or front window; arrows step through stories
     addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
-        if (curPk) { e.preventDefault(); closeApp(); }
+        if (!story.hidden) { e.preventDefault(); closeStory(); }
+        else if (!sheet.hidden) { e.preventDefault(); closeSheet(); }
         else if (wins.length) {
           e.preventDefault();
           const front = wins[wins.length - 1];
           if (front.theater) toggleWinTheater(front, false);
           else closeWin(front);
         }
-      } else if (curPk && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+      } else if (!story.hidden && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
         e.preventDefault();
-        stepPhoneApp(e.key === 'ArrowRight' ? 1 : -1);
+        storyStep(e.key === 'ArrowRight' ? 1 : -1);
       }
     });
 
