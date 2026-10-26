@@ -589,7 +589,9 @@
     let H = innerHeight, stageW = innerWidth, W = 840, Hl = 548;
     let a1 = 500, b0 = 800, b1 = 1500, end = 1800, deskTop = 0;
     let open = 0, push = 0, aside = 0, atDesk = false, atPhone = false, inStage = true;
-    const snapMarks = [0, 1, 2].map(() => { const m = document.createElement('i'); m.className = 'desk-snap'; m.setAttribute('aria-hidden', 'true'); desk.prepend(m); return m; });
+    // Phones don't scroll the page: the scene has three states (cover, desktop, phone) and a swipe or a button plays
+    // an eased transition between them, so it can never stop half way (iOS Safari's momentum and toolbar did that).
+    let vY = 0, tweenRaf = 0, tweening = false;
     let lastScrollY = scrollY, scrollDir = 1, snapTimer = 0, snapping = false, pointerDown = false;
     let nudgeDeg = 0, interacted = false;
     let wins = [], zCounter = 10, cascadeIdx = 0;
@@ -611,9 +613,8 @@
       b0 = Math.round(a1 + 0.35 * H);
       b1 = Math.round(b0 + 0.8 * H);
       end = Math.round(b1 + 0.35 * H);
-      desk.style.height = `${H + end}px`;
-      // phones snap natively (CSS scroll-snap) to the cover, the desktop and the phone
-      snapMarks.forEach((m, i) => { m.style.top = `${[0, a1, b1][i]}px`; });
+      desk.style.height = wide.matches ? `${H + end}px` : `${H}px`;
+      if (!wide.matches) vY = [0, a1, b1][stateOf(vY)];
 
       if (wide.matches) {
         W = Math.round(Math.min(0.72 * stageW, (H - 136) / 0.652, 1120));
@@ -630,7 +631,8 @@
       const rect = desk.getBoundingClientRect();
       deskTop = scrollY + rect.top;
       inStage = rect.bottom > 80 && rect.top < H * 0.85;
-      const y = clamp(-rect.top, 0, end);
+      const y = wide.matches ? clamp(-rect.top, 0, end) : vY;
+      if (!wide.matches) inStage = true;
 
       if (reduce) {
         if (y < a1 * 0.5) { open = 0; push = 0; aside = 0; }
@@ -747,9 +749,64 @@
       syncPlayers();
     }
 
+    // Phones: which of the three states a position belongs to, and an eased tween between states
+    function stateOf(y) { return y < a1 * 0.5 ? 0 : y < (a1 + b1) * 0.5 ? 1 : 2; }
+    function tweenTo(target, immediate = false) {
+      cancelAnimationFrame(tweenRaf);
+      const from = vY;
+      if (immediate || reduce || from === target) { vY = target; tweening = false; frame(); return; }
+      // the lid and the zoom get room to breathe; the slide to the phone is quicker
+      const dur = Math.abs(target - from) > (b1 - a1) * 1.2 ? 1900 : (target > a1 || from > a1) ? 950 : 1500;
+      const t0 = performance.now();
+      const ease = (p) => (p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2);
+      tweening = true;
+      const step = (now) => {
+        const p = clamp((now - t0) / dur);
+        vY = from + (target - from) * ease(p);
+        frame();
+        if (p < 1) tweenRaf = requestAnimationFrame(step);
+        else { vY = target; tweening = false; frame(); }
+      };
+      tweenRaf = requestAnimationFrame(step);
+    }
+    function stepState(dir) {
+      if (tweening) return;
+      const next = clamp(stateOf(vY) + dir, 0, 2);
+      if (next === stateOf(vY)) return;
+      if (next < 2) closeStory(true);
+      if (next !== 1) closeAllWins(true);
+      tweenTo([0, a1, b1][next]);
+    }
+    // a vertical swipe anywhere outside the scrolling parts (the feed, a story, an open window) changes state
+    const SCROLLERS = '.ig-views, .igs, .ig-sheet, .win, .dt-wins, input, textarea, [data-slide-file]';
+    let swipe = null;
+    stage.addEventListener('touchstart', (e) => {
+      if (wide.matches || e.touches.length !== 1 || e.target.closest(SCROLLERS)) { swipe = null; return; }
+      swipe = { x: e.touches[0].clientX, y: e.touches[0].clientY, t: performance.now() };
+    }, { passive: true });
+    stage.addEventListener('touchmove', (e) => {
+      if (swipe && !wide.matches && e.cancelable) e.preventDefault();
+    }, { passive: false });
+    stage.addEventListener('touchend', (e) => {
+      if (!swipe || wide.matches) return;
+      const t = e.changedTouches[0];
+      const dx = t.clientX - swipe.x, dy = t.clientY - swipe.y;
+      swipe = null;
+      if (Math.abs(dy) > 36 && Math.abs(dy) > Math.abs(dx) * 1.2) stepState(dy < 0 ? 1 : -1);
+    });
+    let wheelLock = 0;
+    stage.addEventListener('wheel', (e) => {
+      if (wide.matches || e.target.closest(SCROLLERS)) return;
+      e.preventDefault();
+      if (Math.abs(e.deltaY) < 12 || performance.now() < wheelLock) return;
+      wheelLock = performance.now() + 1100;
+      stepState(e.deltaY > 0 ? 1 : -1);
+    }, { passive: false });
+
     // Scroll to a target offset inside section.desk
     function scrollToDesk(targetY, immediate = false) {
       interacted = true;
+      if (!wide.matches) { tweenTo(clamp(targetY, 0, b1), immediate); return; }
       const top = deskTop + targetY;
       if (immediate || reduce) {
         if (lenis) lenis.scrollTo(top, { immediate: true });
