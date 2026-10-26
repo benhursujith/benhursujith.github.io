@@ -619,7 +619,7 @@
       if (wide.matches) {
         W = Math.round(Math.min(0.72 * stageW, (H - 136) / 0.652, 1120));
       } else {
-        W = Math.round(Math.min(0.94 * stageW, 440));
+        W = Math.round(Math.min(0.88 * stageW, 370));
       }
       Hl = Math.round(0.652 * W);
       mac.style.setProperty('--W', `${W}px`);
@@ -715,20 +715,19 @@
         pocket.style.setProperty('--pk-y', `${((1 - pkProg) * 32).toFixed(2)}%`);
         pocket.style.setProperty('--pk-op', pkProg.toFixed(3));
       } else {
-        // Phones: the closed laptop sits in the space under the words, tilted toward you; opening it, the camera
+        // Phones: the closed laptop sits just under the words (Sujith's pick); opening it, the camera
         // zooms into its screen (transform only, so it stays on the GPU) and the real desktop fades in over it.
         const ep = smoothstep(0, 1, push);
         const meBottom = deskMe.offsetTop + deskMe.offsetHeight;
-        const room = Math.max(0, H - meBottom);
         const x0 = (stageW - W) * 0.5;
-        const y0 = meBottom + room * 0.5 - Hl * 1.5;
+        const y0 = Math.min(H - Hl - 48, meBottom - Hl + 32);
         const y1 = (H - Hl) * 0.44;
         const zoom = Math.max(stageW / (W * 0.94), H / (Hl * 0.9)) * 1.04;
         const ms = 1 + (zoom - 1) * ep * ep;
         const yz = H * 0.5 - Hl * 0.5 + Hl * 0.03 * ms;
         const mx = x0 - stageW * 0.92 * ea;
         const my = y0 + (y1 - y0) * eo + (yz - y1) * ep;
-        mac.style.setProperty('--rx', `${(-22 * (1 - eo)).toFixed(2)}deg`);
+        mac.style.setProperty('--rx', '0deg');
         mac.style.setProperty('--ry', '0deg');
         mac.style.setProperty('--rz', '0deg');
         mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
