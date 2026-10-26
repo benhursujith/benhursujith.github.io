@@ -16,7 +16,11 @@
   const theme = () => root.dataset.theme || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
   // cards are paper, so the phone's status bar follows the theme there
   const syncCards = () => $$('.card:not([hidden])').forEach((c) => c.parentElement.classList.toggle('band-dark', theme() === 'dark'));
-  const syncTheme = () => { if (themeBtn) themeBtn.textContent = theme() === 'dark' ? 'Switch to light' : 'Switch to dark'; syncCards(); };
+  const syncTheme = () => {
+    if (themeBtn) themeBtn.textContent = theme() === 'dark' ? 'Switch to light' : 'Switch to dark';
+    syncCards();
+    $$('iframe.win-iframe').forEach((f) => { try { if (f.contentDocument) f.contentDocument.documentElement.dataset.theme = theme(); } catch (e) {} });
+  };
   themeBtn?.addEventListener('click', () => {
     const next = theme() === 'dark' ? 'light' : 'dark';
     root.dataset.theme = next;
@@ -26,7 +30,7 @@
 
   /* ---------- Smooth scroll ---------- */
   let lenis = null;
-  if (!reduce && window.Lenis) {
+  if (!reduce && !root.classList.contains('embed') && window.Lenis) {
     lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 0.95 });
     const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf); };
     requestAnimationFrame(raf);
@@ -173,8 +177,12 @@
     }), { threshold }).observe(el);
   }
   // Scale a fixed-size virtual screen (390 x 844 or 1280 x 800) to its frame.
-  function fit(container, baseWidth) {
-    const set = () => container.style.setProperty('--s', container.clientWidth / baseWidth);
+  function fit(container, baseWidth, baseHeight = 0) {
+    const set = () => {
+      const sw = container.clientWidth / baseWidth;
+      const sh = baseHeight && container.clientHeight ? container.clientHeight / baseHeight : sw;
+      container.style.setProperty('--s', Math.min(sw, sh));
+    };
     new ResizeObserver(set).observe(container);
     set();
   }
@@ -286,7 +294,7 @@
       const app = $('[data-ads]', container);
       const phone = base < 600;
       app.classList.toggle('ads--phone', phone);
-      fit(container, base);
+      fit(container, base, phone ? 0 : 800);
       const turns = $$('[data-step]', app);
       const typed = $('[data-ads-typed]', app);
       const cursor = $('[data-ads-cursor]', app);
@@ -491,280 +499,1097 @@
   $$('[data-sketch]').forEach((el) => sketch(el, series[el.dataset.sketch], { w: 346, h: 232, labels: true }));
   $$('[data-sketch-spark]').forEach((el) => sketch(el, series[el.dataset.sketchSpark], { w: 116, h: 42, labels: false }));
 
-  /* ---------- Landing: my highlights, as stories ----------
-     Each .note is one story screen: its words, and what plays on the device (a recording, a recreated demo, or a
-     card). On phones the profile is screen zero and the whole first screen is the story: tap the right side for
-     next, the left for back, hold to pause, swipe sideways to change chapter, scroll to leave. On wide screens the
-     profile stays beside the device, the stories start by themselves, and the device takes the clicks. */
-  function setupStories(land) {
-    const notes = $$('.note', land);
-    const stage = $('.stage', land);
-    const devices = Object.fromEntries($$('[data-device]', stage).map((d) => [d.dataset.device, d]));
-    const segs = $('.st-segs', land), chapterLabel = $('.st-chapter', land);
-    const countEl = $('.nn-count', land), more = $('.nn-more', land);
-    const mk = $('.mk', land), mkText = $('.mk span', land);
-    const intro = $('.intro', land), introHome = intro.parentElement;
-    const INTRO = 2800;   // ms the title card holds before a recording starts
-    const rings = $$('.ring', land);
-    const ringName = Object.fromEntries(rings.map((r) => [r.dataset.go, $('.ring-name', r).textContent]));
-    const order = [...new Set(notes.map((n) => n.dataset.chapter))];
-    const layers = new Map();
-    const seen = new Set();
-    let idx = null, cur = null, raf = 0, visible = false, held = false, ended = false, segChapter = null;
-    let marks = [], markIdx = -1;
+  /* ---------- Landing: open my laptop, then my phone ----------
+     Scroll position drives the lid, the narrow push-in, and the laptop-aside-to-phone handoff. Every button or lid
+     drag is a shortcut to a scroll target. Desktop apps and files open in windows (or full-screen sheets on phones)
+     that grow from their icon and can also be dragged out by sliding. */
+  function setupDesk(desk) {
+    const stage = $('.desk-stage', desk);
+    const deskMe = $('.desk-me', desk);
+    const mac = $('[data-mac]', desk);
+    const macLid = $('[data-mac-lid]', desk);
+    const macScreen = $('[data-mac-screen]', desk);
+    const macDark = $('[data-mac-dark]', desk);
+    const desktop = $('[data-desktop]', desk);
+    const dtFront = $('[data-dt-front]', desk);
+    const dtClock = $('[data-clock]', desk);
+    const dtWins = $('[data-dt-wins]', desk);
+    const mScreen = $('[data-m-screen]', desk);
+    const pocket = $('[data-pocket]', desk);
+    const pkPhone = $('[data-pk-phone]', desk);
+    const pkScreen = $('.device-screen', pkPhone);
+    const pkStatusTime = $('.phone-status span', pkPhone);
+    const pkApp = $('[data-pk-app]', desk);
+    const pkTitle = $('[data-pk-title]', pkApp);
+    const pkMore = $('[data-pk-more]', pkApp);
+    const pkVideo = $('[data-pk-video]', pkApp);
+    const pkIntro = $('[data-pk-intro]', pkApp);
+    const stickiesBox = $('[data-stickies]', desk);
+    const stickies = $$('.sticky', stickiesBox);
+    const mk = $('[data-mk]', desk), mkText = $('span', mk);
+    const notesByKey = Object.fromEntries($$('.desk-data .note', desk).map((n) => [n.dataset.key, n]));
+    const tpls = Object.fromEntries($$('.desk-data template[data-tpl]', desk).map((t) => [t.dataset.tpl, t]));
+    const phoneAppOrder = ['carepilot', 'ask', 'zenea-caregiver', 'zenea-parent', 'learn', 'trade', 'eatouts'];
+    const INTRO = 2800;
 
-    $$('.card', land).forEach((c) => fit(c, 390));
-    $$('.mk-arrow path', land).forEach((p) => p.setAttribute('pathLength', '1'));
+    const smoothstep = (a, b, x) => { const t = clamp((x - a) / (b - a)); return t * t * (3 - 2 * t); };
+    const tintFor = (ch) => (ch === 'pixis' ? 'var(--lilac)' : (ch === 'personal' || ch === 'hi') ? 'var(--blush)' : ch === 'ai' ? 'var(--sand)' : 'var(--sage)');
 
-    const chapterOf = (i) => notes[i].dataset.chapter;
-    const inChapter = (ch) => notes.reduce((a, n, k) => (n.dataset.chapter === ch ? [...a, k] : a), []);
-    const first = () => (wide.matches ? 0 : -1);
+    $$('.card', desk).forEach((c) => fit(c, 390));
+    stickies.forEach((s, i) => s.style.setProperty('--si', i));
 
-    // What a screen plays, and in which frame: phones can swap a browser demo for a phone-sized one.
-    const spec = (n) => {
-      const m = !wide.matches && n.dataset.mFrame;
-      return {
-        frame: (m ? n.dataset.mFrame : n.dataset.frame) || 'phone',
-        video: m ? n.dataset.mVideo : n.dataset.video,
-        html: m ? n.dataset.mHtml : n.dataset.html,
-        card: n.dataset.card,
-      };
+    // Live Mumbai clock in the laptop's menu bar and the phone's status bar.
+    const fmtMenu = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', weekday: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+    const fmtPhone = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false });
+    const tickClock = () => {
+      const now = new Date();
+      const parts = Object.fromEntries(fmtMenu.formatToParts(now).map((p) => [p.type, p.value]));
+      if (dtClock) dtClock.textContent = `Mumbai · ${parts.weekday} ${parts.hour}:${parts.minute}`;
+      if (pkStatusTime) pkStatusTime.textContent = fmtPhone.format(now);
     };
+    tickClock();
+    setInterval(tickClock, 20000);
 
-    // One layer per screen inside its device, built on first use and kept.
-    function layerFor(n) {
-      const s = spec(n);
-      const key = `${s.frame}:${s.video || s.html || s.card}`;
-      if (layers.has(key)) return layers.get(key);
-      const device = devices[s.frame];
+    // State & geometry
+    let H = innerHeight, stageW = innerWidth, W = 840, Hl = 548;
+    let a1 = 500, b0 = 800, b1 = 1500, end = 1800, deskTop = 0;
+    let open = 0, push = 0, aside = 0, atDesk = false, atPhone = false, inStage = true;
+    let lastScrollY = scrollY, scrollDir = 1, snapTimer = 0, snapping = false, pointerDown = false;
+    let nudgeDeg = 0, interacted = false;
+    let wins = [], zCounter = 10, cascadeIdx = 0;
+    let curPk = null, mkTimer = 0, activeMarks = [], activeMarkIdx = -1, activePlayer = null, activeMkHost = null;
+
+    // Re-parent desktop and stickies when crossing the 900px breakpoint.
+    function syncBreakpoint() {
+      closeAllWins(true);
+      closeApp(true);
+      if (wide.matches) {
+        if (desktop.parentElement !== macScreen) macScreen.prepend(desktop);
+        stickies.forEach((s) => { if (s.parentElement !== stickiesBox) stickiesBox.append(s); });
+      } else {
+        if (desktop.parentElement !== mScreen) mScreen.append(desktop);
+        stickies.forEach((s) => {
+          s.style.left = '';
+          s.style.top = '';
+          const cell = $(`.home-cell[data-cell="${s.dataset.for}"]`, pocket);
+          if (cell && s.parentElement !== cell) cell.append(s);
+        });
+      }
+    }
+
+    function measure() {
+      H = stage.clientHeight || innerHeight;
+      stageW = stage.clientWidth || innerWidth;
+      a1 = Math.round((wide.matches ? 0.6 : 0.8) * H);
+      b0 = Math.round(a1 + 0.35 * H);
+      b1 = Math.round(b0 + 0.8 * H);
+      end = Math.round(b1 + 0.35 * H);
+      desk.style.height = `${H + end}px`;
+
+      if (wide.matches) {
+        W = Math.round(Math.min(0.72 * stageW, (H - 136) / 0.652, 1120));
+      } else {
+        W = Math.round(Math.min(0.88 * stageW, 370));
+      }
+      Hl = Math.round(0.652 * W);
+      mac.style.setProperty('--W', `${W}px`);
+      deskTop = scrollY + desk.getBoundingClientRect().top;
+      frame();
+      if (wide.matches) requestAnimationFrame(placeStickies);
+    }
+
+    // Position the six labeled result cards around the wide-screen phone (no arrows).
+    function placeStickies() {
+      if (!wide.matches) return;
+      const stBox = stage.getBoundingClientRect();
+      const phBox = pkPhone.getBoundingClientRect();
+      if (!phBox.width) return;
+      const pkBox = pocket.getBoundingClientRect();
+      const dyPk = (pkBox.top + pkBox.height * 0.5) - (stBox.top + H * 0.5);
+      const phLeft = phBox.left - stBox.left;
+      const phRight = phBox.right - stBox.left;
+      const phTop = phBox.top - stBox.top - dyPk;
+      const phBot = phBox.bottom - stBox.top - dyPk;
+
+      const layoutSide = (list, side) => {
+        const w = list[0]?.offsetWidth || 190;
+        const x = side === 'left'
+          ? Math.max(16, phLeft - w - 34)
+          : Math.min(stageW - w - 16, phRight + 34);
+        const spanTop = Math.max(108, phTop + 92);
+        const spanBot = Math.min(H - 96, phBot - 96);
+        const step = (spanBot - spanTop) / Math.max(1, list.length - 1);
+        list.forEach((s, idx) => {
+          const h = s.offsetHeight || 104;
+          const cy = clamp(spanTop + idx * step, 84 + h * 0.5, H - 44 - h * 0.5);
+          s.style.left = `${Math.round(x)}px`;
+          s.style.top = `${Math.round(cy - h * 0.5)}px`;
+        });
+      };
+
+      layoutSide(stickies.filter((s) => s.dataset.side === 'left'), 'left');
+      layoutSide(stickies.filter((s) => s.dataset.side === 'right'), 'right');
+    }
+
+    function frame() {
+      const rect = desk.getBoundingClientRect();
+      deskTop = scrollY + rect.top;
+      inStage = rect.bottom > 80 && rect.top < H * 0.85;
+      const y = clamp(-rect.top, 0, end);
+
+      if (reduce) {
+        if (y < a1 * 0.5) { open = 0; push = 0; aside = 0; }
+        else if (y < (b0 + b1) * 0.5) { open = 1; push = 1; aside = 0; }
+        else { open = 1; push = 1; aside = 1; }
+      } else if (wide.matches) {
+        open = clamp(y / a1);
+        push = 0;
+        aside = clamp((y - b0) / (b1 - b0));
+      } else {
+        open = clamp(y / (a1 * 0.5));
+        push = clamp((y - a1 * 0.5) / (a1 * 0.5));
+        aside = clamp((y - b0) / (b1 - b0));
+      }
+
+      const onCover = open <= 0.02;
+      atDesk = (wide.matches ? open >= 0.98 : push >= 0.98) && aside <= 0.02;
+      atPhone = aside >= 0.98;
+
+      desk.classList.toggle('on-cover', onCover);
+      desk.classList.toggle('is-desk', atDesk);
+      desk.classList.toggle('is-phone', atPhone);
+      desktop.inert = !atDesk;
+      pocket.inert = !atPhone;
+      stickiesBox.inert = !atPhone;
+
+      // Identity copy fade
+      const meOp = 1 - smoothstep(0.02, 0.46, open);
+      const meY = -smoothstep(0, 0.5, open) * 26;
+      deskMe.style.setProperty('--me-op', meOp.toFixed(3));
+      deskMe.style.setProperty('--me-y', `${meY.toFixed(1)}px`);
+
+      // Lid angle, glass reflection sweep, and studio lighting
+      const eo = smoothstep(0, 1, open);
+      const ea = smoothstep(0, 1, aside);
+      const lidDeg = clamp(-90 * (1 - eo) + (onCover ? nudgeDeg : 0), -90, 0);
+      macLid.style.setProperty('--lid', `${lidDeg.toFixed(2)}deg`);
+      mac.style.setProperty('--deck-op', smoothstep(0.05, 0.35, open).toFixed(3));
+      const darkOp = 1 - smoothstep(0.48, 0.88, open);
+      macDark.style.setProperty('--dark', darkOp.toFixed(3));
+      const sheenX = -34 + eo * 66;
+      const sheenOp = Math.sin(eo * Math.PI) * 0.85 + 0.12;
+      mac.style.setProperty('--sheen', `${sheenX.toFixed(1)}%`);
+      mac.style.setProperty('--sheen-op', sheenOp.toFixed(3));
+
+      if (wide.matches) {
+        const x0 = 0.72 * stageW - 0.5 * W;
+        const y0 = 0.44 * H - 0.82 * Hl;
+        const s0 = 0.63;
+        const x1 = (stageW - W) * 0.5;
+        const y1 = Math.max(66, (H - Hl) * 0.42);
+        const s1 = 1;
+        const x2 = 0.04 * stageW - 0.5 * W;
+        const y2 = (H - Hl) * 0.5;
+        const s2 = 0.45;
+
+        const mx = x0 + (x1 - x0) * eo + (x2 - x1) * ea;
+        const my = y0 + (y1 - y0) * eo + (y2 - y1) * ea;
+        const ms = s0 + (s1 - s0) * eo + (s2 - s1) * ea;
+
+        // 3D hero camera angle on the cover, orbiting to front-and-center as the lid opens, then angling aside
+        const heroRx = 5.5 * (1 - eo);
+        const heroRy = -9.5 * (1 - eo) + 20 * ea;
+        const heroRz = 0.8 * (1 - eo);
+        mac.style.setProperty('--rx', `${heroRx.toFixed(2)}deg`);
+        mac.style.setProperty('--ry', `${heroRy.toFixed(2)}deg`);
+        mac.style.setProperty('--rz', `${heroRz.toFixed(2)}deg`);
+        mac.style.setProperty('--sh-y', `${(28 - 10 * eo).toFixed(1)}px`);
+        mac.style.setProperty('--sh-s', (0.94 + 0.06 * eo).toFixed(3));
+
+        const macOp = 1 - 0.45 * ea;
+
+        if (atDesk) {
+          mac.style.transform = `translate3d(${Math.round(x1)}px, ${Math.round(y1)}px, 0) scale(1)`;
+        } else {
+          mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
+        }
+        mac.style.opacity = macOp.toFixed(3);
+
+        const pkProg = smoothstep(0.28, 1, aside);
+        pocket.style.setProperty('--pk-y', `${((1 - pkProg) * 32).toFixed(2)}%`);
+        pocket.style.setProperty('--pk-op', pkProg.toFixed(3));
+      } else {
+        mac.style.setProperty('--rx', '0deg');
+        mac.style.setProperty('--ry', '0deg');
+        mac.style.setProperty('--rz', '0deg');
+        const ep = smoothstep(0, 1, push);
+        const meBottom = deskMe.offsetTop + deskMe.offsetHeight;
+        const x0 = (stageW - W) * 0.5;
+        const y0 = Math.min(H - Hl - 48, meBottom - Hl + 32);
+        const x1 = (stageW - W) * 0.5;
+        const y1 = (H - Hl) * 0.44;
+        const mx = x0 + (x1 - x0) * eo - stageW * 0.92 * ea;
+        const my = y0 + (y1 - y0) * eo;
+        const ms = 1 + 0.32 * ep * (1 - ea);
+        mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
+        mac.style.opacity = (1 - smoothstep(0.55, 0.95, ep) * (1 - ea) - 0.3 * ea).toFixed(3);
+
+        if (push <= 0.01) {
+          mScreen.style.opacity = '0';
+          mScreen.style.clipPath = 'inset(40% 10% 40% 10% round 12px)';
+          mScreen.style.transform = 'none';
+        } else if (push < 0.98 && aside <= 0.01) {
+          const tIn = Math.max(0, y1 * (1 - ep));
+          const bIn = Math.max(0, (H - (y1 + Hl)) * (1 - ep));
+          const sIn = Math.max(0, x1 * (1 - ep));
+          const rad = Math.round(12 * (1 - ep));
+          mScreen.style.opacity = smoothstep(0.02, 0.25, ep).toFixed(3);
+          mScreen.style.clipPath = `inset(${tIn.toFixed(0)}px ${sIn.toFixed(0)}px ${bIn.toFixed(0)}px ${sIn.toFixed(0)}px round ${rad}px)`;
+          mScreen.style.transform = 'none';
+        } else {
+          mScreen.style.clipPath = 'none';
+          mScreen.style.opacity = (1 - smoothstep(0, 0.85, ea)).toFixed(3);
+          mScreen.style.transform = ea > 0 ? `translateX(${(-ea * 100).toFixed(1)}%)` : 'none';
+        }
+
+        pocket.style.setProperty('--pk-x', `${((1 - ea) * 102).toFixed(2)}%`);
+      }
+
+      syncPlayers();
+    }
+
+    // Scroll to a target offset inside section.desk
+    function scrollToDesk(targetY, immediate = false) {
+      interacted = true;
+      const top = deskTop + targetY;
+      if (immediate || reduce) {
+        if (lenis) lenis.scrollTo(top, { immediate: true });
+        else window.scrollTo(0, top);
+        frame();
+        return;
+      }
+      snapping = true;
+      clearTimeout(snapTimer);
+      if (lenis) lenis.scrollTo(top, { duration: 0.9 });
+      else window.scrollTo({ top, behavior: 'smooth' });
+      setTimeout(() => {
+        if (lenis) lenis.scrollTo(top, { immediate: true });
+        else window.scrollTo(0, top);
+        snapping = false;
+        frame();
+      }, 920);
+    }
+
+    // Direction-aware snap after ~160ms idle
+    function checkSnap() {
+      if (reduce || snapping || pointerDown) return;
+      const rect = desk.getBoundingClientRect();
+      const y = -rect.top;
+      if (y <= 2 || y >= end - 2) return;
+      if (y > 0 && y < a1) {
+        const prog = y / a1;
+        const dest = (scrollDir >= 0 ? prog > 0.12 : prog > 0.88) ? a1 : 0;
+        scrollToDesk(dest);
+      } else if (y > b0 && y < b1) {
+        const prog = (y - b0) / (b1 - b0);
+        const dest = (scrollDir >= 0 ? prog > 0.12 : prog > 0.88) ? b1 : b0;
+        scrollToDesk(dest);
+      }
+    }
+
+    let rafScroll = 0;
+    addEventListener('scroll', () => {
+      const dy = scrollY - lastScrollY;
+      if (Math.abs(dy) > 0.5) { scrollDir = dy > 0 ? 1 : -1; interacted = true; }
+      lastScrollY = scrollY;
+      if (!rafScroll) rafScroll = requestAnimationFrame(() => { rafScroll = 0; frame(); });
+      if (!snapping && !reduce) {
+        clearTimeout(snapTimer);
+        snapTimer = setTimeout(checkSnap, 160);
+      }
+    }, { passive: true });
+
+    addEventListener('pointerdown', () => { pointerDown = true; interacted = true; clearTimeout(snapTimer); }, { passive: true });
+    const endPointer = () => {
+      if (!pointerDown) return;
+      pointerDown = false;
+      if (!snapping && !reduce) { clearTimeout(snapTimer); snapTimer = setTimeout(checkSnap, 160); }
+    };
+    addEventListener('pointerup', endPointer, { passive: true });
+    addEventListener('pointercancel', endPointer, { passive: true });
+
+    // Shortcuts & lid drag
+    $$('[data-desk-open]', desk).forEach((b) => b.addEventListener('click', () => {
+      scrollToDesk(a1);
+      setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
+    }));
+    $$('[data-desk-phone]', desk).forEach((b) => b.addEventListener('click', () => {
+      closeAllWins(true);
+      scrollToDesk(b1);
+      setTimeout(() => $('.home-widget, .home-app', pocket)?.focus({ preventScroll: true }), reduce ? 20 : 940);
+    }));
+    $$('[data-desk-laptop]', desk).forEach((b) => b.addEventListener('click', () => {
+      closeApp(true);
+      scrollToDesk(b0);
+      setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
+    }));
+
+    // Lid drag or click on the closed/aside laptop
+    let lidDrag = null;
+    mac.addEventListener('pointerdown', (e) => {
+      if (e.button > 0) return;
+      if (atDesk) return;
+      if (atPhone) { scrollToDesk(b0); return; }
+      if (e.pointerType === 'touch') return; // touch uses native scroll
+      lidDrag = { id: e.pointerId, startY: e.clientY, startScroll: clamp(-desk.getBoundingClientRect().top, 0, a1), moved: false };
+      mac.setPointerCapture(e.pointerId);
+    });
+    mac.addEventListener('pointermove', (e) => {
+      if (!lidDrag || e.pointerId !== lidDrag.id) return;
+      const dy = lidDrag.startY - e.clientY;
+      if (Math.abs(dy) > 5) lidDrag.moved = true;
+      if (!lidDrag.moved) return;
+      const target = clamp(lidDrag.startScroll + (dy / 300) * a1, 0, a1);
+      scrollDir = dy >= 0 ? 1 : -1;
+      scrollToDesk(target, true);
+    });
+    const endLidDrag = (e) => {
+      if (!lidDrag || e.pointerId !== lidDrag.id) return;
+      const d = lidDrag;
+      lidDrag = null;
+      if (!d.moved) scrollToDesk(a1);
+      else checkSnap();
+    };
+    mac.addEventListener('pointerup', endLidDrag);
+    mac.addEventListener('pointercancel', endLidDrag);
+
+    /* ---------- Players & Title Card (titled) ---------- */
+
+    function makePlayer(note, bodyEl, isPhoneView) {
+      const m = isPhoneView && (note.dataset.mVideo || note.dataset.mHtml);
+      const videoName = m && note.dataset.mVideo ? note.dataset.mVideo : note.dataset.video;
+      const htmlName = m && note.dataset.mHtml ? note.dataset.mHtml : note.dataset.html;
       let L;
-      if (s.video) {
-        const v = document.createElement('video');
-        v.className = 'dv-video';
-        v.muted = true; v.playsInline = true; v.preload = 'none'; v.hidden = true;
-        v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
-        $('.device-screen', device).prepend(v);
+      if (videoName) {
+        let v = $('video', bodyEl);
+        if (!v) {
+          v = document.createElement('video');
+          v.className = 'dv-video';
+          v.muted = true; v.playsInline = true; v.preload = 'none';
+          v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
+          bodyEl.prepend(v);
+        }
+        v.hidden = false;
+        const src = MEDIA + videoName;
+        const load = () => { if (v.dataset.src !== src) { v.dataset.src = src; v.poster = `${src}.jpg${MV}`; v.src = `${src}.mp4${MV}`; } };
+        const redraw = () => { if (v.readyState >= 1) v.currentTime = v.currentTime; };
         L = {
-          el: v, src: MEDIA + s.video,
+          el: v, load,
           get elapsed() { return v.currentTime * 1000; },
           get duration() { return (v.duration || 12) * 1000; },
-          start(onEnd) { v.onended = onEnd; try { v.currentTime = 0; } catch (e) { /* not loaded yet */ } v.play().catch(() => {}); },
-          resume() { v.play().catch(() => {}); },
+          start(onEnd) { load(); v.loop = !onEnd; v.onended = onEnd || null; try { v.currentTime = 0; } catch (e) {} v.play().catch(redraw); },
+          resume() { load(); v.play().catch(redraw); },
           pause() { v.pause(); },
-          still() { /* the poster stands in */ },
+          still() { load(); v.pause(); redraw(); },
         };
-      } else if (s.html) {
-        const el = $(`.dv-html[data-html="${s.html}"]`, device);
-        L = clock(htmlDemos[s.html](el));
-        L.el = el;
-      } else {
-        const el = $(`.card[data-card="${s.card}"]`, device);
-        L = clock({
-          duration: +n.dataset.dwell || 8000, steps: [],
-          reset() { el.classList.remove('is-on'); void el.offsetWidth; el.classList.add('is-on'); },
-          still() { el.classList.add('is-on'); },
-        });
-        L.el = el;
-        L.card = true;
+      } else if (htmlName) {
+        let box = $(`.dv-html[data-html="${htmlName}"]`, bodyEl);
+        if (!box) {
+          box = document.createElement('div');
+          box.className = 'dv-html';
+          box.dataset.html = htmlName;
+          bodyEl.prepend(box);
+        }
+        box.hidden = false;
+        const c = clock(htmlDemos[htmlName](box));
+        L = {
+          el: box, load() {},
+          get elapsed() { return c.elapsed; },
+          get duration() { return c.duration; },
+          start(onEnd) { const done = onEnd || (() => c.start(done)); c.start(done); },
+          resume() { c.resume(); },
+          pause() { c.pause(); },
+          still() { c.still(); },
+        };
       }
-      L.device = device;
-      layers.set(key, L);
       return L;
     }
-    // A title card, then the layer: one player whose time covers both, so the story bar fills across the two.
-    // On wide screens the card opens inside the device's own screen; on phones it fills the story.
-    function withIntro(L, n, stat) {
-      $('.intro-kick', intro).textContent = $('.note-kick', n)?.textContent || '';
-      $('.intro-title', intro).textContent = $('.note-title', n)?.textContent.trim().replace(/\s+/g, ' ') || '';
-      $('.intro-stat .marker', intro).textContent = stat;
-      $('.intro-lab', intro).textContent = $('.note-lab', n)?.textContent || '';
-      const tags = n.dataset.more ? $$(`${n.dataset.more} .row-tags li`).slice(0, 3) : [];
-      $('.intro-tags', intro).innerHTML = tags.map((li) => `<li>${li.textContent}</li>`).join('');
-      const place = () => {
-        const host = wide.matches ? $('.device-screen', L.device) : introHome;
-        if (intro.parentElement !== host) host.append(intro);
-        host.classList.toggle('band-dark', theme() === 'dark');   // the status bar follows the card, not the last frame
-      };
+
+    function titled(L, note, introEl) {
+      const stat = $('.note-stat', note)?.textContent || '';
+      if (!L || !stat) return L;
+      $('.intro-kick', introEl).textContent = $('.note-kick', note)?.textContent || '';
+      $('.intro-title', introEl).textContent = $('.note-title', note)?.textContent.trim().replace(/\s+/g, ' ') || '';
+      $('.intro-stat .marker', introEl).textContent = stat;
+      $('.intro-lab', introEl).textContent = $('.note-lab', note)?.textContent || '';
+      const tags = note.dataset.more ? $$(`${note.dataset.more} .row-tags li`).slice(0, 3) : [];
+      $('.intro-tags', introEl).innerHTML = tags.map((li) => `<li>${li.textContent}</li>`).join('');
+      introEl.style.setProperty('--tint', tintFor(note.dataset.chapter));
+
       const card = clock({ duration: INTRO, steps: [], reset() {}, still() {} });
       let main = false;
       return {
-        el: L.el, device: L.device, src: L.src,
+        el: L.el,
         get elapsed() { return main ? INTRO + L.elapsed : card.elapsed; },
         get duration() { return INTRO + L.duration; },
         get media() { return main ? L.elapsed : -1; },
         start(onEnd) {
           main = false;
-          place();
-          intro.classList.add('on');
-          card.start(() => { main = true; intro.classList.remove('on'); L.start(onEnd); });
+          L.load?.();
+          introEl.classList.add('on');
+          card.start(() => { main = true; introEl.classList.remove('on'); L.start(onEnd); });
         },
         resume() { if (main) L.resume(); else card.resume(); },
         pause() { if (main) L.pause(); else card.pause(); },
-        still() { place(); intro.classList.add('on'); L.still(); },   // with motion off, the card is the still
+        still() { L.still(); introEl.classList.add('on'); },
       };
     }
-    const load = (L) => { if (L.src && !L.el.getAttribute('src')) { L.el.poster = `${L.src}.jpg${MV}`; L.el.src = `${L.src}.mp4${MV}`; } };
 
-    function go(i) {
-      if (cur) {
-        cur.pause();
-        cur.running = false;
-        cur.el.hidden = true;
-        if (cur.card) cur.el.classList.remove('is-on');
-      }
-      cancelAnimationFrame(raf);
-      intro.classList.remove('on');
+    /* ---------- Timed Ink Notes (.mk) ---------- */
+
+    function setActiveInk(player, note, hostEl, isPhoneCut) {
+      activePlayer = player;
+      activeMkHost = hostEl;
+      activeMarkIdx = -1;
       mk.classList.remove('on');
-      idx = i;
-      ended = false;
-      land.classList.toggle('on-cover', i < 0);
-      if (i >= 0) land.dataset.ch = chapterOf(i);   // each chapter has its own colour wash
-      notes.forEach((n, k) => n.classList.toggle('is-on', k === i));
-      if (i < 0) { cur = null; paint(); sync(); return; }
-
-      const n = notes[i];
-      const L = layerFor(n);
-      // a recording opens with a title card: the result and the tech, in the page's own type
-      const stat = $('.note-stat', n)?.textContent || '';
-      cur = (!L.card && stat) ? withIntro(L, n, stat) : L;
-      cur.started = false;
-      cur.running = false;
-      Object.values(devices).forEach((d) => d.classList.toggle('is-on', d === L.device));
-      land.classList.toggle('is-browser', L.device === devices.browser);
-      land.classList.toggle('is-card', !!L.card);
-      const title = $('[data-title]', L.device);
-      if (title) title.textContent = n.dataset.title || '';
-      $$('.dv-video, .dv-html, .card', L.device).forEach((el) => { el.hidden = el !== L.el; });
-      if (L.card) syncCards();
-      load(L);
-      const nx = notes[i + 1];
-      if (nx) { const N = layerFor(nx); if (N.src) { N.el.preload = 'metadata'; load(N); } }
-
-      // a phone-width recording keeps its own timings
-      const phoneCut = !wide.matches && !!n.dataset.mVideo;
-      marks = $$('.note-marks li', n).map((li) => ({ at: +(phoneCut && li.dataset.mAt ? li.dataset.mAt : li.dataset.at), y: +li.dataset.y || 50, text: li.textContent }));
-      markIdx = -1;
-      mk.classList.remove('on');
-      more.setAttribute('href', n.dataset.more || '#work');
-      seen.add(chapterOf(i));
-      paint();
-      sync();
+      if (!player || !note) { activeMarks = []; return; }
+      activeMarks = $$('.note-marks li', note).map((li) => ({
+        at: +(isPhoneCut && li.dataset.mAt ? li.dataset.mAt : li.dataset.at),
+        y: +li.dataset.y || 50,
+        text: li.textContent,
+      }));
     }
 
-    const want = () => visible && !held && !ended && !document.hidden && !reduce;
-    function sync() {
-      cancelAnimationFrame(raf);
-      if (!cur) { land.classList.add('is-paused'); return; }
-      if (reduce && !cur.started) { cur.started = true; cur.still(); }
-      const run = want();
-      if (run && !cur.running) {
-        cur.running = true;
-        if (cur.started) cur.resume();
-        else { cur.started = true; cur.start(next); }
-      } else if (!run && cur.running) {
-        cur.running = false;
-        cur.pause();
-      }
-      land.classList.toggle('is-paused', !cur.running);
-      draw();
-      if (cur.running) raf = requestAnimationFrame(tick);
-    }
-    function tick() { draw(); if (cur?.running) raf = requestAnimationFrame(tick); }
-
-    // The current segment fills with time; the latest pen note for this moment shows beside the screen.
-    function draw() {
-      if (!cur) return;
-      const t = cur.elapsed;
-      const seg = $$('b', segs)[inChapter(chapterOf(idx)).indexOf(idx)];
-      if (seg) seg.style.width = `${clamp(t / cur.duration) * 100}%`;
-      const tm = cur.media === undefined ? t : cur.media;   // notes follow the recording, not the title card
+    function tickInk() {
+      if (!activePlayer || !activeMarks.length) return;
+      const tm = activePlayer.media === undefined ? activePlayer.elapsed : activePlayer.media;
       let m = -1;
-      if (tm >= 0) marks.forEach((x, k) => { if (tm >= x.at * 1000) m = k; });
-      if (m === markIdx) return;
-      markIdx = m;
-      mk.classList.remove('on');
-      if (m < 0) return;
-      void mk.offsetWidth;
-      mkText.textContent = marks[m].text;
-      mk.style.setProperty('--y', marks[m].y);
-      mk.classList.toggle('mk-top', marks[m].y >= 50);   // on phones the note sits away from what it points at
-      mk.classList.add('on');
-    }
-
-    function paint() {
-      rings.forEach((r) => {
-        r.classList.toggle('is-on', idx >= 0 && r.dataset.go === chapterOf(idx));
-        r.classList.toggle('is-seen', seen.has(r.dataset.go) && !(idx >= 0 && r.dataset.go === chapterOf(idx)));
-      });
-      if (idx < 0) return;
-      const ch = chapterOf(idx), list = inChapter(ch), pos = list.indexOf(idx);
-      if (segChapter !== ch) {
-        segChapter = ch;
-        segs.innerHTML = list.map(() => '<i><b></b></i>').join('');
+      if (tm >= 0) activeMarks.forEach((x, k) => { if (tm >= x.at * 1000) m = k; });
+      if (m !== activeMarkIdx) {
+        activeMarkIdx = m;
+        mk.classList.remove('on');
+        if (m >= 0) {
+          void mk.offsetWidth;
+          mkText.textContent = activeMarks[m].text;
+          mk.style.setProperty('--y', activeMarks[m].y);
+          mk.classList.toggle('mk-top', activeMarks[m].y >= 50);
+          // Place beside the device on wide screens when margin >= 180px; otherwise as an ivory pill inside the window/sheet.
+          if (!wide.matches) {
+            if (activeMkHost && mk.parentElement !== activeMkHost) activeMkHost.append(mk);
+            mk.classList.add('mk--pill');
+          } else if (atDesk) {
+            const macRect = macScreen.getBoundingClientRect();
+            const stRect = stage.getBoundingClientRect();
+            const rightMargin = stRect.right - macRect.right;
+            if (rightMargin >= 180) {
+              if (mk.parentElement !== stage) stage.append(mk);
+              mk.classList.remove('mk--pill');
+              mk.style.setProperty('--mk-x', `${Math.round(macRect.right - stRect.left + 16)}px`);
+              mk.style.setProperty('--mk-w', `${Math.round(rightMargin - 28)}px`);
+            } else {
+              if (activeMkHost && mk.parentElement !== activeMkHost) activeMkHost.append(mk);
+              mk.classList.add('mk--pill');
+            }
+          } else if (atPhone) {
+            const phRect = pkPhone.getBoundingClientRect();
+            const stRect = stage.getBoundingClientRect();
+            const rightMargin = stRect.right - phRect.right;
+            if (mk.parentElement !== stage) stage.append(mk);
+            mk.classList.remove('mk--pill');
+            mk.style.setProperty('--mk-x', `${Math.round(phRect.right - stRect.left + 18)}px`);
+            mk.style.setProperty('--mk-w', `${Math.max(180, Math.round(rightMargin - 28))}px`);
+          }
+          mk.classList.add('on');
+        }
       }
-      chapterLabel.textContent = $('.note-kick', notes[idx])?.textContent || ringName[ch] || '';
-      $$('b', segs).forEach((b, k) => { b.style.width = k < pos ? '100%' : '0%'; });
-      countEl.textContent = `${pos + 1} / ${list.length}`;
+      if (activePlayer.running) mkTimer = requestAnimationFrame(tickInk);
     }
 
-    function next() {
-      if (idx + 1 < notes.length) go(idx + 1);
-      else if (wide.matches) go(0);
-      else { ended = true; sync(); }          // on a phone the last screen stays, with "watch again"
-    }
-    function prev() { go(Math.max(first(), idx - 1)); }
-    function chapter(ch) { const k = notes.findIndex((n) => n.dataset.chapter === ch); if (k >= 0) go(k); }
-    function jump(dir) {
-      if (idx < 0) { if (dir > 0) go(0); return; }
-      const c = order.indexOf(chapterOf(idx)) + dir;
-      if (c < 0) go(first());
-      else if (c < order.length) chapter(order[c]);
-    }
-    const touched = () => land.classList.add('touched');
+    function syncPlayers() {
+      cancelAnimationFrame(mkTimer);
+      const canPlay = inStage && !document.hidden;
+      // Laptop windows: only the front window plays when atDesk
+      const frontWin = wins[wins.length - 1];
+      wins.forEach((w) => {
+        if (!w.player) return;
+        const wantWin = canPlay && atDesk && w === frontWin && w.t >= 0.95;
+        if (reduce && wantWin && !w.started) { w.started = true; w.player.still(); }
+        else if (wantWin && !reduce && !w.running) {
+          w.running = true;
+          w.player.running = true;
+          if (w.started) w.player.resume();
+          else { w.started = true; w.player.start(); }
+        } else if ((!wantWin || reduce) && w.running) {
+          w.running = false;
+          w.player.running = false;
+          w.player.pause();
+        }
+      });
 
-    $$('[data-go]', land).forEach((b) => b.addEventListener('click', () => { touched(); chapter(b.dataset.go); }));
-    $$('.nn', land).forEach((b) => b.addEventListener('click', () => { touched(); if (+b.dataset.step > 0) next(); else prev(); }));
+      // Phone app player: plays when atPhone
+      if (curPk?.player) {
+        const wantPk = canPlay && atPhone;
+        if (reduce && wantPk && !curPk.started) { curPk.started = true; curPk.player.still(); }
+        else if (wantPk && !reduce && !curPk.running) {
+          curPk.running = true;
+          curPk.player.running = true;
+          if (curPk.started) curPk.player.resume();
+          else { curPk.started = true; curPk.player.start(() => closeApp()); }
+        } else if ((!wantPk || reduce) && curPk.running) {
+          curPk.running = false;
+          curPk.player.running = false;
+          curPk.player.pause();
+        }
+      }
 
-    // Taps, holds and swipes. Links and buttons inside keep their own clicks.
-    let down = null, holdTimer = 0;
-    const release = () => { clearTimeout(holdTimer); if (held) { held = false; sync(); } };
-    land.addEventListener('pointerdown', (e) => {
-      if (e.button > 0 || e.target.closest('a, button')) return;
-      if (wide.matches && !e.target.closest('.stage')) return;
-      down = { x: e.clientX, y: e.clientY, hold: false };
-      clearTimeout(holdTimer);
-      holdTimer = setTimeout(() => { if (down) { down.hold = true; held = true; sync(); } }, 260);
+      // Drive timed ink notes for whichever player is active
+      if (atDesk && frontWin?.player && frontWin.t >= 0.95) {
+        setActiveInk(frontWin.player, frontWin.note, frontWin.body, !wide.matches);
+        if (frontWin.running) mkTimer = requestAnimationFrame(tickInk);
+      } else if (atPhone && curPk?.player) {
+        setActiveInk(curPk.player, curPk.note, pkApp, !wide.matches);
+        if (curPk.running) mkTimer = requestAnimationFrame(tickInk);
+      } else {
+        setActiveInk(null, null, null, false);
+      }
+    }
+
+    /* ---------- Window Manager (Desktop Apps & Files) ---------- */
+
+    function winSizeFor(key) {
+      if (key === 'ads' || key === 'money-plan' || key === 'gbf') return { w: 0.64, aspect: 1.6 };
+      if (key === 'mis' || key === 'ai') return { w: 0.64, h: 0.72 };
+      if (key.startsWith('writing-')) return { w: 0.62, h: 0.76 };
+      if (key === 'kit') return { w: 0.48, h: 0.66 };
+      if (key === 'pixis') return { w: 0.56, h: 0.66 };
+      return { w: 0.42, h: 0.48 };
+    }
+
+    function populateWinBody(key, note, body) {
+      if (note?.dataset.video || note?.dataset.html) {
+        const introEl = document.createElement('div');
+        introEl.className = 'intro';
+        introEl.setAttribute('aria-hidden', 'true');
+        introEl.innerHTML = '<p class="intro-kick"></p><p class="intro-title"></p><p class="intro-stat"><span class="marker"></span></p><p class="intro-lab"></p><ul class="row-tags intro-tags"></ul>';
+        body.append(introEl);
+        const raw = makePlayer(note, body, !wide.matches);
+        return titled(raw, note, introEl);
+      }
+      body.classList.add('win-body--scroll');
+      if (key === 'mis') {
+        body.append(tpls.mis.content.cloneNode(true));
+        $$('[data-sketch]', body).forEach((el) => sketch(el, series[el.dataset.sketch], { w: 460, h: 200, labels: true }));
+        $$('[data-sketch-spark]', body).forEach((el) => sketch(el, series[el.dataset.sketchSpark], { w: 116, h: 42, labels: false }));
+      } else if (key === 'ai') {
+        const wrap = document.createElement('div');
+        wrap.className = 'win-pad win-ai';
+        const stats = $('#ai .hx-stats')?.cloneNode(true);
+        const tree = $('#ai .hx-tree')?.cloneNode(true);
+        if (stats) wrap.append(stats);
+        if (tree) wrap.append(tree);
+        body.append(wrap);
+      } else if (key === 'pixis') {
+        const wrap = document.createElement('div');
+        wrap.className = 'win-pad win-pixis';
+        const roles = $('#pixis-roles')?.cloneNode(true);
+        if (roles) { roles.removeAttribute('id'); wrap.append(roles); }
+        body.append(wrap);
+      } else if (key === 'kit') {
+        body.append(tpls.kit.content.cloneNode(true));
+      } else if (key === 'hi') {
+        body.append(tpls.hi.content.cloneNode(true));
+      } else if (note?.dataset.article) {
+        body.classList.remove('win-body--scroll');
+        const iframe = document.createElement('iframe');
+        iframe.className = 'win-iframe';
+        iframe.src = `${note.dataset.article}?embed=1`;
+        iframe.title = note.dataset.title || 'Article';
+        iframe.addEventListener('load', () => {
+          try { if (iframe.contentDocument) iframe.contentDocument.documentElement.dataset.theme = theme(); } catch (e) {}
+        });
+        body.append(iframe);
+      }
+      return null;
+    }
+
+    function focusWin(w) {
+      const idx = wins.indexOf(w);
+      if (idx < 0) return;
+      wins.splice(idx, 1);
+      wins.push(w);
+      wins.forEach((item, i) => {
+        item.el.style.zIndex = String(++zCounter);
+        item.el.classList.toggle('is-front', i === wins.length - 1);
+      });
+      if (dtFront) dtFront.textContent = (w.note?.dataset.title || '').split('·')[0].trim();
+      syncPlayers();
+    }
+
+    function measureWinGeom(w) {
+      if (!wide.matches) {
+        w.box = { left: 0, top: 0, width: innerWidth, height: innerHeight };
+        const ir = w.fromEl?.getBoundingClientRect() || { left: innerWidth * 0.5, top: innerHeight * 0.5, width: 48, height: 48 };
+        w.fromBox = { left: ir.left, top: ir.top, width: ir.width, height: ir.height };
+        return;
+      }
+      const hostRect = dtWins.getBoundingClientRect();
+      const hostW = dtWins.clientWidth || hostRect.width || 800;
+      const hostH = dtWins.clientHeight || hostRect.height || 480;
+      const scale = hostRect.width / hostW || 1;
+
+      if (w.maximized) {
+        w.el.style.left = '0px';
+        w.el.style.top = '0px';
+        w.el.style.width = `${hostW}px`;
+        w.el.style.height = `${hostH}px`;
+        w.box = { left: 0, top: 0, width: hostW, height: hostH };
+      } else {
+        const spec = winSizeFor(w.key);
+        const winW = Math.round(hostW * spec.w);
+        const barH = 34;
+        const winH = spec.aspect ? Math.min(hostH - 20, Math.round(winW / spec.aspect) + barH) : Math.round(hostH * spec.h);
+        const off = (w.cascade % 4 - 1) * 16;
+        const left = Math.round(clamp((hostW - winW) * 0.5 + off, 10, Math.max(10, hostW - winW - 10)));
+        const top = Math.round(clamp((hostH - winH) * 0.14 + off * 0.6, 6, Math.max(6, hostH - winH - 6)));
+        w.el.style.left = `${left}px`;
+        w.el.style.top = `${top}px`;
+        w.el.style.width = `${winW}px`;
+        w.el.style.height = `${winH}px`;
+        w.box = { left, top, width: winW, height: winH };
+      }
+
+      const iconEl = $('.dt-icon, .dt-ficon', w.fromEl) || w.fromEl;
+      const ir = iconEl ? iconEl.getBoundingClientRect() : hostRect;
+      w.fromBox = {
+        left: (ir.left - hostRect.left) / scale,
+        top: (ir.top - hostRect.top) / scale,
+        width: Math.max(24, ir.width / scale),
+        height: Math.max(24, ir.height / scale),
+      };
+    }
+
+    function syncWinControls(w) {
+      w.el.classList.toggle('is-max', !!w.maximized && !w.theater);
+      w.el.classList.toggle('is-theater', !!w.theater);
+      const fsBtn = $('[data-win-fs]', w.el);
+      if (fsBtn) {
+        if (w.theater) {
+          fsBtn.textContent = 'In laptop ↙';
+          fsBtn.setAttribute('aria-label', 'Return window to laptop screen');
+        } else if (w.maximized) {
+          fsBtn.textContent = 'Windowed';
+          fsBtn.setAttribute('aria-label', 'Switch to floating window');
+        } else {
+          fsBtn.textContent = 'Full screen';
+          fsBtn.setAttribute('aria-label', 'Maximize window in laptop screen');
+        }
+      }
+    }
+
+    function toggleWinMax(w, forceMax) {
+      if (!wide.matches) return;
+      if (w.theater) {
+        w.theater = false;
+        if (w.el.parentElement !== dtWins) dtWins.append(w.el);
+      }
+      w.maximized = forceMax !== undefined ? forceMax : !w.maximized;
+      syncWinControls(w);
+      measureWinGeom(w);
+      setWinT(w, 1);
+      syncPlayers();
+    }
+
+    function toggleWinTheater(w, forceTheater) {
+      if (!wide.matches) return;
+      w.theater = forceTheater !== undefined ? forceTheater : !w.theater;
+      if (w.theater) {
+        if (w.el.parentElement !== stage) stage.append(w.el);
+        w.el.style.transform = 'none';
+        w.el.style.opacity = '1';
+      } else {
+        if (w.el.parentElement !== dtWins) dtWins.append(w.el);
+        measureWinGeom(w);
+        setWinT(w, 1);
+      }
+      syncWinControls(w);
+      syncPlayers();
+    }
+
+    function setWinT(w, t, dragOffset = null) {
+      w.t = clamp(t);
+      if (w.theater) {
+        w.el.style.transform = 'none';
+        w.el.style.opacity = '1';
+        return;
+      }
+      const { left, top, width, height } = w.box;
+      const fb = w.fromBox;
+      const dx = (fb.left - left) * (1 - w.t) + (dragOffset ? dragOffset.x * (1 - w.t) : 0);
+      const dy = (fb.top - top) * (1 - w.t) + (dragOffset ? dragOffset.y * (1 - w.t) : 0);
+      const sx = (fb.width / width) + (1 - fb.width / width) * w.t;
+      const sy = (fb.height / height) + (1 - fb.height / height) * w.t;
+      if (w.t >= 0.999 && !dragOffset) {
+        w.el.style.transform = 'none';
+        w.el.style.opacity = '1';
+      } else {
+        w.el.style.transform = `translate3d(${dx.toFixed(1)}px, ${dy.toFixed(1)}px, 0) scale(${sx.toFixed(3)}, ${sy.toFixed(3)})`;
+        w.el.style.opacity = clamp(w.t * 1.6).toFixed(3);
+      }
+    }
+
+    function animateWinT(w, targetT, onDone) {
+      cancelAnimationFrame(w.raf);
+      if (reduce) {
+        setWinT(w, targetT);
+        if (onDone) onDone();
+        syncPlayers();
+        return;
+      }
+      const startT = w.t;
+      const t0 = performance.now();
+      const dur = targetT > startT ? 400 : 280;
+      const step = (now) => {
+        const p = clamp((now - t0) / dur);
+        const e = 1 - Math.pow(1 - p, 3);
+        setWinT(w, startT + (targetT - startT) * e);
+        if (p < 1) w.raf = requestAnimationFrame(step);
+        else { setWinT(w, targetT); if (onDone) onDone(); syncPlayers(); }
+      };
+      w.raf = requestAnimationFrame(step);
+    }
+
+    function createWin(key, fromEl) {
+      const existing = wins.find((x) => x.key === key);
+      if (existing) {
+        focusWin(existing);
+        return existing;
+      }
+      if (!wide.matches) closeAllWins(true);
+      else if (wins.length >= 3) closeWin(wins[0], true);
+
+      const note = notesByKey[key];
+      const titleText = note?.dataset.title || key;
+      const el = document.createElement('div');
+      el.className = 'win is-front is-max';
+      el.setAttribute('role', 'dialog');
+      el.setAttribute('aria-label', titleText);
+
+      let extLink = '';
+      if (note?.dataset.article) extLink = `<a class="win-ext" href="${note.dataset.article}">Full page ↗</a>`;
+      else if (key === 'gbf') extLink = '<a class="win-ext" href="https://www.gbf-blr.com" target="_blank" rel="noopener">Visit ↗</a>';
+      else if (note?.dataset.more) extLink = `<a class="win-ext" href="${note.dataset.more}" data-win-jump>Read the notes ↓</a>`;
+
+      el.innerHTML = `<div class="win-bar"><div class="win-lights"><button class="win-dot win-dot--close" type="button" data-win-close aria-label="Close ${titleText}">×</button><button class="win-dot win-dot--min" type="button" data-win-mode="window" aria-label="Toggle windowed mode">–</button><button class="win-dot win-dot--full" type="button" data-win-mode="theater" aria-label="Toggle full screen">+</button></div><span class="win-title">${titleText}</span><div class="win-actions"><button class="win-fs" type="button" data-win-fs>Windowed</button>${extLink}</div></div><div class="win-body"></div>`;
+      dtWins.append(el);
+
+      const body = $('.win-body', el);
+      const player = populateWinBody(key, note, body);
+      const w = { key, note, el, body, player, fromEl, cascade: cascadeIdx++, maximized: true, theater: false, t: 0, raf: 0, started: false, running: false };
+      wins.push(w);
+      syncWinControls(w);
+      measureWinGeom(w);
+      setWinT(w, 0);
+      focusWin(w);
+
+      if (!wide.matches) {
+        root.classList.add('sheet-open');
+        lenis?.stop();
+      }
+
+      $('[data-win-close]', el).addEventListener('click', (e) => { e.stopPropagation(); closeWin(w); });
+      $('[data-win-mode="window"]', el).addEventListener('click', (e) => { e.stopPropagation(); toggleWinMax(w); });
+      $('[data-win-mode="theater"]', el).addEventListener('click', (e) => { e.stopPropagation(); toggleWinTheater(w); });
+      $('[data-win-fs]', el).addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (w.theater) toggleWinTheater(w, false);
+        else toggleWinMax(w);
+      });
+      $('[data-win-jump]', el)?.addEventListener('click', (e) => {
+        const href = e.currentTarget.getAttribute('href');
+        const target = $(href);
+        if (!target) return;
+        e.preventDefault();
+        closeAllWins(true);
+        if (lenis) lenis.scrollTo(target, { offset: -10, duration: 1.2 });
+        else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+      });
+      el.addEventListener('pointerdown', () => focusWin(w));
+
+      // Title-bar double-click toggles full-screen/windowed on wide screens; drag moves windowed windows; swipe-down closes on phones
+      const bar = $('.win-bar', el);
+      bar.addEventListener('dblclick', (e) => {
+        if (e.target.closest('button, a') || !wide.matches) return;
+        toggleWinMax(w);
+      });
+      let dragState = null;
+      bar.addEventListener('pointerdown', (e) => {
+        if (e.button > 0 || e.target.closest('button, a')) return;
+        focusWin(w);
+        if (wide.matches && (w.maximized || w.theater)) return;
+        dragState = { id: e.pointerId, sx: e.clientX, sy: e.clientY, origL: w.box.left, origT: w.box.top };
+        bar.setPointerCapture(e.pointerId);
+      });
+      bar.addEventListener('pointermove', (e) => {
+        if (!dragState || e.pointerId !== dragState.id) return;
+        const dx = e.clientX - dragState.sx, dy = e.clientY - dragState.sy;
+        if (!wide.matches) {
+          if (dy > 0) el.style.transform = `translate3d(0, ${dy.toFixed(1)}px, 0)`;
+          return;
+        }
+        const hostW = dtWins.clientWidth, hostH = dtWins.clientHeight;
+        w.box.left = clamp(dragState.origL + dx, -w.box.width * 0.4, hostW - w.box.width * 0.6);
+        w.box.top = clamp(dragState.origT + dy, 0, hostH - 36);
+        el.style.left = `${Math.round(w.box.left)}px`;
+        el.style.top = `${Math.round(w.box.top)}px`;
+      });
+      const endBarDrag = (e) => {
+        if (!dragState || e.pointerId !== dragState.id) return;
+        const dy = e.clientY - dragState.sy;
+        dragState = null;
+        if (!wide.matches) {
+          if (dy > 90) closeWin(w);
+          else el.style.transform = 'none';
+        }
+      };
+      bar.addEventListener('pointerup', endBarDrag);
+      bar.addEventListener('pointercancel', endBarDrag);
+
+      return w;
+    }
+
+    function openWin(key, fromEl) {
+      const w = createWin(key, fromEl);
+      fromEl?.classList.add('is-opened');
+      animateWinT(w, 1, () => {
+        $('[data-win-close]', w.el)?.focus({ preventScroll: true });
+      });
+    }
+
+    function closeWin(w, immediate = false) {
+      const idx = wins.indexOf(w);
+      if (idx < 0) return;
+      wins.splice(idx, 1);
+      if (w.theater) {
+        w.theater = false;
+        w.el.classList.remove('is-theater');
+        if (w.el.parentElement !== dtWins) dtWins.append(w.el);
+      }
+      if (w.player) { w.player.pause(); w.running = false; }
+      const finish = () => {
+        w.el.remove();
+        if (!wins.length) {
+          if (dtFront) dtFront.textContent = '';
+          if (!wide.matches && !curPk) { root.classList.remove('sheet-open'); lenis?.start(); }
+        } else {
+          focusWin(wins[wins.length - 1]);
+        }
+        syncPlayers();
+        if (!immediate) w.fromEl?.focus({ preventScroll: true });
+      };
+      if (immediate) { cancelAnimationFrame(w.raf); finish(); }
+      else animateWinT(w, 0, finish);
+    }
+
+    function closeAllWins(immediate = false) {
+      [...wins].forEach((w) => closeWin(w, immediate));
+    }
+
+    // Desktop apps: click opens
+    $$('.dt-app', desktop).forEach((btn) => {
+      btn.addEventListener('click', () => openWin(btn.dataset.open, btn));
     });
-    land.addEventListener('pointerup', (e) => {
-      if (!down) return;
-      const d = down;
-      down = null;
-      release();
-      if (d.hold) return;
-      const dx = e.clientX - d.x, dy = e.clientY - d.y;
-      if (Math.abs(dy) > 14 && Math.abs(dy) > Math.abs(dx)) return;      // a scroll, not a tap
-      touched();
-      if (Math.abs(dx) > 48) { jump(dx < 0 ? 1 : -1); return; }
-      const box = (wide.matches ? stage : land).getBoundingClientRect();
-      if (e.clientX - box.left < box.width * 0.3) prev(); else next();
+
+    // Files: click, Enter, or slide/drag to open (§6 & §8)
+    $$('[data-slide-file]', desktop).forEach((btn) => {
+      let slide = null;
+      btn.addEventListener('pointerdown', (e) => {
+        if (e.button > 0) return;
+        slide = { id: e.pointerId, sx: e.clientX, sy: e.clientY, win: null, dragging: false };
+        btn.setPointerCapture(e.pointerId);
+      });
+      btn.addEventListener('pointermove', (e) => {
+        if (!slide || e.pointerId !== slide.id) return;
+        const dx = e.clientX - slide.sx, dy = e.clientY - slide.sy;
+        const dist = wide.matches ? Math.hypot(dx, dy) : Math.max(0, -dy);
+        if (!slide.dragging && dist > 6) {
+          slide.dragging = true;
+          slide.win = createWin(btn.dataset.open, btn);
+        }
+        if (!slide.dragging || !slide.win) return;
+        const threshold = wide.matches ? 200 : innerHeight * 0.35;
+        const t = clamp(dist / threshold);
+        setWinT(slide.win, t, { x: dx * 0.35, y: dy * 0.35 });
+      });
+      const endSlide = (e) => {
+        if (!slide || e.pointerId !== slide.id) return;
+        const s = slide;
+        slide = null;
+        if (!s.dragging) return; // plain click handler will run
+        if (s.win.t > 0.4) {
+          btn.classList.add('is-opened');
+          animateWinT(s.win, 1, () => $('[data-win-close]', s.win.el)?.focus({ preventScroll: true }));
+        } else {
+          closeWin(s.win);
+        }
+      };
+      btn.addEventListener('pointerup', endSlide);
+      btn.addEventListener('pointercancel', endSlide);
+      btn.addEventListener('click', () => {
+        const existing = wins.find((x) => x.key === btn.dataset.open);
+        if (existing && existing.t > 0.1) return;
+        openWin(btn.dataset.open, btn);
+      });
     });
-    land.addEventListener('pointercancel', () => { down = null; release(); });
-    land.addEventListener('contextmenu', (e) => { if (held) e.preventDefault(); });
+
+    /* ---------- Phone Home Screen & Apps ---------- */
+
+    function openApp(key, fromEl) {
+      const note = notesByKey[key];
+      if (!note) return;
+      if (curPk) closeApp(true);
+
+      const appBtn = $(`.home-app[data-app="${key}"]`, pocket) || fromEl;
+      appBtn?.classList.add('is-opened');
+
+      // Compute origin from the icon inside .device-screen
+      const scRect = pkScreen.getBoundingClientRect();
+      const icEl = $('.home-icon', appBtn) || appBtn;
+      if (icEl && scRect.width) {
+        const ir = icEl.getBoundingClientRect();
+        const ox = clamp(((ir.left + ir.width * 0.5 - scRect.left) / scRect.width) * 100, 10, 90);
+        const oy = clamp(((ir.top + ir.height * 0.5 - scRect.top) / scRect.height) * 100, 10, 90);
+        pkApp.style.setProperty('--ox', `${ox.toFixed(1)}%`);
+        pkApp.style.setProperty('--oy', `${oy.toFixed(1)}%`);
+      }
+
+      pkTitle.textContent = note.dataset.title || '';
+      pkMore.setAttribute('href', note.dataset.more || '#work');
+      $$('.dv-video, .dv-html, .card', pkApp).forEach((el) => { el.hidden = true; el.classList.remove('is-on'); });
+      pkIntro.classList.remove('on');
+
+      let player = null;
+      if (note.dataset.card === 'mis') {
+        const cardEl = $('.card[data-card="mis"]', pkApp);
+        cardEl.hidden = false;
+        void cardEl.offsetWidth;
+        cardEl.classList.add('is-on');
+        syncCards();
+      } else {
+        const raw = makePlayer(note, pkApp, !wide.matches);
+        player = titled(raw, note, pkIntro);
+      }
+
+      curPk = { key, note, player, fromEl: appBtn, started: false, running: false };
+      desk.classList.add('has-pk-app');
+      pkApp.hidden = false;
+      if (!reduce) {
+        pkApp.classList.add('is-opening');
+        requestAnimationFrame(() => pkApp.classList.remove('is-opening'));
+      }
+      if (!wide.matches) {
+        root.classList.add('sheet-open');
+        lenis?.stop();
+      }
+      syncPlayers();
+      $('.pk-close', pkApp)?.focus({ preventScroll: true });
+    }
+
+    function closeApp(immediate = false) {
+      if (!curPk) return;
+      const prev = curPk;
+      curPk = null;
+      if (prev.player) { prev.player.pause(); prev.running = false; }
+      pkVideo.pause();
+      pkIntro.classList.remove('on');
+      desk.classList.remove('has-pk-app');
+      pkApp.hidden = true;
+      pkScreen.classList.remove('band-dark');
+      if (!wide.matches && !wins.length) {
+        root.classList.remove('sheet-open');
+        lenis?.start();
+      }
+      syncPlayers();
+      if (!immediate) prev.fromEl?.focus({ preventScroll: true });
+    }
+
+    function stepPhoneApp(dir) {
+      if (!curPk) return;
+      const idx = phoneAppOrder.indexOf(curPk.key);
+      if (idx < 0) return;
+      const nextKey = phoneAppOrder[(idx + dir + phoneAppOrder.length) % phoneAppOrder.length];
+      openApp(nextKey, $(`.home-app[data-app="${nextKey}"]`, pocket));
+    }
+
+    $$('[data-app]', pocket).forEach((btn) => {
+      btn.addEventListener('click', () => openApp(btn.dataset.app, btn));
+    });
+    stickies.forEach((s) => {
+      const setTarget = (on) => {
+        [s.dataset.for, s.dataset.for2].filter(Boolean).forEach((k) => {
+          $(`.home-app[data-app="${k}"]`, pocket)?.classList.toggle('is-target', on);
+        });
+      };
+      s.addEventListener('pointerenter', () => setTarget(true));
+      s.addEventListener('pointerleave', () => setTarget(false));
+      s.addEventListener('focusin', () => setTarget(true));
+      s.addEventListener('focusout', () => setTarget(false));
+      s.addEventListener('click', (e) => {
+        e.stopPropagation();
+        setTarget(false);
+        openApp(s.dataset.for, $(`.home-app[data-app="${s.dataset.for}"]`, pocket));
+      });
+    });
+    $$('[data-pk-close]', pkApp).forEach((b) => b.addEventListener('click', () => closeApp()));
+    pkMore.addEventListener('click', (e) => {
+      const target = $(pkMore.getAttribute('href'));
+      if (!target) return;
+      e.preventDefault();
+      closeApp(true);
+      if (lenis) lenis.scrollTo(target, { offset: -10, duration: 1.2 });
+      else target.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth' });
+    });
+
+    // Swipe down on narrow phone app sheet to close; swipe left/right for neighbouring app
+    let pkTouch = null;
+    pkApp.addEventListener('pointerdown', (e) => {
+      if (e.button > 0 || e.target.closest('button, a')) return;
+      pkTouch = { id: e.pointerId, sx: e.clientX, sy: e.clientY };
+    });
+    pkApp.addEventListener('pointerup', (e) => {
+      if (!pkTouch || e.pointerId !== pkTouch.id) return;
+      const dx = e.clientX - pkTouch.sx, dy = e.clientY - pkTouch.sy;
+      pkTouch = null;
+      if (dy > 80 && Math.abs(dy) > Math.abs(dx)) closeApp();
+      else if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) stepPhoneApp(dx < 0 ? 1 : -1);
+    });
+
+    // Keyboard controls: Esc exits theater or closes front window / phone app; ArrowLeft/Right step phone apps
     addEventListener('keydown', (e) => {
-      if (!visible || e.altKey || e.metaKey || e.ctrlKey || /^(input|textarea|select)$/i.test(e.target.tagName)) return;
-      if (e.key === 'ArrowRight') { touched(); next(); }
-      if (e.key === 'ArrowLeft') { touched(); prev(); }
+      if (e.key === 'Escape') {
+        if (curPk) { e.preventDefault(); closeApp(); }
+        else if (wins.length) {
+          e.preventDefault();
+          const front = wins[wins.length - 1];
+          if (front.theater) toggleWinTheater(front, false);
+          else closeWin(front);
+        }
+      } else if (curPk && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
+        e.preventDefault();
+        stepPhoneApp(e.key === 'ArrowRight' ? 1 : -1);
+      }
     });
 
-    new IntersectionObserver(([e]) => {
-      visible = e.intersectionRatio >= 0.5;
-      if (visible && idx === null) go(first());
-      else sync();
-    }, { threshold: [0, 0.5, 1] }).observe(land);
-    document.addEventListener('visibilitychange', sync);
-    wide.addEventListener('change', () => { if (idx !== null) go(idx < 0 ? first() : idx); });
+    document.addEventListener('visibilitychange', syncPlayers);
+    wide.addEventListener('change', () => { syncBreakpoint(); measure(); });
+    addEventListener('resize', () => {
+      measure();
+      wins.forEach((w) => { measureWinGeom(w); setWinT(w, w.t); });
+    });
+
+    syncBreakpoint();
+    measure();
   }
-  $$('[data-stories]').forEach(setupStories);
+  $$('[data-desk]').forEach(setupDesk);
 
   syncTheme();
   onScroll();

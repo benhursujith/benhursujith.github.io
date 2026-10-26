@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=23">
+<link rel="stylesheet" href="assets/site.css?v=26">
 </head>
 <body>
 <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -47,198 +47,469 @@
 
 <main id="main">
 
-<!-- ============ Landing: my highlights, told as stories ============ -->
-<section class="land on-cover" id="top" data-stories aria-label="Highlights">
-  <div class="st-bars" aria-hidden="true"><span class="st-chapter"></span><span class="st-segs"></span></div>
+<!-- ============ Landing: open my laptop, then my phone ============ -->
+<section class="desk on-cover" id="top" data-desk aria-label="Sujith's laptop and phone">
+  <div class="desk-stage">
 
-  <div class="profile">
-    <p class="me-hi">Hi, I'm Sujith.</p>
-    <h1 class="me-title" data-write>I build AI that gives people their <span class="brush">hours back</span>.</h1>
-    <p class="me-role">Lead Product Manager for AI products at BorderPlus, in Mumbai. <span class="me-years">Five years taking products from first spec to scale.</span></p>
-    <ul class="me-domains" aria-label="Domains"><li>Healthcare &amp; workforce migration</li><li>AdTech &amp; MarTech</li><li>Agents &amp; developer tooling</li></ul>
-    <nav class="rings" aria-label="Highlights">
-      <div class="ring-row" role="group" aria-label="Work">
-        <button class="ring" type="button" data-go="borderplus"><span class="ring-pic ring-logo"><img src="assets/brand/borderplus-mark.png" alt="" width="30" height="30"></span><span class="ring-name">BorderPlus</span></button>
-        <button class="ring" type="button" data-go="pixis"><span class="ring-pic ring-logo ring-logo--fill"><img src="assets/brand/pixis-mark.svg" alt="" width="56" height="56"></span><span class="ring-name">Pixis</span></button>
-      </div>
-      <div class="ring-row" role="group" aria-label="More">
-        <button class="ring" type="button" data-go="personal"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 11.6 12 4.2l8.5 7.4"/><path d="M6.2 10v10h11.6V10"/><path d="M10.2 20v-5.4h3.6V20"/></svg></span><span class="ring-name">Personal</span></button>
-        <button class="ring" type="button" data-go="ai"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.4c.7 4.3 2.3 6.5 7.4 8.4-5.1 1.9-6.7 4.1-7.4 8.4-.7-4.3-2.3-6.5-7.4-8.4 5.1-1.9 6.7-4.1 7.4-8.4z"/><path d="M19.2 3.2v3.2M17.6 4.8h3.2"/></svg></span><span class="ring-name">AI setup</span></button>
-        <button class="ring" type="button" data-go="writing"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.2 19.8l1.1-4.4L16.4 4.3a1.9 1.9 0 0 1 2.7 0l.6.6a1.9 1.9 0 0 1 0 2.7L8.6 18.7z"/><path d="M14.4 6.3l3.3 3.3"/></svg></span><span class="ring-name">Writing</span></button>
-        <button class="ring" type="button" data-go="hi"><span class="ring-pic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.2h14a1.5 1.5 0 0 1 1.5 1.5v8.6a1.5 1.5 0 0 1-1.5 1.5h-7.6l-4.3 3.4v-3.4H5a1.5 1.5 0 0 1-1.5-1.5V6.7A1.5 1.5 0 0 1 5 5.2z"/><path d="M8 10.2h8M8 13h5"/></svg></span><span class="ring-name">Say hi</span></button>
-      </div>
-    </nav>
-    <button class="me-go" type="button" data-go="borderplus">Watch my highlights <span aria-hidden="true">→</span></button>
-    <p class="me-hint">or scroll for the full notes</p>
-  </div>
+    <div class="desk-me">
+      <p class="me-hi">Hi, I'm Sujith.</p>
+      <h1 class="me-title" data-write>I build AI that gives people their <span class="brush">hours back</span>.</h1>
+      <p class="me-role">Lead Product Manager for AI products at BorderPlus, in Mumbai. <span class="me-years">Five years taking products from first spec to scale.</span></p>
+      <ul class="me-domains" aria-label="Domains"><li>Healthcare &amp; workforce migration</li><li>AdTech &amp; MarTech</li><li>Agents &amp; developer tooling</li></ul>
+      <button class="me-open" type="button" data-desk-open>
+        <span class="only-wide">Open my laptop <span aria-hidden="true">→</span></span>
+        <span class="only-narrow">Swipe up to open <span aria-hidden="true">↑</span></span>
+      </button>
+    </div>
 
-  <div class="notes">
-      <article class="note" data-chapter="borderplus" data-video="carepilot" data-more="#carepilot">
+    <div class="mac" data-mac>
+      <div class="mac-shadow" aria-hidden="true"></div>
+      <div class="mac-body" data-mac-body>
+        <div class="mac-lid" data-mac-lid>
+          <div class="mac-face">
+            <div class="mac-cam" aria-hidden="true"><i></i></div>
+            <div class="mac-screen" data-mac-screen>
+              <div class="desktop" data-desktop role="region" aria-label="Sujith's MacBook desktop">
+                <div class="dt-bar">
+                  <span class="dt-brand"><b>Sujith's MacBook</b><span class="dt-front" data-dt-front></span></span>
+                  <span class="dt-clock" data-clock>Mumbai</span>
+                </div>
+                <div class="dt-workspace">
+                  <ul class="dt-apps" aria-label="Desktop apps">
+                    <li>
+                      <button class="dt-app" type="button" data-open="ads">
+                        <span class="dt-icon dt-icon--fill"><img src="assets/brand/pixis-mark.svg" alt="" width="56" height="56"></span>
+                        <span class="dt-name">Ads Agent</span>
+                        <span class="dt-kick">Pixis</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dt-app" type="button" data-open="money-plan">
+                        <span class="dt-icon" style="--w:var(--blush)">
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17" height="15.5" rx="2.5"/><path d="M3.5 9.5h17M8 3.2v3.2M16 3.2v3.2"/><path d="M7.5 13.5h3M13.5 13.5h3M7.5 17h3"/></svg>
+                        </span>
+                        <span class="dt-name">Money Plan</span>
+                        <span class="dt-kick">Personal</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dt-app" type="button" data-open="gbf">
+                        <span class="dt-icon dt-icon--fill"><img src="assets/brand/gbf-icon.png" alt="" width="56" height="56"></span>
+                        <span class="dt-name">gbf-blr.com</span>
+                        <span class="dt-kick">Church</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dt-app" type="button" data-open="mis">
+                        <span class="dt-icon" style="--w:var(--sage)">
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19.5h16"/><path d="M5 16.5 9.5 12l3.5 2.5 6-7.5"/><circle cx="19" cy="7" r="1.8"/></svg>
+                        </span>
+                        <span class="dt-name">Weekly MIS</span>
+                        <span class="dt-kick">BorderPlus</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dt-app" type="button" data-open="ai">
+                        <span class="dt-icon" style="--w:var(--sand)">
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3.5 7.2a2 2 0 0 1 2-2h4.2l2 2.2h6.8a2 2 0 0 1 2 2v8.4a2 2 0 0 1-2 2H5.5a2 2 0 0 1-2-2z"/></svg>
+                        </span>
+                        <span class="dt-name">AI harness</span>
+                        <span class="dt-kick">How I work</span>
+                      </button>
+                    </li>
+                  </ul>
+
+                  <aside class="dt-sticky" aria-label="How to use the desktop">
+                    <p>Click an app to open it full screen.</p>
+                    <p>Drag a file out to read it.</p>
+                  </aside>
+
+                  <ul class="dt-files" aria-label="Files">
+                    <li class="dt-file-stack">
+                      <div class="dt-stack" role="group" aria-label="Writing articles">
+                        <button class="dt-sheet" type="button" data-open="writing-memory" data-slide-file style="--si:2">
+                          <span class="dt-sheet-k">8 min</span>
+                          <span class="dt-sheet-t">Memory that outlives the chat</span>
+                        </button>
+                        <button class="dt-sheet" type="button" data-open="writing-context" data-slide-file style="--si:1">
+                          <span class="dt-sheet-k">8 min</span>
+                          <span class="dt-sheet-t">One file to resume any project</span>
+                        </button>
+                        <button class="dt-sheet" type="button" data-open="writing-instruction-files" data-slide-file style="--si:0">
+                          <span class="dt-sheet-k">9 min</span>
+                          <span class="dt-sheet-t">Instruction files for AI agents</span>
+                        </button>
+                      </div>
+                      <span class="dt-fname">Writing</span>
+                    </li>
+                    <li>
+                      <button class="dt-file" type="button" data-open="kit" data-slide-file>
+                        <span class="dt-ficon" style="--w:var(--panel)">
+                          <svg viewBox="0 0 28 32" aria-hidden="true"><path d="M6 2.5h11l6 6v19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-23a2 2 0 0 1 2-2z"/><path d="M17 2.5v6h6"/><path d="M11 8v2M11 12v2M11 16v2M9.5 20h3v4h-3z"/></svg>
+                        </span>
+                        <span class="dt-fname">agent-files.zip</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dt-file" type="button" data-open="pixis" data-slide-file>
+                        <span class="dt-ficon dt-ficon--folder" style="--w:var(--lilac)">
+                          <svg viewBox="0 0 28 24" aria-hidden="true"><path d="M2.5 6.2a2 2 0 0 1 2-2h5.2l2.2 2.4h11.6a2 2 0 0 1 2 2v10.8a2 2 0 0 1-2 2h-19a2 2 0 0 1-2-2z"/></svg>
+                        </span>
+                        <span class="dt-fname">Pixis, 2020–2025</span>
+                      </button>
+                    </li>
+                    <li>
+                      <button class="dt-file" type="button" data-open="hi" data-slide-file>
+                        <span class="dt-ficon" style="--w:var(--blush)">
+                          <svg viewBox="0 0 28 32" aria-hidden="true"><path d="M6 2.5h11l6 6v19a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-23a2 2 0 0 1 2-2z"/><path d="M17 2.5v6h6"/><path d="M8.5 14h11M8.5 18.5h11M8.5 23h7"/></svg>
+                        </span>
+                        <span class="dt-fname">say-hi.txt</span>
+                      </button>
+                    </li>
+                  </ul>
+
+                  <button class="dt-phone-btn only-narrow" type="button" data-desk-phone>My phone <span aria-hidden="true">→</span></button>
+                </div>
+                <div class="dt-wins" data-dt-wins data-lenis-prevent></div>
+              </div>
+              <div class="mac-glow" aria-hidden="true">
+                <div class="mg-bar"><span>Sujith's MacBook</span><span>Mumbai</span></div>
+                <div class="mg-apps"><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="mg-files"><i></i><i></i><i></i><i></i></div>
+              </div>
+              <div class="mac-sheen" aria-hidden="true"></div>
+              <div class="mac-dark" data-mac-dark aria-hidden="true"></div>
+            </div>
+          </div>
+          <div class="mac-back" aria-hidden="true"><div class="mac-emblem"></div></div>
+        </div>
+        <div class="mac-hinge" aria-hidden="true"></div>
+        <div class="mac-deck" aria-hidden="true"><div class="mac-keys"></div><div class="mac-pad"></div></div>
+        <div class="mac-front" aria-hidden="true"><div class="mac-notch"></div></div>
+      </div>
+    </div>
+
+    <div class="m-screen" data-m-screen></div>
+
+    <div class="pocket" data-pocket role="region" aria-label="Sujith's phone">
+      <div class="pk-stage">
+        <div class="device phone is-on" data-pk-phone>
+          <div class="device-screen">
+            <div class="home" data-home>
+              <div class="home-head only-narrow">
+                <span class="home-title">On my phone</span>
+                <button class="home-back" type="button" data-desk-laptop>← My laptop</button>
+              </div>
+              <button class="home-widget" type="button" data-app="mis">
+                <div class="hw-copy">
+                  <p class="hw-k">NursePlus · weekly MIS</p>
+                  <p class="hw-big"><span class="marker on">5,400+</span></p>
+                  <p class="hw-l">nurses on the app, from about 100 in March</p>
+                </div>
+                <div class="hw-chart" data-sketch="nurses" aria-hidden="true"></div>
+              </button>
+              <div class="home-group">
+                <p class="home-gtitle">BorderPlus</p>
+                <ul class="home-grid" aria-label="BorderPlus apps">
+                  <li class="home-cell" data-cell="carepilot">
+                    <button class="home-app" type="button" data-app="carepilot">
+                      <span class="home-icon" style="--w:var(--sage)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="3.5" width="6" height="11" rx="3"/><path d="M5.5 11.5a6.5 6.5 0 0 0 13 0M12 18v3M8.5 21h7"/></svg>
+                      </span>
+                      <span class="home-name">CarePilot</span>
+                    </button>
+                  </li>
+                  <li class="home-cell" data-cell="ask">
+                    <button class="home-app" type="button" data-app="ask">
+                      <span class="home-icon" style="--w:var(--sage)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5.2h14a1.5 1.5 0 0 1 1.5 1.5v8.6a1.5 1.5 0 0 1-1.5 1.5h-7.6l-4.3 3.4v-3.4H5a1.5 1.5 0 0 1-1.5-1.5V6.7A1.5 1.5 0 0 1 5 5.2z"/><path d="M8 10.2h8M8 13h5"/></svg>
+                      </span>
+                      <span class="home-name">Ask</span>
+                    </button>
+                  </li>
+                  <li class="home-cell" data-cell="zenea-caregiver">
+                    <button class="home-app" type="button" data-app="zenea-caregiver">
+                      <span class="home-icon home-icon--logo">
+                        <img src="assets/brand/zenea-mark.svg" alt="" width="40" height="40">
+                      </span>
+                      <span class="home-name">Caregiver</span>
+                    </button>
+                  </li>
+                  <li class="home-cell" data-cell="zenea-parent">
+                    <button class="home-app" type="button" data-app="zenea-parent">
+                      <span class="home-icon home-icon--logo">
+                        <img src="assets/brand/zenea-mark.svg" alt="" width="40" height="40">
+                      </span>
+                      <span class="home-name">Parent</span>
+                    </button>
+                  </li>
+                  <li class="home-cell" data-cell="learn">
+                    <button class="home-app" type="button" data-app="learn">
+                      <span class="home-icon" style="--w:var(--sage)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.2c-2.2-1.4-5.2-1.6-8-.8v12.4c2.8-.8 5.8-.6 8 .8 2.2-1.4 5.2-1.6 8-.8V5.4c-2.8-.8-5.8-.6-8 .8z"/><path d="M12 6.2v12.4"/></svg>
+                      </span>
+                      <span class="home-name">Learn</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+              <div class="home-group">
+                <p class="home-gtitle">Mine</p>
+                <ul class="home-grid" aria-label="Personal apps">
+                  <li class="home-cell" data-cell="trade">
+                    <button class="home-app" type="button" data-app="trade">
+                      <span class="home-icon" style="--w:var(--blush)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 17.5 9.5 12l3.8 3.2L19.5 7"/><path d="M15 7h4.5v4.5"/></svg>
+                      </span>
+                      <span class="home-name">Trading loop</span>
+                    </button>
+                  </li>
+                  <li class="home-cell" data-cell="eatouts">
+                    <button class="home-app" type="button" data-app="eatouts">
+                      <span class="home-icon" style="--w:var(--blush)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3.5v7a2.5 2.5 0 0 0 5 0v-7M9.5 3.5v17M16.5 3.5c-1.8 2-2 5.5 0 7.5v9.5"/></svg>
+                      </span>
+                      <span class="home-name">Eatouts Mumbai</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            <div class="pk-app" data-pk-app hidden>
+              <div class="pk-top">
+                <button class="pk-close" type="button" data-pk-close aria-label="Close app">×</button>
+                <span class="pk-app-title" data-pk-title></span>
+                <a class="pk-more" data-pk-more href="#work">Read the notes ↓</a>
+              </div>
+              <video class="dv-video" data-pk-video muted playsinline preload="none" hidden></video>
+              <div class="dv-html" data-html="trade" hidden></div>
+              <div class="card" data-card="mis" hidden><div class="card-in">
+                <p class="card-k">NursePlus · weekly MIS</p>
+                <p class="card-big"><span class="marker">5,400+</span></p>
+                <p class="card-l">nurses on the app, from about 100 in March</p>
+                <div class="card-chart" data-sketch="nurses" aria-hidden="true"></div>
+                <div class="card-row"><p><b>14,800+</b><span>questions answered by Ask</span></p><div class="card-spark" data-sketch-spark="ask"></div></div>
+                <div class="card-row"><p><b>4,600+</b><span>hours of learning delivered</span></p><div class="card-spark" data-sketch-spark="learn"></div></div>
+                <p class="card-foot">Running totals, March to September 2026, rounded down.</p>
+              </div></div>
+              <div class="intro" data-pk-intro aria-hidden="true">
+                <p class="intro-kick"></p>
+                <p class="intro-title"></p>
+                <p class="intro-stat"><span class="marker"></span></p>
+                <p class="intro-lab"></p>
+                <ul class="row-tags intro-tags"></ul>
+              </div>
+              <button class="pk-home-hit" type="button" data-pk-close aria-label="Back to home screen"></button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="stickies" data-stickies aria-label="Results by app">
+      <button class="sticky" type="button" data-for="carepilot" data-side="left" style="--w:var(--sage);--rot:-1.2deg">
+        <span class="sticky-app">BorderPlus · CarePilot</span>
+        <span class="sticky-big"><span class="marker on">2.5 h → 30 min</span></span>
+        <span class="sticky-lab">of documentation per nurse, per shift</span>
+        <span class="sticky-short">2.5 h → 30 min</span>
+      </button>
+      <button class="sticky" type="button" data-for="ask" data-side="left" style="--w:var(--sage);--rot:1deg">
+        <span class="sticky-app">BorderPlus · Ask</span>
+        <span class="sticky-big"><span class="marker on">14,800+</span></span>
+        <span class="sticky-lab">questions answered, for 3,100+ nurses</span>
+        <span class="sticky-short">14,800+ answers</span>
+      </button>
+      <button class="sticky" type="button" data-for="learn" data-side="left" style="--w:var(--sage);--rot:-1deg">
+        <span class="sticky-app">BorderPlus · Learn</span>
+        <span class="sticky-big"><span class="marker on">48% vs 14%</span></span>
+        <span class="sticky-lab">come back when they use Ask and Learn together</span>
+        <span class="sticky-short">48% come back</span>
+      </button>
+      <button class="sticky" type="button" data-for="zenea-caregiver" data-for2="zenea-parent" data-side="right" style="--w:var(--sage);--rot:1.2deg">
+        <span class="sticky-app">Zenea · Caregiver &amp; Parent</span>
+        <span class="sticky-big"><span class="marker on">Both apps</span></span>
+        <span class="sticky-lab">the caregiver's and the parents', for one childcare service</span>
+        <span class="sticky-short">2 apps</span>
+      </button>
+      <button class="sticky" type="button" data-for="eatouts" data-side="right" style="--w:var(--blush);--rot:-1.2deg">
+        <span class="sticky-app">Personal · Eatouts Mumbai</span>
+        <span class="sticky-big"><span class="marker on">50 restaurants</span></span>
+        <span class="sticky-lab">Google reviews and Reddit threads, read for me</span>
+        <span class="sticky-short">50 places</span>
+      </button>
+      <button class="sticky" type="button" data-for="trade" data-side="right" style="--w:var(--blush);--rot:1deg">
+        <span class="sticky-app">Personal · Trading loop</span>
+        <span class="sticky-big"><span class="marker on">2 of 4</span></span>
+        <span class="sticky-lab">strategies passed backtests; now on paper</span>
+        <span class="sticky-short">2 of 4 passed</span>
+      </button>
+    </div>
+
+    <p class="mk" data-mk aria-hidden="true">
+      <i class="mk-dot"></i>
+      <span></span>
+    </p>
+
+    <div class="desk-nav">
+      <button class="desk-step desk-step--laptop" type="button" data-desk-laptop><span aria-hidden="true">←</span> My laptop</button>
+      <button class="desk-step desk-step--phone" type="button" data-desk-phone>My phone <span aria-hidden="true">→</span></button>
+    </div>
+
+    <div class="desk-data" hidden>
+      <article class="note" data-key="carepilot" data-chapter="borderplus" data-video="carepilot" data-title="CarePilot · BorderPlus" data-more="#carepilot">
         <p class="note-kick">BorderPlus · CarePilot</p>
         <h2 class="note-title">Care records, talked through.</h2>
         <p class="note-stat"><span class="marker">2.5 h → 30 min</span></p><p class="note-lab">of documentation per nurse, per shift</p>
-        <p class="note-text">A nurse picks the report, talks it through, checks the transcript, and gets a structured report with a quality score and the questions still open. Live in three care homes.</p>
         <ol class="note-marks" hidden><li data-at="0.3" data-y="22">every report gets a quality score</li><li data-at="1" data-y="50">pick the kind of report</li><li data-at="3.4" data-y="74">then just talk it through</li><li data-at="6.9" data-y="44">check what it heard</li><li data-at="9.2" data-y="62">the model writes it up</li><li data-at="11" data-y="34">in the report's own structure</li><li data-at="12.3" data-y="70">gaps get asked before saving</li></ol>
       </article>
-      <article class="note" data-chapter="borderplus" data-video="nurseplus-ask" data-more="#ask">
+      <article class="note" data-key="ask" data-chapter="borderplus" data-video="nurseplus-ask" data-title="Ask · BorderPlus" data-more="#ask">
         <p class="note-kick">BorderPlus · Ask</p>
         <h2 class="note-title">Answers for nurses, in German and English.</h2>
         <p class="note-stat"><span class="marker">3,100+ nurses</span></p><p class="note-lab">have asked: 14,800+ questions answered</p>
-        <p class="note-text">Nurses ask in German or English and get the answer in both, with the words they need on the ward.</p>
         <ol class="note-marks" hidden><li data-at="0.3" data-y="32">ask in German or English</li><li data-at="3.8" data-y="40">an answer in a line, with sources</li><li data-at="5.2" data-y="58">→ straight into the lesson</li><li data-at="7.3" data-y="42">the same answer, in English</li><li data-at="10.3" data-y="64">tap a word for its card</li><li data-at="14.4" data-y="72">save it to a word list</li></ol>
       </article>
-      <article class="note" data-chapter="borderplus" data-video="nurseplus-home" data-more="#learn">
+      <article class="note" data-key="learn" data-chapter="borderplus" data-video="nurseplus-home" data-title="Learn · BorderPlus" data-more="#learn">
         <p class="note-kick">BorderPlus · Learn</p>
         <h2 class="note-title">German for the job, in short episodes.</h2>
         <p class="note-stat"><span class="marker">48% vs 14%</span></p><p class="note-lab">come back when they use Ask and Learn together</p>
-        <p class="note-text">Pathways of roleplay episodes: a first call from the airport, a day on the ward, opening a bank account. A phrase trainer keeps the words close.</p>
         <ol class="note-marks" hidden><li data-at="0.3" data-y="27">pathways of short episodes</li><li data-at="1.3" data-y="55">roleplays, with recurring characters</li><li data-at="3.7" data-y="40">switch to the integration pathway</li><li data-at="6.7" data-y="58">life admin too: a bank account</li><li data-at="8.7" data-y="57">unit checks along the way</li><li data-at="9.9" data-y="72">then a home, and recognition</li></ol>
       </article>
-      <article class="note" data-chapter="borderplus" data-card="mis" data-dwell="8500" data-more="#mis">
+      <article class="note" data-key="mis" data-chapter="borderplus" data-card="mis" data-title="Weekly MIS · BorderPlus" data-more="#mis">
         <p class="note-kick">BorderPlus · analytics</p>
         <h2 class="note-title">Product analytics, set up from scratch.</h2>
         <p class="note-stat"><span class="marker">5,400+ nurses</span></p><p class="note-lab">on the app by September, from about 100 in March</p>
-        <p class="note-text">Six automated pipelines from Firebase, BigQuery and the app's APIs feed a weekly MIS and the executive dashboard.</p>
       </article>
-      <article class="note" data-chapter="borderplus" data-video="zenea-caregiver" data-more="#zenea-caregiver">
+      <article class="note" data-key="zenea-caregiver" data-chapter="borderplus" data-video="zenea-caregiver" data-title="Zenea Caregiver · BorderPlus" data-more="#zenea-caregiver">
         <p class="note-kick">BorderPlus · Zenea</p>
         <h2 class="note-title">Childcare, with a nurse who lives in.</h2>
         <p class="note-stat"><span class="marker">Caregiver app</span></p><p class="note-lab">the day as routines, cards and checklists</p>
-        <p class="note-text">A childcare subscription: a trained nurse lives with the family and cares for children up to five. I shaped both apps, one for the caregiver and one for the parents.</p>
         <ol class="note-marks" hidden><li data-at="0.3" data-y="40">a start-of-day check</li><li data-at="2.2" data-y="60">the day, as routines</li><li data-at="4.3" data-y="60">each routine is a card</li><li data-at="6.3" data-y="36">every card holds its checklist</li><li data-at="9.4" data-y="50">parents see what's done</li></ol>
       </article>
-      <article class="note" data-chapter="borderplus" data-video="zenea-parent" data-more="#zenea-parent">
+      <article class="note" data-key="zenea-parent" data-chapter="borderplus" data-video="zenea-parent" data-title="Zenea Parent · BorderPlus" data-more="#zenea-parent">
         <p class="note-kick">BorderPlus · Zenea</p>
         <h2 class="note-title">Your child's day, moment by moment.</h2>
         <p class="note-stat"><span class="marker">Parent app</span></p><p class="note-lab">meals, naps, play and growth, as they happen</p>
-        <p class="note-text">Parents at work see the day instead of asking about it, and growth is tracked against WHO ranges.</p>
         <ol class="note-marks" hidden><li data-at="0.3" data-y="28">the day at a glance</li><li data-at="3.2" data-y="34">moments arrive as they happen</li><li data-at="9.2" data-y="34">growth against WHO ranges</li><li data-at="11.5" data-y="76">milestones, too</li></ol>
       </article>
-      <article class="note" data-chapter="pixis" data-html="ads" data-frame="browser" data-m-html="ads-phone" data-m-frame="phone" data-title="Ads Agent" data-more="#ads-agent">
+      <article class="note" data-key="ads" data-chapter="pixis" data-html="ads" data-m-html="ads-phone" data-title="Ads Agent · Pixis" data-more="#ads-agent">
         <p class="note-kick">Pixis · Ads Agent</p>
         <h2 class="note-title">Ad budgets you can talk to.</h2>
         <p class="note-stat"><span class="marker">1–2 h → 10–15 min</span></p><p class="note-lab">to answer a marketer's question</p>
-        <p class="note-text">Pixis' optimisation models, exposed to an agent as MCP tools. <em>Recreated here with invented campaigns.</em></p>
         <ol class="note-marks" hidden><li data-at="0.4" data-y="82">ask the ad account</li><li data-at="2.9" data-y="40">the models are its tools</li><li data-at="4.6" data-y="56">an answer, with the numbers</li><li data-at="6.6" data-y="74">then act on it</li><li data-at="8.9" data-y="70">done, and it checks back tomorrow</li></ol>
       </article>
-      <article class="note" data-chapter="pixis" data-card="pixis" data-dwell="7500" data-more="#pixis-roles">
+      <article class="note" data-key="pixis" data-chapter="pixis" data-card="pixis" data-title="Pixis, 2020–2025" data-more="#pixis-roles">
         <p class="note-kick">Pixis · optimisation engine</p>
         <h2 class="note-title">Founding PM of the optimisation engine.</h2>
         <p class="note-stat"><span class="marker">5–15% less ad spend</span></p><p class="note-lab">for clients, across 300+ brands</p>
-        <p class="note-text">Regression and deep-learning features for campaign decisions. Marketers got 50 to 60% more done, and automation scaled tenfold across Meta and Google.</p>
       </article>
-      <article class="note" data-chapter="personal" data-html="trade" data-more="#investment-agent">
+      <article class="note" data-key="trade" data-chapter="personal" data-html="trade" data-title="Trading loop · Personal" data-more="#investment-agent">
         <p class="note-kick">Personal · investing</p>
         <h2 class="note-title">It proposes trades, and waits for my yes.</h2>
         <p class="note-stat"><span class="marker">2 of 4</span></p><p class="note-lab">strategies passed backtests; now on paper</p>
-        <p class="note-text">Every proposal reaches my phone, and nothing happens without an approve. A phone can halt it; only the laptop can restart it. 39 automated tests. <em>Recreated with invented figures.</em></p>
         <ol class="note-marks" hidden><li data-at="0.4" data-y="30">every trade starts as a proposal</li><li data-at="3.0" data-y="52">nothing moves without my yes</li><li data-at="4.0" data-y="60">paper fill, stop is live</li><li data-at="7.2" data-y="64">it reports in</li><li data-at="10.9" data-y="74">a phone can halt it; only the laptop restarts it</li></ol>
       </article>
-      <article class="note" data-chapter="personal" data-video="eatouts-mumbai" data-more="#eatouts">
+      <article class="note" data-key="eatouts" data-chapter="personal" data-video="eatouts-mumbai" data-title="Eatouts Mumbai · Personal" data-more="#eatouts">
         <p class="note-kick">Personal · food</p>
         <h2 class="note-title">What to order at Mumbai's favourite tables.</h2>
         <p class="note-stat"><span class="marker">50 restaurants</span></p><p class="note-lab">Google reviews and Reddit threads, read for me</p>
-        <p class="note-text">What each place is for, what to order by course, and what to watch out for.</p>
         <ol class="note-marks" hidden><li data-at="0.3" data-y="30">50 of Mumbai's most-reviewed</li><li data-at="3.3" data-y="40">filter by area, meal and mood</li><li data-at="7.2" data-y="44">what to order, course by course</li><li data-at="10.2" data-y="62">what Reddit raves about</li></ol>
       </article>
-      <article class="note" data-chapter="personal" data-video="money-plan" data-frame="browser" data-m-video="money-plan-phone" data-m-frame="phone" data-title="Money Plan" data-more="#money-plan">
+      <article class="note" data-key="money-plan" data-chapter="personal" data-video="money-plan" data-m-video="money-plan-phone" data-title="Money Plan · Personal" data-more="#money-plan">
         <p class="note-kick">Personal · money</p>
         <h2 class="note-title">A year of money, planned and tracked.</h2>
         <p class="note-stat"><span class="marker">12 months</span></p><p class="note-lab">rent, giving, cards, savings, debts and trips</p>
-        <p class="note-text">Built from my bank and card statements, with a tracker that forecasts from each balance check-in. <em>Shown with made-up figures.</em></p>
         <ol class="note-marks" hidden><li data-at="0.4" data-m-at="0.4" data-y="80">a year, month by month</li><li data-at="4.2" data-m-at="5.3" data-y="80">rent, giving, cards, savings</li><li data-at="8.2" data-m-at="8.2" data-y="80">where the year ends up</li><li data-at="11.2" data-m-at="12" data-y="80">check in, and it re-forecasts</li></ol>
       </article>
-      <article class="note" data-chapter="personal" data-video="gbf-site" data-frame="browser" data-m-video="gbf-site-phone" data-m-frame="phone" data-title="gbf-blr.com" data-more="#gbf">
+      <article class="note" data-key="gbf" data-chapter="personal" data-video="gbf-site" data-m-video="gbf-site-phone" data-title="gbf-blr.com · Church" data-more="#gbf">
         <p class="note-kick">Personal · church</p>
         <h2 class="note-title">My church's website.</h2>
         <p class="note-stat"><span class="marker">gbf-blr.com</span></p><p class="note-lab">Grace Bible Fellowship, Bangalore</p>
-        <p class="note-text">Service times, sermons pulled from YouTube, podcasts, and answers to what first-time visitors ask.</p>
         <ol class="note-marks" hidden><li data-at="0.4" data-m-at="0.4" data-y="80">service times, up front</li><li data-at="5.4" data-m-at="6.4" data-y="80">who we are, and what we teach</li><li data-at="8.2" data-m-at="10" data-y="80">the latest sermon, from YouTube</li></ol>
       </article>
-      <article class="note" data-chapter="ai" data-card="jobs" data-dwell="8500" data-more="#ai">
+      <article class="note" data-key="ai" data-chapter="ai" data-card="ai" data-title="AI harness · How I work" data-more="#ai">
         <p class="note-kick">How I work with AI</p>
         <h2 class="note-title">One folder, 23 projects.</h2>
-        <p class="note-text">Work, church and side builds run out of one Obsidian folder that Claude Code works in.</p>
       </article>
-      <article class="note" data-chapter="writing" data-card="writing" data-dwell="8000" data-more="#writing">
-        <p class="note-kick">Writing</p>
-        <h2 class="note-title">Notes on working with agents.</h2>
-        
-        <p class="note-text">How I set up AI to work across a dozen projects without explaining everything again each session.</p>
+      <article class="note" data-key="kit" data-chapter="writing" data-card="kit" data-title="agent-files.zip · Starter kit" data-more="#writing">
+        <p class="note-kick">Writing · Starter kit</p>
+        <h2 class="note-title">agent-files.zip</h2>
       </article>
-      <article class="note" data-chapter="hi" data-card="hi" data-dwell="10000" data-more="#contact">
+      <article class="note" data-key="hi" data-chapter="hi" data-card="hi" data-title="say-hi.txt" data-more="#contact">
         <p class="note-kick">Say hi</p>
         <h2 class="note-title">Let's talk.</h2>
-        
-        <p class="note-text">I build AI products that give people their hours back, and I like hard, messy problems with real users.</p>
       </article>
-      <div class="note-nav">
-        <button class="nn" type="button" data-step="-1" aria-label="Previous highlight">←</button>
-        <span class="nn-count"></span>
-        <button class="nn" type="button" data-step="1" aria-label="Next highlight">→</button>
-        <a class="nn-more" href="#work">Read the notes <span aria-hidden="true">↓</span></a>
-      </div>
+      <article class="note" data-key="writing-instruction-files" data-chapter="writing" data-article="writing/instruction-files.html" data-title="How I write instruction files for AI agents · 9 min" data-more="#writing">
+        <p class="note-kick">Writing · 9 min</p>
+        <h2 class="note-title">How I write instruction files for AI agents</h2>
+      </article>
+      <article class="note" data-key="writing-context" data-chapter="writing" data-article="writing/context.html" data-title="One file to resume any project · 8 min" data-more="#writing">
+        <p class="note-kick">Writing · 8 min</p>
+        <h2 class="note-title">One file to resume any project</h2>
+      </article>
+      <article class="note" data-key="writing-memory" data-chapter="writing" data-article="writing/memory.html" data-title="Memory that outlives the chat · 8 min" data-more="#writing">
+        <p class="note-kick">Writing · 8 min</p>
+        <h2 class="note-title">Memory that outlives the chat</h2>
+      </article>
+
+      <template data-tpl="mis">
+        <div class="win-pad win-mis is-on">
+          <div class="wm-head">
+            <div>
+              <p class="card-k">NursePlus · weekly MIS</p>
+              <p class="wm-big"><span class="marker on">5,400+</span></p>
+              <p class="card-l">nurses on the app, from about 100 in March</p>
+            </div>
+            <div class="wm-sparks">
+              <div class="wm-row"><p><b>14,800+</b><span>questions answered by Ask</span></p><div class="card-spark" data-sketch-spark="ask"></div></div>
+              <div class="wm-row"><p><b>4,600+</b><span>hours of learning delivered</span></p><div class="card-spark" data-sketch-spark="learn"></div></div>
+            </div>
+          </div>
+          <div class="wm-chart" data-sketch="nurses" aria-hidden="true"></div>
+          <p class="card-foot">Six pipelines from Firebase and BigQuery. Running totals, March to September 2026, rounded down.</p>
+        </div>
+      </template>
+
+      <template data-tpl="kit">
+        <div class="win-pad win-kit">
+          <div class="wk-top">
+            <div>
+              <p class="card-k">Starter kit · 13 files</p>
+              <h3 class="wk-h">agent-files/</h3>
+            </div>
+            <a class="wk-dl" href="kit/agent-files.zip" download>Download the zip, 9 KB</a>
+          </div>
+          <ul class="wk-tree" aria-label="Files in agent-files.zip">
+            <li><a href="kit/agent-files/README.md" download>README.md</a><span>how the pieces fit together</span></li>
+            <li><a href="kit/agent-files/AGENTS.md" download>AGENTS.md</a><span>root rules every project inherits</span></li>
+            <li><a href="kit/agent-files/CLAUDE.md" download>CLAUDE.md</a><span>one-line @AGENTS.md shim</span></li>
+            <li><a href="kit/agent-files/.claude/settings.json" download>.claude/settings.json</a><span>permissions and hooks</span></li>
+            <li><a href="kit/agent-files/.claude/commands/session-start.md" download>.claude/commands/session-start.md</a><span>/session-start ritual</span></li>
+            <li><a href="kit/agent-files/.claude/commands/session-end.md" download>.claude/commands/session-end.md</a><span>/session-end ritual</span></li>
+            <li><a href="kit/agent-files/.claude/hooks/no-long-numbers.py" download>.claude/hooks/no-long-numbers.py</a><span>blocks long digit runs in summaries</span></li>
+            <li class="wk-dir"><span>project-template/</span><span>copy to start a project</span></li>
+            <li class="wk-sub"><a href="kit/agent-files/project-template/_index.md" download>_index.md</a><span>state, next 3, closed decisions</span></li>
+            <li class="wk-sub"><a href="kit/agent-files/project-template/PASTE-ME.md" download>PASTE-ME.md</a><span>self-contained chat briefing</span></li>
+            <li class="wk-sub"><a href="kit/agent-files/project-template/LOG.md" download>LOG.md</a><span>append-only dated log</span></li>
+            <li class="wk-sub"><a href="kit/agent-files/project-template/TASKS.md" download>TASKS.md</a><span>open tasks</span></li>
+            <li class="wk-sub"><a href="kit/agent-files/project-template/AGENTS.md" download>AGENTS.md</a><span>stack, commands, guardrails</span></li>
+            <li class="wk-sub"><a href="kit/agent-files/project-template/CLAUDE.md" download>CLAUDE.md</a><span>@AGENTS.md</span></li>
+          </ul>
+        </div>
+      </template>
+
+      <template data-tpl="hi">
+        <div class="win-pad win-hi">
+          <p class="card-h">Is your team losing hours to work a model could do?</p>
+          <p class="card-big card-talk"><span class="marker on">Let's talk.</span></p>
+          <p class="card-links">
+            <a href="mailto:sujithbenhur@gmail.com">sujithbenhur@gmail.com</a>
+            <a href="https://www.linkedin.com/in/sujithbenhur" target="_blank" rel="noopener">LinkedIn</a>
+          </p>
+        </div>
+      </template>
     </div>
 
-  <div class="stage">
-    <div class="sc-stage">
-      <div class="device phone" data-device="phone">
-        <div class="device-screen">
-          <div class="dv-html" data-html="trade" hidden></div>
-          <div class="dv-html" data-html="ads-phone" hidden></div>
-          <div class="card" data-card="mis" hidden><div class="card-in">
-            <p class="card-k">NursePlus · weekly MIS</p>
-            <p class="card-big"><span class="marker">5,400+</span></p>
-            <p class="card-l">nurses on the app, from about 100 in March</p>
-            <div class="card-chart" data-sketch="nurses" aria-hidden="true"></div>
-            <div class="card-row"><p><b>14,800+</b><span>questions answered by Ask</span></p><div class="card-spark" data-sketch-spark="ask"></div></div>
-            <div class="card-row"><p><b>4,600+</b><span>hours of learning delivered</span></p><div class="card-spark" data-sketch-spark="learn"></div></div>
-            <p class="card-foot">Running totals, March to September 2026, rounded down.</p>
-          </div></div>
-          <div class="card" data-card="pixis" hidden><div class="card-in">
-            <p class="card-k">Pixis · optimisation engine</p>
-            <p class="card-h">What the engine did</p>
-            <ol class="card-list">
-              <li style="--i:0"><b>5–15%</b><span>less ad spend for clients</span></li>
-              <li style="--i:1"><b>300+</b><span>brands, across Meta and Google</span></li>
-              <li style="--i:2"><b>50–60%</b><span>more done by each marketer</span></li>
-              <li style="--i:3"><b>10×</b><span>marketing automation, scaled</span></li>
-            </ol>
-          </div></div>
-          <div class="card" data-card="jobs" hidden><div class="card-in">
-            <p class="card-k">How I work with AI</p>
-            <p class="card-h">One folder, 23 projects</p>
-            <ol class="card-list">
-              <li style="--i:0"><b>30</b><span>rule files, layered by folder</span></li>
-              <li style="--i:1"><b>2,500</b><span>words read to start a session, of 900,000</span></li>
-              <li style="--i:2"><b>1</b><span>brand library, used by four projects</span></li>
-              <li style="--i:3"><b>6</b><span>habit skills for cheaper models</span></li>
-            </ol>
-          </div></div>
-          <div class="card" data-card="writing" hidden><div class="card-in">
-            <p class="card-h">Notes on working with agents</p>
-            <ol class="card-posts">
-              <li><a href="writing/instruction-files.html">How I write instruction files for AI agents</a></li>
-              <li><a href="writing/context.html">One file to resume any project</a></li>
-              <li><a href="writing/memory.html">Memory that outlives the chat</a></li>
-            </ol>
-            <p class="card-foot">Nine, eight and eight minute reads.</p>
-          </div></div>
-          <div class="card" data-card="hi" hidden><div class="card-in">
-            <p class="card-h">Is your team losing hours to work a model could do?</p>
-            <p class="card-big card-talk">Let's talk.</p>
-            <p class="card-links"><a href="mailto:sujithbenhur@gmail.com">sujithbenhur@gmail.com</a><a href="https://www.linkedin.com/in/sujithbenhur" rel="noopener">LinkedIn</a></p>
-            <button class="card-again" type="button" data-go="borderplus">↺ Watch again</button>
-          </div></div>
-        </div>
-      </div>
-      <div class="device browser" data-device="browser">
-        <div class="browser-bar"><span class="browser-dots" aria-hidden="true"><i></i><i></i><i></i></span><span class="browser-title" data-title></span></div>
-        <div class="device-screen"><div class="dv-html" data-html="ads" hidden></div></div>
-      </div>
-      <div class="intro" aria-hidden="true"><p class="intro-kick"></p><p class="intro-title"></p><p class="intro-stat"><span class="marker"></span></p><p class="intro-lab"></p><ul class="row-tags intro-tags"></ul></div>
-      <p class="mk" aria-hidden="true"><svg class="mk-arrow" viewBox="0 0 64 34"><path d="M62 6C46 4 24 10 6 26"/><path d="M6 26l12.5-1.6M6 26l3.4-12"/></svg><span></span></p>
-    </div>
   </div>
 </section>
 
@@ -567,6 +838,6 @@
 </footer>
 
 <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
-<script src="assets/site.js?v=17" defer></script>
+<script src="assets/site.js?v=20" defer></script>
 </body>
 </html>

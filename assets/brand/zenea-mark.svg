@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Zenea">
+  <!-- The Zenea mark: the wordmark's final single-storey "a" — a green bowl
+       whose base is an orange smile. Green is the brand; the smile is the pop. -->
+  <g fill="none" stroke-width="6" stroke-linecap="round" stroke-linejoin="round">
+    <!-- stem, on the right edge of the bowl (kept short so it reads "a", not "d") -->
+    <path d="M41 26 V51" stroke="#4F6F3A"/>
+    <!-- bowl: green everywhere except the bottom -->
+    <path d="M35.9 47.8 A12 12 0 1 0 22.1 47.8" stroke="#4F6F3A"/>
+    <!-- the smile: the bowl's base, in orange -->
+    <path d="M22.1 47.8 A12 12 0 0 1 35.9 47.8" stroke="#F4A261"/>
+  </g>
+</svg>
