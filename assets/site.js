@@ -1458,7 +1458,7 @@
     const STORIES = [
       { label: 'Pixis', av: mark('pixis-mark.svg'), when: '2020–25', keys: ['ads', 'pixis'] },
       { label: 'BorderPlus', av: mark('borderplus-mark.png'), when: '2026', keys: ['carepilot', 'ask', 'learn', 'mis', 'pathways'] },
-      { label: 'Zenea', av: mark('zenea-mark.svg', true), when: '2026', keys: ['zenea-caregiver', 'zenea-parent'] },
+      { label: 'Zenea', av: mark('zenea-wordmark.png', true), when: '2026', keys: ['zenea-caregiver', 'zenea-parent'] },
       { label: 'Personal', av: '<span>S</span>', me: true, when: '2026', keys: ['money-plan', 'trade', 'eatouts'] },
       { label: 'Church', av: mark('gbf-icon.png'), when: '2026', keys: ['gbf'] },
       { label: 'Say hi', av: '<span>Hi</span>', me: true, when: 'Oct 2026', keys: ['kit', 'hi'] },

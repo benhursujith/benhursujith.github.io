@@ -1210,7 +1210,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   overflow: visible;
 }
 .ig-av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #fff; }
-.ig-av img.is-mark { object-fit: contain; padding: 17%; }
+.ig-av img.is-mark { object-fit: contain; padding: 0 13%; }
 .ig-av--me { background: linear-gradient(150deg, #2E6E53, #1F4D3A); }
 .ig-av > span { font: 500 1em/1 var(--display); color: #F4F1EA; letter-spacing: -.02em; }
 
