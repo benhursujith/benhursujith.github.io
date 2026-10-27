@@ -2370,10 +2370,10 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
 
 /* ---------- Phones: the scene doesn't scroll; swipes and buttons play transitions between three states ---------- */
 @media (max-width: 900px) {
-  html, body { height: 100%; overflow: hidden; overscroll-behavior: none; }
+  html.is-home, html.is-home body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   .desk-stage { touch-action: none; }
   .ig-views, .igs-card, .win-body--scroll, .m-screen .dt-workspace { touch-action: pan-y; }
-  .foot { display: none; }
+  html.is-home .foot { display: none; }
   .mac, .m-screen, .pocket { will-change: transform, opacity; }
   .mac { transition: none; }
   .desk.is-phone .mac, .desk.is-phone .mac:hover { filter: none; }
