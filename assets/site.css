@@ -1649,16 +1649,11 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
     width: auto; margin: 22px 4px 0;
     font-size: 13px;
   }
-  /* On a phone the Mac desktop holds an Instagram icon; tapping it opens the app out of the icon */
-  .dt-phone-btn {
-    order: 3; align-self: center;
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    margin-top: 22px; padding: 0; border: 0; background: none;
-    cursor: pointer;
-  }
+  /* On a phone the Mac desktop's icon grid holds Instagram; tapping it opens the app out of the icon */
+  .dt-phone-btn { cursor: pointer; }
   .ig-app-icon {
     display: grid; place-items: center;
-    width: 66px; height: 66px;
+    width: 54px; height: 54px;
     border-radius: 23%;
     background: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
     box-shadow: 0 10px 22px -6px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .35);
@@ -1667,6 +1662,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   .ig-app-icon svg { width: 62%; height: 62%; fill: none; stroke: #fff; stroke-width: 1.9; }
   .ig-app-icon svg circle:last-child { fill: #fff; stroke: none; }
   .dt-phone-btn:active .ig-app-icon { transform: scale(.9); animation: none; }
+  .dt-phone-btn .dt-fname { margin-top: 5px; }
   @keyframes ig-app-nudge { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(-6px); } 90% { transform: translateY(0); } }
   .m-screen .dt-dock { position: relative; left: auto; bottom: auto; order: 4; align-self: center; margin-top: auto; transform: none; padding: 0 10px; }
   .m-screen .dt-icon { width: 42px; height: 42px; }
@@ -2299,5 +2295,13 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
   .mac, .m-screen, .pocket { will-change: transform, opacity; }
   .mac { transition: none; }
   .desk.is-phone .mac, .desk.is-phone .mac:hover { filter: none; }
-  .mac-shadow { filter: blur(14px); }
+  .mac-shadow {
+    left: 2%; right: 2%;
+    top: calc(var(--sh-top, var(--Hl)) - var(--W) * .045);
+    height: calc(var(--W) * .2);
+    background: radial-gradient(50% 46% at 50% 30%, rgba(10, 10, 8, .5) 0%, rgba(10, 10, 8, .2) 50%, transparent 80%);
+    filter: blur(9px);
+    transform: none;
+    opacity: 1;
+  }
 }

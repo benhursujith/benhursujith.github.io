@@ -625,6 +625,11 @@
       mac.style.setProperty('--W', `${W}px`);
       deskTop = scrollY + desk.getBoundingClientRect().top;
       frame();
+      // phones: the shadow goes right under the closed laptop's front edge, wherever the 3D projection puts it
+      if (!wide.matches && Math.round(vP) === 0) {
+        const fr = $('.mac-front', mac).getBoundingClientRect(), mr = mac.getBoundingClientRect();
+        if (fr.height) mac.style.setProperty('--sh-top', `${Math.round(fr.bottom - mr.top)}px`);
+      }
     }
 
     function frame() {
@@ -1522,12 +1527,13 @@
     stIntro.innerHTML = INTRO_HTML;
 
     // a logo either fills its circle, or (a mark drawn to its edges) sits inside it with room around it
+    const ME = '<img src="assets/brand/sujith.jpg" alt="" width="40" height="40">';
     const mark = (src, inset) => `<img src="assets/brand/${src}" alt="" width="40" height="40"${inset ? ' class="is-mark"' : ''}>`;
     const STORIES = [
       { label: 'Pixis', av: mark('pixis-mark.svg'), when: '2020–25', keys: ['ads', 'pixis'] },
       { label: 'BorderPlus', av: mark('borderplus-mark.png'), when: '2026', keys: ['carepilot', 'ask', 'learn', 'mis', 'pathways'] },
       { label: 'Zenea', av: mark('zenea-wordmark.png', true), when: '2026', keys: ['zenea-caregiver', 'zenea-parent'] },
-      { label: 'Personal', av: '<span>S</span>', me: true, when: '2026', keys: ['money-plan', 'trade', 'eatouts'] },
+      { label: 'Personal', av: ME, when: '2026', keys: ['money-plan', 'trade', 'eatouts'] },
       { label: 'Church', av: mark('gbf-icon.png'), when: '2026', keys: ['gbf'] },
       { label: 'Say hi', av: '<span>Hi</span>', me: true, when: 'Oct 2026', keys: ['kit', 'hi'] },
     ];
@@ -1575,7 +1581,7 @@
       const st = STORIES[where(key)];
       const tags = (note.dataset.tags || '').split('|').filter(Boolean);
       return `<article class="ig-post" data-post="${key}">
-        <header class="ig-ph"><span class="ig-av ig-av--me"><span>S</span></span><span class="ig-ph-who"><b>sujithbenhur</b><span>${txt(note, '.note-kick')}</span></span><span class="ig-ph-time">${st.when}</span></header>
+        <header class="ig-ph"><span class="ig-av">${ME}</span><span class="ig-ph-who"><b>sujithbenhur</b><span>${txt(note, '.note-kick')}</span></span><span class="ig-ph-time">${st.when}</span></header>
         <button class="ig-pm" type="button" data-post-media="${key}" aria-label="${playable(note) ? 'Watch' : 'View'} ${product(note)}">${card(key)}<span class="ig-burst" aria-hidden="true">${icon.heart}</span></button>
         <div class="ig-pb">
           <div class="ig-acts"><button class="ig-act" type="button" data-like aria-label="Like">${icon.heart}</button><button class="ig-act" type="button" data-post-media="${key}" aria-label="Watch">${icon.chat}</button><button class="ig-act" type="button" data-ig-hi aria-label="Say hi">${icon.send}</button><span class="ig-act ig-act--save" aria-hidden="true">${icon.save}</span></div>
