@@ -295,7 +295,8 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   --b: calc(var(--W) * 0.015);
   --Hl: calc(var(--W) * 0.652);
   --D: var(--Hl);
-  --T: calc(var(--W) * 0.018);
+  --T: calc(var(--W) * 0.03);
+  --LT: calc(var(--W) * 0.011);
   position: absolute; top: 0; left: 0; z-index: 5;
   width: var(--W); height: var(--Hl);
   perspective: calc(var(--W) * 4.4);
@@ -392,15 +393,16 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
     inset 0 -3px 6px rgba(0, 0, 0, .25),
     inset 0 0 0 1px rgba(255, 255, 255, .35),
     0 0 0 1px var(--alu-seam);
-  transform: rotateY(180deg) translateZ(0.2px);
+  transform: rotateY(180deg) translateZ(var(--LT));
 }
 /* the Apple on the lid, lit from the screen behind it */
 .mac-emblem {
   position: absolute; top: 50%; left: 50%;
   width: calc(var(--W) * 0.075); height: auto;
   transform: translate(-50%, -50%) rotate(180deg);
-  fill: rgba(255, 255, 255, .94);
-  filter: drop-shadow(0 0 calc(var(--W) * .012) rgba(255, 255, 255, .85));
+  /* closed and asleep it's polished metal; it only glows while the screen behind it is lit */
+  fill: rgba(255, 255, 255, calc(.62 + (1 - var(--dark, 1)) * .32));
+  filter: drop-shadow(0 .5px 0 rgba(0, 0, 0, .14)) drop-shadow(0 0 calc(var(--W) * .012 * (1 - var(--dark, 1))) rgba(255, 255, 255, .85));
 }
 
 .mac-screen {
@@ -534,12 +536,12 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   transform: translateZ(var(--D));
 }
 .mac-notch {
-  position: absolute; top: 0; left: 41.5%; right: 41.5%; height: 58%;
-  border-radius: 0 0 99px 99px;
-  background: linear-gradient(180deg, #54524C 0%, #8E8B82 100%);
+  position: absolute; top: 0; left: 43.5%; right: 43.5%; height: 46%;
+  border-radius: 0 0 50% 50% / 0 0 100% 100%;
+  background: linear-gradient(180deg, #9A968D 0%, #CBC8BF 100%);
   box-shadow:
-    inset 0 2px 4px rgba(0, 0, 0, .6),
-    0 1px 0 rgba(255, 255, 255, .7);
+    inset 0 1.5px 2.5px rgba(0, 0, 0, .35),
+    0 1px 0 rgba(255, 255, 255, .6);
 }
 
 /* ---------- The desktop: Mac OS X Leopard on the unibody MacBook Pro ----------
@@ -2436,3 +2438,23 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
   .rd-short { display: block; font: 700 12px/1.3 var(--aqua); font-style: normal; white-space: nowrap; }
   .rd-page { inset: 0; border-radius: 0; box-shadow: none; }
 }
+
+/* The unibody's thickness: side walls on the base, and edges on the lid (it has depth --LT behind the screen),
+   so the closed laptop reads as a solid slab from any angle instead of a sheet over a strip. */
+.mac-side {
+  position: absolute; top: var(--Hl); left: 0;
+  width: var(--D); height: var(--T);
+  transform-origin: 0 0;
+  transform: rotateY(-90deg);
+  border-radius: 0 0 calc(var(--W) * .016) 0;
+  background: linear-gradient(180deg, var(--alu-mid) 0%, var(--alu-bot) 70%, #8E8A81 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+}
+.mac-side--r { left: 100%; background: linear-gradient(180deg, var(--alu-top) 0%, var(--alu-mid) 70%, var(--alu-bot) 100%); }
+.mac-ledge { position: absolute; display: block; background: linear-gradient(90deg, var(--alu-bot), var(--alu-mid)); }
+.mac-ledge--l, .mac-ledge--r { top: calc(var(--W) * .006); bottom: 0; left: 0; width: var(--LT); transform-origin: 0 50%; transform: rotateY(90deg); }
+.mac-ledge--r { left: 100%; background: linear-gradient(90deg, var(--alu-mid), var(--alu-top)); }
+.mac-ledge--t { top: 0; left: calc(var(--W) * .006); right: calc(var(--W) * .006); height: var(--LT); transform-origin: 50% 0; transform: rotateX(-90deg); background: linear-gradient(180deg, var(--alu-edge), var(--alu-mid)); }
+
+/* an article is always a scrolling page, whatever width it's shown at (the reader's pane is narrower than a phone breakpoint) */
+html:not(.is-home), html:not(.is-home) body { height: auto; overflow-y: visible; }

@@ -1,6 +1,8 @@
 /* Sujith Benhur — site behaviour. No framework. */
 (() => {
   const root = document.documentElement;
+  // the articles open in iframes, which a page reload doesn't refresh; a new release gets new article URLs
+  const BUILD = (document.currentScript?.src.match(/[?&]v=(\w+)/) || [])[1] || '0';
   root.classList.add('js');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -677,7 +679,7 @@
       const shut = wide.matches ? smoothstep(0.1, 0.5, aside) : 0;
       const lidDeg = clamp(-90 * (1 - eo) - 90 * shut + (onCover ? nudgeDeg : 0), -90, 0);
       macLid.style.setProperty('--lid', `${lidDeg.toFixed(2)}deg`);
-      mac.style.setProperty('--deck-op', smoothstep(0.05, 0.35, open).toFixed(3));
+      mac.style.setProperty('--deck-op', (smoothstep(0.05, 0.35, open) * (1 - shut)).toFixed(3));
       const darkOp = Math.max(1 - smoothstep(0.48, 0.88, open), smoothstep(0.08, 0.3, shut));
       mac.style.setProperty('--dark', darkOp.toFixed(3));
       const sheenX = -34 + eo * 66;
@@ -1199,7 +1201,7 @@
         body.classList.remove('win-body--scroll');
         const iframe = document.createElement('iframe');
         iframe.className = 'win-iframe';
-        iframe.src = `${note.dataset.article}?embed=1`;
+        iframe.src = `${note.dataset.article}?embed=1&v=${BUILD}`;
         iframe.title = note.dataset.title || 'Article';
         iframe.addEventListener('load', () => {
           try { if (iframe.contentDocument) iframe.contentDocument.documentElement.dataset.theme = 'light'; } catch (e) {}
@@ -1634,7 +1636,7 @@
       iframe.className = 'win-iframe rd-frame';
       iframe.title = art?.title || 'Article';
       iframe.dataset.src = href;
-      iframe.src = `${href}?embed=1`;
+      iframe.src = `${href}?embed=1&v=${BUILD}`;
       if (!first && !reduce) iframe.classList.add('is-coming');
       iframe.addEventListener('load', () => {
         try { if (iframe.contentDocument) iframe.contentDocument.documentElement.dataset.theme = 'light'; } catch (e) {}
