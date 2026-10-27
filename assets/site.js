@@ -556,7 +556,7 @@
 
     $$('.card', desk).forEach((c) => fit(c, 390));
 
-    // The unibody keyboard: black keys set into the aluminium, one row at a time (width in key units).
+    // The Air's keyboard: black keys set into the aluminium, one row at a time (width in key units).
     const KEYS = [
       [['esc', 1.4], ...'F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12'.split(' ').map((k) => [k, 1]), ['⏏', 1]],
       [...'` 1 2 3 4 5 6 7 8 9 0 - ='.split(' ').map((k) => [k, 1]), ['delete', 1.5]],
@@ -621,11 +621,11 @@
       if (!wide.matches) vP = Math.round(vP);
 
       if (wide.matches) {
-        W = Math.round(Math.min(0.72 * stageW, (H - 136) / 0.652, 1120));
+        W = Math.round(Math.min(0.72 * stageW, (H - 136) / 0.69, 1120));
       } else {
         W = Math.round(Math.min(0.88 * stageW, 370));
       }
-      Hl = Math.round(0.652 * W);
+      Hl = Math.round(0.69 * W);
       mac.style.setProperty('--W', `${W}px`);
       deskTop = scrollY + desk.getBoundingClientRect().top;
       frame();

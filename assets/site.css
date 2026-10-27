@@ -293,10 +293,13 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .mac {
   --W: 840px;
   --b: calc(var(--W) * 0.015);
-  --Hl: calc(var(--W) * 0.652);
+  /* The original MacBook Air (2008), to its real proportions in fractions of its width (325 mm): 227 mm deep,
+     a base that tapers from 15 mm at the hinge to a 1.3 mm lip on a curved underside, and a 4 mm lid. */
+  --Hl: calc(var(--W) * 0.69);
   --D: var(--Hl);
-  --T: calc(var(--W) * 0.03);
-  --LT: calc(var(--W) * 0.011);
+  --T: calc(var(--W) * 0.046);
+  --Tf: calc(var(--W) * 0.0045);
+  --LT: calc(var(--W) * 0.012);
   position: absolute; top: 0; left: 0; z-index: 5;
   width: var(--W); height: var(--Hl);
   perspective: calc(var(--W) * 4.4);
@@ -340,31 +343,40 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   -webkit-backface-visibility: hidden; backface-visibility: hidden;
 }
 .mac-face {
-  padding: calc(var(--b) * 2.1) calc(var(--b) * 1.75) calc(var(--b) * 2.9);
+  /* the Air's bezel is brushed aluminium, not black: silver all round a black glass panel */
+  padding: calc(var(--W) * .054) calc(var(--W) * .041) calc(var(--W) * .071);
   background:
-    linear-gradient(122deg, rgba(255, 255, 255, .07) 0%, rgba(255, 255, 255, .02) 38%, transparent 38.2%),
-    linear-gradient(180deg, #121214 0%, #050506 100%);
+    linear-gradient(122deg, rgba(255, 255, 255, .22) 0%, rgba(255, 255, 255, .05) 40%, transparent 40.2%),
+    linear-gradient(180deg, #DAD8D2 0%, #CFCDC6 60%, #C4C1BA 100%);
   box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .22),
-    inset 0 0 0 1.5px #2C2C30,
+    inset 0 1px 0 rgba(255, 255, 255, .8),
+    inset 0 0 0 1px rgba(255, 255, 255, .25),
     0 0 0 1px var(--alu-seam),
-    0 30px 70px -20px rgba(0, 0, 0, .55);
+    0 30px 70px -20px rgba(0, 0, 0, .5);
   transform: translateZ(0.8px);
 }
 /* iSight: a pinhole lens with its green light, and the name printed under the screen */
 .mac-cam {
   position: absolute;
-  top: calc(var(--b) * .78); left: 50%; z-index: 7;
+  top: calc(var(--W) * .021); left: 50%; z-index: 7;
   transform: translateX(-50%);
-  display: flex; align-items: center; gap: 5px;
+  display: flex; align-items: center; gap: calc(var(--W) * .028);
   pointer-events: none;
 }
 .mac-cam::before {
   content: "";
-  width: 5px; height: 5px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #34446A 0%, #0D1220 60%, #000 100%);
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .12);
+  order: 1;
+  width: calc(var(--W) * .0062); height: calc(var(--W) * .0062); border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #3A4A70 0%, #0D1220 55%, #000 100%);
+  box-shadow: 0 0 0 calc(var(--W) * .0016) #2A2A2C;
 }
+/* the ambient-light sensor and microphone either side of the iSight */
+.mac-cam::after, .mac-cam b {
+  content: ""; order: 0;
+  width: calc(var(--W) * .0026); height: calc(var(--W) * .0026); border-radius: 50%;
+  background: #8E8C86; box-shadow: inset 0 .5px 1px rgba(0, 0, 0, .5);
+}
+.mac-cam::after { order: 2; }
 .mac-cam i {
   position: absolute; left: calc(100% + 4px);
   width: 3px; height: 3px; border-radius: 50%;
@@ -374,11 +386,12 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   transition: opacity .3s;
 }
 .mac-label {
-  position: absolute; left: 50%; bottom: calc(var(--b) * .78);
+  position: absolute; left: 50%; bottom: calc(var(--W) * .026);
   transform: translateX(-50%);
-  color: #8E8E93;
-  font: 400 clamp(6px, calc(var(--W) * .0115), 12px)/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
-  letter-spacing: .03em;
+  color: #5D5C58;
+  font: 500 clamp(6px, calc(var(--W) * .0118), 13px)/1 "Helvetica Neue", Helvetica, Arial, sans-serif;
+  letter-spacing: .01em;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .45);
   white-space: nowrap;
   pointer-events: none;
 }
@@ -409,7 +422,8 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   position: relative; width: 100%; height: 100%;
   border-radius: 0;
   background: #000;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .08);
+  /* the black border of the glass panel, drawn out over the silver */
+  box-shadow: 0 0 0 calc(var(--W) * .0065) #0B0B0C, 0 0 0 calc(var(--W) * .0065 + 1px) rgba(0, 0, 0, .35);
   overflow: hidden;
   container-type: inline-size;
 }
@@ -437,16 +451,23 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .mac-glow { display: none; }
 
 /* Cylindrical clutch hinge barrel */
+/* two silver hinge barrels between the lid and the base */
 .mac-hinge {
-  position: absolute;
-  left: 8.5%; right: 8.5%;
-  top: calc(var(--Hl) - 5px);
-  height: 9px; z-index: 4;
-  border-radius: 4px;
-  background: linear-gradient(180deg, #2A2A2E 0%, #0E0E10 55%, #3A3A40 100%);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, .45);
+  position: absolute; left: 0; right: 0;
+  top: calc(var(--Hl) - var(--W) * .011);
+  height: calc(var(--W) * .014); z-index: 4;
   opacity: var(--deck-op, 0);
+  transform: translateZ(calc(var(--W) * .006));
+  pointer-events: none;
 }
+.mac-hinge::before, .mac-hinge::after {
+  content: ""; position: absolute; top: 0; bottom: 0; width: 7%;
+  border-radius: calc(var(--W) * .007);
+  background: linear-gradient(180deg, #F1F0EC 0%, #C9C6BE 45%, #8F8C84 100%);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, .35), inset 0 1px 0 rgba(255, 255, 255, .8);
+}
+.mac-hinge::before { left: 9%; }
+.mac-hinge::after { right: 9%; }
 
 /* Precision CNC aluminum keyboard deck */
 .mac-deck {
@@ -463,21 +484,12 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   transform-origin: 50% 0;
   transform: rotateX(90deg);
 }
-/* Micro-perforated speaker grilles flanking the keyboard well */
-.mac-deck::before, .mac-deck::after {
-  content: "";
-  position: absolute; top: 8.5%; height: 50%; width: 4%;
-  background-image: radial-gradient(rgba(0, 0, 0, .42) 0.75px, transparent 0.75px);
-  background-size: 3.2px 3.2px;
-  opacity: calc(var(--deck-op, 1) * 0.75);
-  pointer-events: none;
-}
-.mac-deck::before { left: 2.2%; }
-.mac-deck::after { right: 2.2%; }
+/* the Air has no speaker grilles beside the keyboard */
+.mac-deck::before, .mac-deck::after { display: none; }
 
 /* The keyboard: black keys sunk into the aluminium, white labels that glow faintly once the screen is on */
 .mac-keys {
-  position: absolute; left: 6.6%; right: 6.6%; top: 6%; height: 54%;
+  position: absolute; left: 8.4%; right: 8.4%; top: 7%; height: 47%;
   display: flex; flex-direction: column; gap: 1.6%;
   padding: .9% 1%;
   border-radius: 4px;
@@ -505,9 +517,9 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .mk-row--fn i { font-size: calc(var(--W) * .0062); }
 .mk-row i b { font-weight: 500; font-size: .8em; line-height: 1; }
 .mk-row:last-child i:nth-last-child(2) { flex-direction: column; gap: 0; }
-/* Force Touch glass trackpad */
+/* the Air's wide trackpad */
 .mac-pad {
-  position: absolute; left: 32%; right: 32%; bottom: 6.5%; height: 29.5%;
+  position: absolute; left: 33.5%; right: 33.5%; bottom: 8%; height: 29%;
   border-radius: 8px;
   background: linear-gradient(180deg, color-mix(in srgb, var(--alu-top) 94%, #000), color-mix(in srgb, var(--alu-mid) 94%, #fff));
   box-shadow:
@@ -516,32 +528,19 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   opacity: var(--deck-op, 1);
 }
 /* Anodized unibody front edge & CNC finger lip */
+/* the Air's front lip: a sliver of aluminium where the wedge runs out, rounded underneath */
 .mac-front {
-  position: absolute; left: 0; right: 0; top: var(--Hl);
-  height: var(--T);
-  border-radius: 0 0 calc(var(--W) * 0.016) calc(var(--W) * 0.016);
-  background: linear-gradient(
-    90deg,
-    var(--alu-bot) 0%,
-    var(--alu-top) 12%,
-    var(--alu-edge) 50%,
-    var(--alu-top) 88%,
-    var(--alu-bot) 100%
-  );
-  box-shadow:
-    inset 0 1px 0 rgba(255, 255, 255, .88),
-    inset 0 -3px 5px rgba(0, 0, 0, .38),
-    0 0 0 1px var(--alu-seam),
-    0 14px 30px -6px rgba(0, 0, 0, .48);
+  position: absolute; left: calc(var(--W) * .004); right: calc(var(--W) * .004); top: var(--Hl);
+  height: var(--Tf);
+  border-radius: 0 0 var(--Tf) var(--Tf) / 0 0 100% 100%;
+  background: linear-gradient(90deg, var(--alu-bot) 0%, var(--alu-top) 14%, var(--alu-edge) 50%, var(--alu-top) 86%, var(--alu-bot) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .9), 0 0 0 .5px var(--alu-seam), 0 10px 22px -6px rgba(0, 0, 0, .4);
   transform: translateZ(var(--D));
 }
 .mac-notch {
-  position: absolute; top: 0; left: 43.5%; right: 43.5%; height: 46%;
+  position: absolute; top: 0; left: 46.5%; right: 46.5%; height: 100%;
   border-radius: 0 0 50% 50% / 0 0 100% 100%;
-  background: linear-gradient(180deg, #9A968D 0%, #CBC8BF 100%);
-  box-shadow:
-    inset 0 1.5px 2.5px rgba(0, 0, 0, .35),
-    0 1px 0 rgba(255, 255, 255, .6);
+  background: linear-gradient(180deg, #8E8B83, #BDBAB2);
 }
 
 /* ---------- The desktop: Mac OS X Leopard on the unibody MacBook Pro ----------
@@ -2439,22 +2438,30 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
   .rd-page { inset: 0; border-radius: 0; box-shadow: none; }
 }
 
-/* The unibody's thickness: side walls on the base, and edges on the lid (it has depth --LT behind the screen),
-   so the closed laptop reads as a solid slab from any angle instead of a sheet over a strip. */
+
+/* The wedge. Each side wall is the Air's profile: full height at the hinge, curving away underneath to the
+   lip at the front (a polygon along the curve). The lid is a 4 mm plate with edges, so closed it reads as one
+   tapering slab; the rear face only shows from behind. */
 .mac-side {
   position: absolute; top: var(--Hl); left: 0;
   width: var(--D); height: var(--T);
   transform-origin: 0 0;
   transform: rotateY(-90deg);
-  border-radius: 0 0 calc(var(--W) * .016) 0;
-  background: linear-gradient(180deg, var(--alu-mid) 0%, var(--alu-bot) 70%, #8E8A81 100%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, .6);
+  clip-path: polygon(0 0, 100% 0, 100% 10%, 97% 17%, 92% 26%, 85% 37%, 76% 49%, 64% 62%, 50% 74%, 34% 85%, 17% 93%, 0 100%);
+  background: linear-gradient(180deg, var(--alu-mid) 0%, var(--alu-bot) 55%, #8A867D 100%);
 }
-.mac-side--r { left: 100%; background: linear-gradient(180deg, var(--alu-top) 0%, var(--alu-mid) 70%, var(--alu-bot) 100%); }
+.mac-side--r { left: 100%; background: linear-gradient(180deg, var(--alu-top) 0%, var(--alu-mid) 55%, var(--alu-bot) 100%); }
+.mac-rear {
+  position: absolute; top: var(--Hl); left: 0; right: 0; height: var(--T);
+  border-radius: 0 0 calc(var(--W) * .01) calc(var(--W) * .01);
+  background: linear-gradient(180deg, var(--alu-mid), var(--alu-bot));
+  transform: rotateY(180deg);
+  -webkit-backface-visibility: hidden; backface-visibility: hidden;
+}
 .mac-ledge { position: absolute; display: block; background: linear-gradient(90deg, var(--alu-bot), var(--alu-mid)); }
-.mac-ledge--l, .mac-ledge--r { top: calc(var(--W) * .006); bottom: 0; left: 0; width: var(--LT); transform-origin: 0 50%; transform: rotateY(90deg); }
+.mac-ledge--l, .mac-ledge--r { top: calc(var(--W) * .02); bottom: calc(var(--W) * .006); left: 0; width: var(--LT); transform-origin: 0 50%; transform: rotateY(90deg); }
 .mac-ledge--r { left: 100%; background: linear-gradient(90deg, var(--alu-mid), var(--alu-top)); }
-.mac-ledge--t { top: 0; left: calc(var(--W) * .006); right: calc(var(--W) * .006); height: var(--LT); transform-origin: 50% 0; transform: rotateX(-90deg); background: linear-gradient(180deg, var(--alu-edge), var(--alu-mid)); }
+.mac-ledge--t { top: 0; left: calc(var(--W) * .02); right: calc(var(--W) * .02); height: var(--LT); transform-origin: 50% 0; transform: rotateX(-90deg); background: linear-gradient(180deg, var(--alu-edge), var(--alu-mid)); }
 
 /* an article is always a scrolling page, whatever width it's shown at (the reader's pane is narrower than a phone breakpoint) */
 html:not(.is-home), html:not(.is-home) body { height: auto; overflow-y: visible; }
