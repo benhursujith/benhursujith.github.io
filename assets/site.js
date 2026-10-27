@@ -591,7 +591,8 @@
     let open = 0, push = 0, aside = 0, atDesk = false, atPhone = false, inStage = true;
     // Phones don't scroll the page: the scene has three states (cover, desktop, phone) and a swipe or a button plays
     // an eased transition between them, so it can never stop half way (iOS Safari's momentum and toolbar did that).
-    let vP = 0, tweenRaf = 0, tweening = false, igOrigin = [innerWidth / 2, innerHeight * 0.6];
+    let vP = 0, tweenRaf = 0, tweening = false, igOrigin = [innerWidth / 2, innerHeight * 0.6], flyFrom = null;
+    const igFly = $('[data-ig-fly]', desk);
     let lastScrollY = scrollY, scrollDir = 1, snapTimer = 0, snapping = false, pointerDown = false;
     let nudgeDeg = 0, interacted = false;
     let wins = [], zCounter = 10, cascadeIdx = 0;
@@ -599,6 +600,7 @@
 
     // Re-parent the desktop when crossing the 900px breakpoint.
     function syncBreakpoint() {
+      if (fanBtn) setFan(false);
       closeAllWins(true);
       closeStory(true);
       if (wide.matches) {
@@ -672,10 +674,11 @@
       // Lid angle, glass reflection sweep, and studio lighting
       const eo = smoothstep(0, 1, open);
       const ea = smoothstep(0, 1, aside);
-      const lidDeg = clamp(-90 * (1 - eo) + (onCover ? nudgeDeg : 0), -90, 0);
+      const shut = wide.matches ? smoothstep(0.1, 0.5, aside) : 0;
+      const lidDeg = clamp(-90 * (1 - eo) - 90 * shut + (onCover ? nudgeDeg : 0), -90, 0);
       macLid.style.setProperty('--lid', `${lidDeg.toFixed(2)}deg`);
       mac.style.setProperty('--deck-op', smoothstep(0.05, 0.35, open).toFixed(3));
-      const darkOp = 1 - smoothstep(0.48, 0.88, open);
+      const darkOp = Math.max(1 - smoothstep(0.48, 0.88, open), smoothstep(0.08, 0.3, shut));
       mac.style.setProperty('--dark', darkOp.toFixed(3));
       const sheenX = -34 + eo * 66;
       const sheenOp = Math.sin(eo * Math.PI) * 0.85 + 0.12;
@@ -689,7 +692,7 @@
         const x1 = (stageW - W) * 0.5;
         const y1 = Math.max(66, (H - Hl) * 0.42);
         const s1 = 1;
-        const x2 = 0.04 * stageW - 0.5 * W;
+        const x2 = 0.17 * stageW - 0.5 * W;
         const y2 = (H - Hl) * 0.5;
         const s2 = 0.45;
 
@@ -707,7 +710,7 @@
         mac.style.setProperty('--sh-y', `${(28 - 10 * eo).toFixed(1)}px`);
         mac.style.setProperty('--sh-s', (0.94 + 0.06 * eo).toFixed(3));
 
-        const macOp = 1 - 0.45 * ea;
+        const macOp = 1 - 0.15 * ea;
 
         if (atDesk) {
           mac.style.transform = `translate3d(${Math.round(x1)}px, ${Math.round(y1)}px, 0) scale(1)`;
@@ -716,9 +719,30 @@
         }
         mac.style.opacity = macOp.toFixed(3);
 
-        const pkProg = smoothstep(0.28, 1, aside);
-        pocket.style.setProperty('--pk-y', `${((1 - pkProg) * 32).toFixed(2)}%`);
-        pocket.style.setProperty('--pk-op', pkProg.toFixed(3));
+        // Handoff: Instagram lifts off the desktop, the lid shuts behind it (the sleep light starts to breathe),
+        // the icon arcs over to where the phone will be, and opens into it the way iOS launches an app.
+        const cb = pocket.offsetParent;
+        if (aside <= 0.001 || !flyFrom) {
+          const ic = $('[data-ig-app-icon]', desktop)?.getBoundingClientRect(), r = cb?.getBoundingClientRect();
+          if (ic && ic.width && r) flyFrom = { x: ic.left + ic.width / 2 - r.left, y: ic.top + ic.height / 2 - r.top, s: ic.width };
+        }
+        const fl = smoothstep(0, 0.52, aside), op = smoothstep(0.42, 1, aside);
+        if (flyFrom && cb && aside > 0.001 && op < 0.999) {
+          const tx = cb.clientWidth * 0.53, ty = cb.clientHeight * 0.5;
+          const fx = flyFrom.x + (tx - flyFrom.x) * fl;
+          const fy = flyFrom.y + (ty - flyFrom.y) * fl - Math.sin(Math.PI * fl) * H * 0.16;
+          const size = flyFrom.s * (1 + 0.45 * fl);
+          igFly.style.width = igFly.style.height = `${size.toFixed(1)}px`;
+          igFly.style.transform = `translate3d(${(fx - size / 2).toFixed(1)}px, ${(fy - size / 2).toFixed(1)}px, 0) rotate(${(-10 * Math.sin(Math.PI * fl)).toFixed(2)}deg)`;
+          igFly.style.opacity = (smoothstep(0, 0.04, aside) * (1 - smoothstep(0.5, 0.66, aside))).toFixed(3);
+          igFly.style.visibility = 'visible';
+        } else igFly.style.visibility = 'hidden';
+        mac.style.setProperty('--ig-lift', aside > 0.001 ? '0' : '1');
+        pocket.style.setProperty('--pk-tx', '0px');
+        pocket.style.setProperty('--pk-ty', '0px');
+        pocket.style.setProperty('--pk-sc', (0.08 + 0.92 * (1 - Math.pow(1 - op, 3))).toFixed(4));
+        pocket.style.setProperty('--pk-op', smoothstep(0.42, 0.52, aside).toFixed(3));
+        pocket.style.setProperty('--pk-launch', (1 - smoothstep(0.55, 0.85, aside)).toFixed(3));
       } else {
         // Phones: the closed laptop sits just under the words (Sujith's pick); opening it, the camera
         // zooms into its screen (transform only, so it stays on the GPU) and the real desktop fades in over it.
@@ -1145,7 +1169,7 @@
     function winSizeFor(key) {
       if (key === 'ads' || key === 'money-plan' || key === 'gbf' || key === 'pathways') return { w: 0.64, aspect: 1.6 };
       if (key === 'mis' || key === 'ai') return { w: 0.64, h: 0.72 };
-      if (key.startsWith('writing-')) return { w: 0.62, h: 0.76 };
+      if (key === 'writing') return { w: 0.8, h: 0.86 };
       if (key === 'kit') return { w: 0.48, h: 0.66 };
       if (key === 'pixis') return { w: 0.56, h: 0.66 };
       return { w: 0.42, h: 0.48 };
@@ -1168,6 +1192,9 @@
       } else if (tpls[key]) {
         body.append(tpls[key].content.cloneNode(true));
         if (key === 'hi') greetTxt(body);
+      } else if (key === 'writing') {
+        body.classList.remove('win-body--scroll');
+        buildReader(body);
       } else if (note?.dataset.article) {
         body.classList.remove('win-body--scroll');
         const iframe = document.createElement('iframe');
@@ -1346,6 +1373,7 @@
 
       let extLink = '';
       if (note?.dataset.article) extLink = `<a class="win-ext" href="${note.dataset.article}">Full page ↗</a>`;
+      else if (key === 'writing') extLink = `<a class="win-ext" href="${readerArt}" data-reader-ext>Full page ↗</a>`;
       else if (key === 'gbf') extLink = '<a class="win-ext" href="https://www.gbf-blr.com" target="_blank" rel="noopener">Visit ↗</a>';
       else if (key === 'money-plan') extLink = '<a class="win-ext" href="runway/" target="_blank" rel="noopener">Visit ↗</a>';
       else if (key === 'pathways') extLink = '<a class="win-ext" href="https://pathways.borderplus.co" target="_blank" rel="noopener">Visit ↗</a>';
@@ -1510,6 +1538,111 @@
         openWin(btn.dataset.open, btn);
       });
     });
+
+    /* ---------- Writing: a Leopard stack that fans out, and a reader app ----------
+       The articles are the .note[data-article] entries. Clicking the stack throws them out of the pile into a
+       grid (Leopard's Stacks); picking one opens the reader, a source list of every article beside the page. */
+
+    const ARTS = $$('.desk-data .note[data-article]', desk).map((n) => {
+      const [title, mins] = (n.dataset.title || '').split('·').map((x) => x.trim());
+      return { href: n.dataset.article, title, short: n.dataset.short || title, mins: mins || '', dek: n.dataset.dek || '' };
+    });
+    let readerArt = ARTS[0]?.href || '';
+    const fanBtn = $('[data-fan]', desktop), fan = $('[data-fan-panel]', desktop), fanList = $('.dt-fan-list', fan);
+    if (ARTS[0]) { $('[data-fan-k]', desktop).textContent = ARTS[0].mins; $('[data-fan-t]', desktop).textContent = ARTS[0].short; }
+    fanList.innerHTML = ARTS.map((a, i) => `<li style="--i:${i}"><button type="button" class="dt-fan-item" data-art="${a.href}"><span class="dt-fan-doc"><b>${a.short}</b><i></i><i></i><i></i><em>${a.mins}</em></span><span class="dt-fan-name">${a.short}</span></button></li>`).join('');
+    const fanOpen = () => !fan.hidden;
+    function placeFan() {
+      const dr = desktop.getBoundingClientRect(), sc = dr.width / desktop.offsetWidth || 1;
+      const sr = fanBtn.getBoundingClientRect();
+      const sx = (sr.left - dr.left + sr.width / 2) / sc, sy = (sr.top - dr.top + sr.height / 2) / sc;
+      const fw = fan.offsetWidth, fh = fan.offsetHeight, W0 = desktop.offsetWidth, H0 = desktop.offsetHeight;
+      let left, top;
+      if (wide.matches) { left = sx - sr.width / sc - fw; top = Math.min(Math.max(sy - fh * 0.32, 30), H0 - fh - 70); }
+      else { left = (W0 - fw) / 2; top = Math.min(Math.max(sy + sr.height / sc * 0.7, 20), H0 - fh - 20); }
+      fan.style.left = `${Math.round(left)}px`; fan.style.top = `${Math.round(top)}px`;
+      fan.style.setProperty('--ax', `${Math.round(sx - left)}px`);
+      fan.style.setProperty('--ay', `${Math.round(sy - top)}px`);
+      // each document starts on the pile and flies to its cell
+      $$('.dt-fan-doc', fan).forEach((d) => {
+        const r = d.getBoundingClientRect();
+        d.style.setProperty('--fx', `${Math.round((sr.left + sr.width / 2 - r.left - r.width / 2) / sc)}px`);
+        d.style.setProperty('--fy', `${Math.round((sr.top + sr.height / 2 - r.top - r.height / 2) / sc)}px`);
+      });
+    }
+    function setFan(on) {
+      if (on === fanOpen() && !fan.classList.contains('is-closing')) return;
+      clearTimeout(fan._t);
+      fanBtn.setAttribute('aria-expanded', String(on));
+      fanBtn.classList.toggle('is-fanned', on);
+      if (on) {
+        fan.classList.remove('is-open', 'is-closing');
+        fan.hidden = false;
+        placeFan();
+        void fan.offsetWidth;
+        fan.classList.add('is-open');
+        setTimeout(() => $('.dt-fan-item', fan)?.focus({ preventScroll: true }), 300);
+      } else {
+        fan.classList.add('is-closing');
+        fan.classList.remove('is-open');
+        fan._t = setTimeout(() => { fan.hidden = true; fan.classList.remove('is-closing'); }, reduce ? 0 : 420);
+      }
+    }
+    fanBtn.addEventListener('click', (e) => { e.stopPropagation(); setFan(!fanOpen()); });
+    fan.addEventListener('click', (e) => {
+      const b = e.target.closest('[data-art]');
+      if (!b) return;
+      setFan(false);
+      openReader(b.dataset.art, $('.dt-fan-doc', b));
+    });
+    document.addEventListener('pointerdown', (e) => { if (fanOpen() && !e.target.closest('[data-fan-panel], [data-fan]')) setFan(false); });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && fanOpen()) { setFan(false); fanBtn.focus(); } });
+
+    function openReader(href, fromEl) {
+      readerArt = href;
+      const w = wins.find((x) => x.key === 'writing');
+      if (w) { showArticle(w.body, href); focusWin(w); return; }
+      openWin('writing', fromEl || fanBtn);
+    }
+
+    function buildReader(body) {
+      const rd = document.createElement('div');
+      rd.className = 'rd';
+      rd.innerHTML = `<aside class="rd-side"><p class="rd-h">Articles</p><ul>${ARTS.map((a) => `<li><button type="button" data-rd="${a.href}"><span class="rd-ico" aria-hidden="true"></span><span class="rd-t"><b>${a.title}</b><i class="rd-short">${a.short}</i><small>${a.mins}</small></span></button></li>`).join('')}</ul><p class="rd-h">Also</p><ul><li><button type="button" data-rd-kit><span class="rd-ico rd-ico--zip" aria-hidden="true"></span><span class="rd-t"><b>agent-files.zip</b><small>The starter kit</small></span></button></li></ul></aside><div class="rd-main"><div class="rd-page"></div></div>`;
+      body.append(rd);
+      $$('[data-rd]', rd).forEach((b) => b.addEventListener('click', () => showArticle(body, b.dataset.rd)));
+      $('[data-rd-kit]', rd).addEventListener('click', () => openWin('kit', $('[data-rd-kit]', rd)));
+      showArticle(body, readerArt, true);
+    }
+
+    function showArticle(body, href, first = false) {
+      const page = $('.rd-page', body);
+      if (!page) return;
+      readerArt = href;
+      $$('[data-rd]', body).forEach((b) => b.classList.toggle('is-on', b.dataset.rd === href));
+      $('[data-rd].is-on', body)?.scrollIntoView({ block: 'nearest' });
+      const art = ARTS.find((a) => a.href === href);
+      const win = body.closest('.win');
+      if (win) {
+        $('.win-title', win).textContent = art ? (wide.matches ? `Writing — ${art.title}` : art.short) : 'Writing';
+        const ext = $('[data-reader-ext]', win);
+        if (ext) ext.href = href;
+      }
+      const old = $('iframe', page);
+      if (old && old.dataset.src === href) return;
+      const iframe = document.createElement('iframe');
+      iframe.className = 'win-iframe rd-frame';
+      iframe.title = art?.title || 'Article';
+      iframe.dataset.src = href;
+      iframe.src = `${href}?embed=1`;
+      if (!first && !reduce) iframe.classList.add('is-coming');
+      iframe.addEventListener('load', () => {
+        try { if (iframe.contentDocument) iframe.contentDocument.documentElement.dataset.theme = 'light'; } catch (e) {}
+        requestAnimationFrame(() => iframe.classList.remove('is-coming'));
+        if (old) { old.classList.add('is-going'); setTimeout(() => old.remove(), reduce ? 0 : 520); }
+      }, { once: true });
+      page.append(iframe);
+    }
 
     /* ---------- Phone: my work as Instagram (stories, a feed of metric cards, search, results, profile) ----------
        Every product is one post and one story segment. A post is its numbers, set as a card, with Watch; stories

@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Decision records for AI agents</title>
+<meta name="description" content="Closed decisions, written down with their reason, date and what would reopen them, so AI models stop reopening settled questions. Format, placement, rotation and examples.">
+<meta name="theme-color" content="#FAF9F5" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#1A1915" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F4D3A'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1EA'%3ES%3C/text%3E%3C/svg%3E">
+<script>try{var t=localStorage.getItem('theme');if(t)document.documentElement.dataset.theme=t}catch(e){}if(location.search.includes('embed'))document.documentElement.classList.add('embed')</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
+<link rel="stylesheet" href="../assets/site.css?v=46">
+<link rel="stylesheet" href="../assets/notes.css?v=3">
+</head>
+<body>
+<svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
+  <defs>
+    <filter id="ink" x="-5%" y="-5%" width="110%" height="110%"><feTurbulence type="fractalNoise" baseFrequency=".06" numOctaves="2" seed="3"/><feDisplacementMap in="SourceGraphic" scale="2.4"/></filter>
+  </defs>
+</svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="masthead">
+  <a class="mark" href="../">Sujith Benhur</a>
+  <nav class="nav nav-article" aria-label="Site"><a href="../">Home</a><a href="mailto:sujithbenhur@gmail.com">Email</a></nav>
+</header>
+
+<main id="main" class="article wrap" data-pin="Writing" data-read="6 min">
+  <header class="article-head">
+    <h1>Closed decisions, so models stop reopening them</h1>
+    <p class="dek">A one-line record for each settled question: the decision, why, when, and what would reopen it. Where they live, how they rotate out, and what a good one looks like.</p>
+    <p class="byline">October 2026. 6 minute read. <a href="#kit">Get the files</a></p>
+  </header>
+
+  <div class="prose">
+    <p>I ask a model to tidy up a small web project. Within a minute it suggests moving to a framework, adding a build step and putting the content in a database. Each suggestion comes with good arguments. I made all three decisions the other way months ago, for reasons that still hold, and I don't remember every reason off the top of my head. So I spend twenty minutes re-arguing a settled question with a very articulate machine.</p>
+    <p>Models are agreeable and thorough. Ask one to improve something and it will propose the obvious alternatives, which are usually the ones you already ruled out. It isn't being difficult. It just can't see the decision. The fix is to write the decision down where it will be seen.</p>
+
+    <h2>What a record looks like</h2>
+    <p>Each record is one line, sometimes two, with four parts.</p>
+    <figure class="dg">
+      <div class="anno">
+        <div class="anno-row anno-row--key">
+<pre><code>- 2026-10-07: Static site, no build step,
+  because any agent can edit it and there's
+  nothing to keep updated.</code></pre>
+          <p class="anno-note"><b>The decision and the reason.</b> The reason is what lets a model judge a new case, and it's the part nobody remembers later.</p>
+        </div>
+        <div class="anno-row">
+<pre><code>  (Owner's call.)</code></pre>
+          <p class="anno-note"><b>Who decided,</b> when it matters. A model treats “the owner chose this” differently from “we tried this once”.</p>
+        </div>
+        <div class="anno-row">
+<pre><code>  Reopen if: the site needs user accounts.</code></pre>
+          <p class="anno-note"><b>What would reopen it.</b> Turns “never” into a condition, so a model knows when raising it again is useful rather than noise.</p>
+        </div>
+      </div>
+      <figcaption>Decision, why, date, and what would reopen it.</figcaption>
+    </figure>
+    <p>The date does two jobs. It tells a reader how old the reasoning is, and it drives rotation, below. The reopen condition is optional, but it's the part that makes a record age well: it says in advance which change in the world would make the old reasoning wrong.</p>
+    <p>Compare a record that does none of this with one that does.</p>
+    <figure class="ix" data-ix="toggle" data-a="Weak record" data-b="Good record">
+      <div data-side="a"><p>No reason, no date, no condition. A model can't tell if it still applies, so it either ignores it or follows it into a case it was never meant for.</p><pre class="ix-code">- Don't use a database.</pre></div>
+      <div data-side="b"><p>The same decision, with what a model needs to apply it well, including the case where it should stop applying.</p><pre class="ix-code">- 2026-09-02: Plain files over a database,
+  because the content is small, edited by
+  hand, and versioned with the code.
+  Reopen if: more than one person edits
+  content at the same time.</pre></div>
+      <figcaption>Same decision. One of them can be reasoned with.</figcaption>
+    </figure>
+
+    <h2>Where decisions live</h2>
+    <p>Recent decisions go at the bottom of each project's index file, the one file every session reads. The section heading is itself an instruction:</p>
+<pre><code>## Decisions (closed, do not reopen without cause)</code></pre>
+    <p>Models follow that heading. They still mention an alternative when there's real cause, which is what you want, but they stop proposing the same three ideas every session.</p>
+    <p>Decisions are written at the end of a session, as part of the same ritual that updates the log and the index. The log entry for that session has a <strong>Decided</strong> line with the full reasoning; the index gets the one-line version. History in the log, the conclusion in the index.</p>
+
+    <h2>The life of a decision</h2>
+    <figure class="ix" data-ix="steps">
+      <ol>
+        <li data-label="Closed"><h4>Closed at the end of a session</h4><p>The session's log entry records the reasoning in full. The index gets one line: decision, why, date.</p></li>
+        <li data-label="Read"><h4>Read every session</h4><p>Because it sits in the index, every model sees it before it starts proposing things. It costs a line, not a conversation.</p></li>
+        <li data-label="Challenged"><h4>Challenged only with cause</h4><p>New evidence, or the reopen condition coming true. A model that raises it should say which.</p><pre class="ix-code">"This was closed on 2 Sept. You now have two
+editors, which is the reopen condition."</pre></li>
+        <li data-label="Superseded"><h4>Superseded, not erased</h4><p>The old line is struck through with a pointer to the new one. A reader can see what changed and when.</p><pre class="ix-code">- ~~2026-10-07: Warm paper palette~~
+  superseded 2026-10-08 by editorial type.</pre></li>
+        <li data-label="Rotated"><h4>Rotated after six months</h4><p>Older decisions move from the index into a separate decisions file. Still on record, no longer loaded by default.</p></li>
+      </ol>
+      <figcaption>From closed to archived. Nothing is deleted; it just moves further from the front.</figcaption>
+    </figure>
+
+    <h2>Why rotate</h2>
+    <p>The index is read at the start of every session, so every line in it is paid for every time. A project that runs for a year can collect dozens of decisions. Most of the old ones are so settled that nobody, human or model, would think to question them; they've become part of how the project is built.</p>
+    <p>So decisions older than six months move to a decisions file in the same folder. The index stays short. The old decisions are still there for the rare session that needs them, and a model can be pointed at the file when a question touches old ground.</p>
+    <p>Six months is a rule of thumb, not a law. The test is whether a fresh model would plausibly propose the alternative. If it would, keep the decision in the index, however old it is.</p>
+
+    <h2>Good and bad records</h2>
+    <figure class="ix" data-ix="cards">
+      <div class="ix-card" data-verdict="do"><p class="ix-front">“Recordings over live embeds, because they stay sharp and only the chosen path goes public.”</p><p class="ix-back">A real alternative was considered, and the reason covers both quality and privacy.</p></div>
+      <div class="ix-card" data-verdict="dont"><p class="ix-front">“Use good judgement on the layout.”</p><p class="ix-back">Not a decision. Nothing was ruled out, so nothing stops a model reopening it.</p></div>
+      <div class="ix-card" data-verdict="dont"><p class="ix-front">“Decided to go with option B (see chat).”</p><p class="ix-back">The chat is gone. A record has to stand on its own.</p></div>
+      <div class="ix-card" data-verdict="do"><p class="ix-front">“No judge or review agents; the builder checks its own work in the browser.”</p><p class="ix-back">Closes a question models raise constantly, and says what happens instead.</p></div>
+      <div class="ix-card" data-verdict="dont"><p class="ix-front">“Search is broken; we'll fix it next week.”</p><p class="ix-back">That's state, not a decision. It belongs in the State section, rewritten each session.</p></div>
+      <div class="ix-card" data-verdict="do"><p class="ix-front">“Numbers on the public site only as rounded running totals, computed locally.”</p><p class="ix-back">A privacy decision with its method built in. A model can follow it without asking.</p></div>
+      <figcaption>Tap a card to see the verdict.</figcaption>
+    </figure>
+
+    <h2>What doesn't belong</h2>
+    <ul>
+      <li><strong>Rules.</strong> “Never delete files” applies across the workspace and isn't up for reconsideration. It goes in the rules file, not a project's decisions.</li>
+      <li><strong>Tasks.</strong> “We'll add tests” is a plan. Plans go in the next three moves or the task list.</li>
+      <li><strong>Every small choice.</strong> If no model would ever propose the alternative, there's nothing to close. A list of trivia buries the decisions that matter.</li>
+    </ul>
+
+    <h2>Try it</h2>
+    <p>Open your most active project. Write down the last three things a model suggested that you'd already ruled out. Give each one line: what you chose, why, the date, and what would change your mind. Put them under a heading that says they're closed. The next session will feel noticeably shorter.</p>
+
+    <aside class="kit ink" id="kit" aria-label="Starter kit">
+      <svg class="kit-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5.5v19.5"/><path d="M12.5 18 20 25.5l7.5-7.5"/><path d="M7 26.5v5.8c0 1.5 1.2 2.7 2.7 2.7h20.6c1.5 0 2.7-1.2 2.7-2.7v-5.8"/></svg>
+      <p class="kit-h">Take the files</p>
+      <p class="kit-t">The index template has the decisions section ready, with its heading and an example line. The session end command adds closed decisions for you.</p>
+      <p><a class="kit-all" href="../kit/agent-files.zip" download>Download the starter kit <span>zip, 9 KB</span></a></p>
+      <ul class="kit-files">
+      <li><a href="../kit/agent-files/project-template/_index.md" download>Index template</a></li>
+      <li><a href="../kit/agent-files/project-template/LOG.md" download>Log template</a></li>
+      <li><a href="../kit/agent-files/.claude/commands/session-end.md" download>Session end command</a></li>
+      </ul>
+    </aside>
+  </div>
+
+  <nav class="next-read" aria-label="More writing">
+    <p><span>Next</span><a href="markdown-dos-donts.html">Writing markdown that agents read well</a></p>
+    <p><span>Previously</span><a href="memory.html">Memory that outlives the chat</a></p>
+  </nav>
+</main>
+
+<footer class="foot wrap">
+  <span>Sujith Benhur, 2026.</span>
+  <button type="button" data-theme-toggle>Switch to dark</button>
+</footer>
+<script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
+<script src="../assets/site.js?v=38" defer></script>
+<script src="../assets/writing.js?v=1" defer></script>
+</body>
+</html>

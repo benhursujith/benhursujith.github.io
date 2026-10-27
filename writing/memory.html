@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Memory that outlives the chat</title>
-<meta name="description" content="Where an AI agent's memory should live, what to keep and what to let go, and how mistakes become rules.">
+<meta name="description" content="Where an AI agent's memory should live, the kinds of memory and their homes, how mistakes become rules, forgetting on purpose, and keeping private data out.">
 <meta name="theme-color" content="#FAF9F5" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#1A1915" media="(prefers-color-scheme: dark)">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F4D3A'/%3E%3Ctext x='32' y='45' font-family='Georgia,serif' font-size='38' text-anchor='middle' fill='%23F4F1EA'%3ES%3C/text%3E%3C/svg%3E">
@@ -12,8 +12,8 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&display=swap">
-<link rel="stylesheet" href="../assets/site.css?v=45">
-<link rel="stylesheet" href="../assets/notes.css?v=2">
+<link rel="stylesheet" href="../assets/site.css?v=46">
+<link rel="stylesheet" href="../assets/notes.css?v=3">
 </head>
 <body>
 <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -27,78 +27,82 @@
   <nav class="nav nav-article" aria-label="Site"><a href="../">Home</a><a href="mailto:sujithbenhur@gmail.com">Email</a></nav>
 </header>
 
-<main id="main" class="article wrap" data-pin="Writing">
+<main id="main" class="article wrap" data-pin="Writing" data-read="6 min">
   <header class="article-head">
     <h1>Memory that outlives the chat</h1>
-    <p class="dek">Where an agent's memory should live, what to keep and what to let go, and how mistakes become rules.</p>
-    <p class="byline">October 2026. 8 minute read. <a href="#kit">Get the files</a></p>
+    <p class="dek">The kinds of memory an agent needs, where each one lives, how mistakes become rules, and why a good memory forgets on purpose.</p>
+    <p class="byline">October 2026. 6 minute read. <a href="#kit">Get the files</a></p>
   </header>
 
   <div class="prose">
-    <p>Most AI tools now offer memory: the model notes things about you and recalls them later. It's useful, and it has a catch. That memory lives inside one product. Switch models, or open the same project in a different app, and it's gone.</p>
+    <p>Most AI tools now offer memory: the model notes things about you and recalls them later. It's useful, and it has a catch. That memory lives inside one product. Open the same project in a different app, or with a different model, and it's gone. Worse, you can't easily see what it remembers, so you can't tell when it's remembering something that stopped being true.</p>
     <p>I work across several models and apps, so I treat built-in memory as a cache and keep the real memory where every model can read it: plain files inside each project.</p>
 
-    <h2>Four kinds of memory</h2>
-    <p>“Memory” covers several different things, and each needs a different home.</p>
+    <h2>Four kinds of memory, four homes</h2>
+    <p>“Memory” covers several different things, and each needs a different home and a different way of changing.</p>
     <figure class="dg">
       <ul class="kinds">
-        <li class="ink"><p class="dg-h">State</p><p class="kind-q">What's true now?</p><p class="kind-row"><span class="dg-mono">_index.md</span><span>rewritten each session</span></p></li>
-        <li class="ink"><p class="dg-h">History</p><p class="kind-q">What happened, and why?</p><p class="kind-row"><span class="dg-mono">LOG.md</span><span>appended, never edited</span></p></li>
-        <li class="ink"><p class="dg-h">Decisions</p><p class="kind-q">What's settled?</p><p class="kind-row"><span class="dg-mono">_index.md</span><span>added, rarely reopened; the old ones move to a decisions file</span></p></li>
-        <li class="ink"><p class="dg-h">Rules</p><p class="kind-q">How should work be done here?</p><p class="kind-row"><span class="dg-mono">AGENTS.md</span><span>edited on purpose</span></p></li>
+        <li class="ink"><p class="dg-h">State</p><p class="kind-q">What's true now?</p><p class="kind-row"><span class="dg-mono">the index</span><span>rewritten each session</span></p></li>
+        <li class="ink"><p class="dg-h">History</p><p class="kind-q">What happened, and why?</p><p class="kind-row"><span class="dg-mono">the log</span><span>appended, never edited</span></p></li>
+        <li class="ink"><p class="dg-h">Decisions</p><p class="kind-q">What's settled?</p><p class="kind-row"><span class="dg-mono">the index</span><span>added, rarely reopened; old ones move to a decisions file</span></p></li>
+        <li class="ink"><p class="dg-h">Rules</p><p class="kind-q">How should work be done here?</p><p class="kind-row"><span class="dg-mono">the rules file</span><span>edited on purpose</span></p></li>
       </ul>
       <figcaption>Four kinds of memory, each with its own home and its own way of changing.</figcaption>
     </figure>
-    <p>Mixing them is the most common mistake I see, in my own files too. History written into state makes the index long and confusing. State written into rules makes rules go stale. Rules buried in a log never get read.</p>
+    <p>Mixing them is the most common mistake I see, in my own files too. History written into state makes the index long and confusing. State written into rules makes rules go stale. Rules buried in a log never get read. Try sorting a few facts yourself.</p>
+    <figure class="ix" data-ix="cards">
+      <div class="ix-card" data-verdict="neutral"><p class="ix-front">“The export script fails on empty files.”</p><p class="ix-back">State, in the index, while it's true. When it's fixed, the fix and its cause go in the log.</p></div>
+      <div class="ix-card" data-verdict="neutral"><p class="ix-front">“We chose a static site over a framework.”</p><p class="ix-back">A decision, in the index, with its reason and date.</p></div>
+      <div class="ix-card" data-verdict="neutral"><p class="ix-front">“Tuesday: moved the job, it broke, fixed the path.”</p><p class="ix-back">History, in the log. Only the general lesson moves on to the rules.</p></div>
+      <div class="ix-card" data-verdict="neutral"><p class="ix-front">“Scripts find their own location; never hard-code paths.”</p><p class="ix-back">A rule, in the rules file. It came from that Tuesday.</p></div>
+      <div class="ix-card" data-verdict="neutral"><p class="ix-front">“After logging in to this tool server, restart the session.”</p><p class="ix-back">About the tool, not the project. One of the few things that belongs in the tool's own memory.</p></div>
+      <figcaption>Tap to see where each fact lives.</figcaption>
+    </figure>
 
     <h2>Put memory where every model can read it</h2>
-    <p>My test for where a fact belongs: if I opened this project tomorrow in a different app, with a different model, would it need to know this? If yes, the fact goes in the project's own files. Tool memory is only for things that are genuinely about the tool, like “after logging in to this server, restart the session or the tools won't appear.”</p>
-    <figure class="dg">
-      <p class="dg-t caches-label">Built-in memory: one per product</p>
-      <ul class="caches">
-        <li class="ink ink--dash"><p class="dg-h">Claude</p></li>
-        <li class="ink ink--dash"><p class="dg-h">ChatGPT</p></li>
-        <li class="ink ink--dash"><p class="dg-h">Gemini</p></li>
-      </ul>
-      <p class="cache-arrows" aria-hidden="true"><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg><svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg></p>
-      <div class="source ink"><p class="dg-mono">a-project/</p><p class="dg-h">The project's own files</p><p class="dg-t">the source every model and app can read</p></div>
-      <figcaption>Built-in memory is a cache inside one product. The real memory lives in the project, and the cache points at it.</figcaption>
+    <p>My test for where a fact belongs: if I opened this project tomorrow in a different app, with a different model, would it need to know this? If yes, it goes in the project's own files. Tool memory is only for facts about the tool, or about how I like to work.</p>
+    <figure class="ix" data-ix="toggle" data-a="Memory inside the tool" data-b="Memory in the project">
+      <div data-side="a"><p>Each product keeps its own copy. Switch apps and it's gone. Two copies drift apart, and nobody can see which one is current.</p><pre class="ix-code">App A remembers: "uses SQLite"
+App B remembers: "considering Postgres"
+Project: no record either way</pre></div>
+      <div data-side="b"><p>The project's files are the source. The tool's memory, if it holds anything, points at them.</p><pre class="ix-code">Index, Decisions:
+- 2026-09-02: SQLite, because it ships
+  inside the app. Reopen if we add sync.</pre></div>
+      <figcaption>The cache should point at the source, not replace it.</figcaption>
     </figure>
-    <p>Even then, I copy anything important into the project. Two copies of a fact drift apart, so the project file is the source and the tool memory just points at it.</p>
 
-    <h2>Decisions are the memory that saves the most time</h2>
-    <p>Models are agreeable and thorough. Ask one to improve a project and it will suggest the thing you ruled out last month, with good arguments. Without a written decision, you spend twenty minutes re-arguing it.</p>
-    <p>So every index ends with a list headed <em>Decisions (closed, do not reopen without cause)</em>. Each entry is one line plus its reason. “Static site over a framework: any agent can edit it, and there's nothing to keep updated.” The heading is an instruction, and models follow it.</p>
-    <p>Decisions older than six months move out of the index into a separate file. They're still on record, just not loaded every session.</p>
+    <h2>How the tool's own memory is kept small</h2>
+    <p>The memory my coding agent does keep is a folder of short notes, plus an index of one line per note. Only the index is loaded each session: a sentence per memory, a few hundred tokens in all. The full note is opened only when its one-line description matches the task. A dozen memories cost almost nothing until one is needed.</p>
+    <p>Each note has the same shape: what to do, <strong>why</strong>, with the date and the words that prompted it, and <strong>how to apply</strong> it. The why matters for the same reason it does in rules. “Read a shared spreadsheet's header row before every write” is a rule. Adding “because someone inserted a column between turns and a batch of rows landed in the wrong cells” tells the model the rule is about other people editing, so it applies it to shared documents too.</p>
+    <p>Most of these notes are feedback: how I like work done, written down the first time I correct something. Use fewer helper agents. Ship a first version before polishing. Editorial type, not handwriting fonts. Each one saves me from saying it a second time.</p>
 
     <h2>Mistakes become rules</h2>
-    <p>The best rules in my workspace each started as an incident.</p>
-    <p>When I reorganised the folders, a scheduled job kept pointing at the old path. It failed silently for nearly six days before I noticed. The same afternoon, a work tool's server registration broke for the same reason: a hard-coded absolute path.</p>
-    <p>The full story went in the log. The lesson went in the rules, in its general form:</p>
-    <blockquote>Prefer path-independence over path-fixing. Scripts work out their location from their own file. Before moving anything that runs, search for absolute paths in scheduled jobs, launch agents, environments and tool settings.</blockquote>
-    <p>And the job got a heartbeat that sends an alert when it goes quiet, so silence can't go unnoticed again. The pattern is the same every time: the story in history, the lesson in rules, and where it matters, a check in code.</p>
-    <figure class="dg">
-      <div class="lesson">
-        <div class="ink"><p class="lesson-k"><span class="dg-h">The story</span><span class="dg-mono">LOG.md</span></p><p class="dg-t">A scheduled job pointed at an old path and failed silently for six days.</p></div>
-        <svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg>
-        <div class="ink"><p class="lesson-k"><span class="dg-h">The lesson</span><span class="dg-mono">AGENTS.md</span></p><p class="dg-t">“Prefer path-independence over path-fixing.”</p></div>
-        <svg class="dg-arrow" viewBox="0 0 48 16" aria-hidden="true"><path d="M3 8.5c11-2.6 24 2.2 38-.4"/><path d="M34.5 2.6 42 8l-7.6 5.6"/></svg>
-        <div class="ink"><p class="lesson-k"><span class="dg-h">The check</span><span class="dg-mono">code</span></p><p class="dg-t">A heartbeat sends an alert when the job goes quiet.</p></div>
-      </div>
-      <figcaption>One incident, three places.</figcaption>
+    <p>The best rules in my workspace each started as an incident. Click through one.</p>
+    <figure class="ix" data-ix="steps">
+      <ol>
+        <li data-label="Incident"><h4>Something breaks quietly</h4><p>I reorganised my folders. A scheduled job kept pointing at the old path and failed silently for days. The same afternoon, a tool's server registration broke for the same reason.</p></li>
+        <li data-label="Story"><h4>The story goes in the log</h4><p>What happened, when, what it cost, how it was found. Dated, in the fixed entry shape. This is history; it's not loaded every session.</p></li>
+        <li data-label="Lesson"><h4>The lesson goes in the rules</h4><p>In its general form, so it covers the next case, not just this one.</p><pre class="ix-code">Prefer path-independence over path-fixing.
+Before moving anything that runs, search for
+absolute paths in jobs, settings and scripts.</pre></li>
+        <li data-label="Check"><h4>Where it matters, a check in code</h4><p>The job got a heartbeat that sends an alert when it goes quiet, so silence can't go unnoticed again.</p></li>
+      </ol>
+      <figcaption>One incident, three places: the story in history, the lesson in rules, the check in code.</figcaption>
     </figure>
 
     <h2>Forgetting on purpose</h2>
-    <p>A memory system that only adds things gets worse over time. Old facts crowd out current ones, and a model can't tell which is which. Three habits help.</p>
+    <p>A memory system that only adds things gets worse over time. Old facts crowd out current ones, and a model can't tell which is which. Every stale line also costs tokens on every session that loads it. Three habits help.</p>
     <ul>
-      <li><strong>Date every claim.</strong> “State as of 6 August” tells the reader how much to trust it.</li>
-      <li><strong>Rotate.</strong> Logs roll over each year. Old decisions move to their own file.</li>
+      <li><strong>Date every claim.</strong> “State as of 20 October” tells the reader how much to trust it.</li>
+      <li><strong>Rotate.</strong> Logs roll over each year into a dated archive file. Decisions older than six months move out of the index into their own file. Still on record, no longer loaded by default.</li>
       <li><strong>Give summaries an expiry.</strong> My weekly “what's live” page says that a line stale for two weeks gets demoted.</li>
     </ul>
+    <p>And when a memory turns out to be wrong, fix it at the source, rather than adding a correction below it. Two contradicting lines are worse than none.</p>
 
     <h2>Memory and privacy</h2>
-    <p>Some projects hold data that must never reach a hosted model: financial records, personal data about other people, an employer's internal datasets. Their memory files carry abstractions only. “Dining spend up about 15%,” not the statement rows.</p>
-    <p>That rule is easy to break by accident while writing a summary, so a hook checks it. Any write to those projects' summary files that contains a long run of digits is refused. It's a blunt check, and blunt is right for something this costly.</p>
+    <p>Some projects hold data that must never reach a hosted model: financial records, personal data about other people, credentials, an employer's internal datasets. Their memory files carry abstractions only. “Dining spend up about 15%,” not the statement rows. “Most of the week's sign-ups came from one channel,” not the list of sign-ups.</p>
+    <p>That rule is easy to break by accident while writing a summary, so a hook checks it. Any write to those projects' index, log or briefing that contains a run of six or more digits is refused, and the agent is told to abstract first. It's blunt, and blunt is right for something this costly.</p>
+    <p>The tool's own memory follows the same rule. It holds how I work and how the tools behave, never the data.</p>
 
     <h2>What I'd tell someone starting</h2>
     <ol>
@@ -107,26 +111,27 @@
       <li>List settled decisions where the model will see them.</li>
       <li>Turn every incident into a rule, and the important rules into checks.</li>
       <li>Store memory in plain files you own, not inside one product.</li>
+      <li>Load an index of memories, not the memories themselves.</li>
       <li>Date things, and retire what has gone stale.</li>
     </ol>
 
     <aside class="kit ink" id="kit" aria-label="Starter kit">
       <svg class="kit-icon" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 5.5v19.5"/><path d="M12.5 18 20 25.5l7.5-7.5"/><path d="M7 26.5v5.8c0 1.5 1.2 2.7 2.7 2.7h20.6c1.5 0 2.7-1.2 2.7-2.7v-5.8"/></svg>
       <p class="kit-h">Take the files</p>
-      <p class="kit-t">The instruction files, the index, briefing and log templates, two session commands and the hook from these notes, ready to fill in.</p>
+      <p class="kit-t">The rules files, the index, briefing and log templates, two session commands and the hook from these notes, ready to fill in.</p>
       <p><a class="kit-all" href="../kit/agent-files.zip" download>Download the starter kit <span>zip, 9 KB</span></a></p>
       <ul class="kit-files">
-      <li><a href="../kit/agent-files/project-template/_index.md" download>_index.md</a></li>
-      <li><a href="../kit/agent-files/project-template/LOG.md" download>LOG.md</a></li>
-      <li><a href="../kit/agent-files/project-template/AGENTS.md" download>project AGENTS.md</a></li>
-      <li><a href="../kit/agent-files/.claude/hooks/no-long-numbers.py" download>no-long-numbers.py</a></li>
+      <li><a href="../kit/agent-files/project-template/_index.md" download>Index template</a></li>
+      <li><a href="../kit/agent-files/project-template/LOG.md" download>Log template</a></li>
+      <li><a href="../kit/agent-files/project-template/AGENTS.md" download>Project rules</a></li>
+      <li><a href="../kit/agent-files/.claude/hooks/no-long-numbers.py" download>Long-number hook</a></li>
       </ul>
     </aside>
   </div>
 
   <nav class="next-read" aria-label="More writing">
-    <p><span>Start here</span><a href="instruction-files.html">How I write instruction files for AI agents</a></p>
-    <p><span>Previously</span><a href="context.html">One file to resume any project</a></p>
+    <p><span>Next</span><a href="decisions.html">Closed decisions, so models stop reopening them</a></p>
+    <p><span>Previously</span><a href="instruction-files.html">How I write instruction files for AI agents</a></p>
   </nav>
 </main>
 
@@ -135,6 +140,7 @@
   <button type="button" data-theme-toggle>Switch to dark</button>
 </footer>
 <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
-<script src="../assets/site.js?v=37" defer></script>
+<script src="../assets/site.js?v=38" defer></script>
+<script src="../assets/writing.js?v=1" defer></script>
 </body>
 </html>
