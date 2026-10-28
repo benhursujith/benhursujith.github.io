@@ -534,6 +534,8 @@
     const stage = $('.desk-stage', desk);
     const deskMe = $('.desk-me', desk);
     const mac = $('[data-mac]', desk);
+    // the laptop's body is drawn in WebGL where it can be (assets/mac-gl.js); the CSS planes are the fallback
+    const macGl = window.MacGL?.(stage, mac) || null;
     const macLid = $('[data-mac-lid]', desk);
     const macScreen = $('[data-mac-screen]', desk);
     const macDark = $('[data-mac-dark]', desk);
@@ -627,6 +629,7 @@
       }
       Hl = Math.round(0.69 * W);
       mac.style.setProperty('--W', `${W}px`);
+      macGl?.resize(stageW, H);
       deskTop = scrollY + desk.getBoundingClientRect().top;
       frame();
       // phones: the shadow goes right under the closed laptop's front edge, wherever the 3D projection puts it
@@ -680,6 +683,7 @@
       const lidDeg = clamp(-90 * (1 - eo) - 90 * shut + (onCover ? nudgeDeg : 0), -90, 0);
       macLid.style.setProperty('--lid', `${lidDeg.toFixed(2)}deg`);
       mac.style.setProperty('--deck-op', (smoothstep(0.05, 0.35, open) * (1 - shut)).toFixed(3));
+      let pose = null;
       const darkOp = Math.max(1 - smoothstep(0.48, 0.88, open), smoothstep(0.08, 0.3, shut));
       mac.style.setProperty('--dark', darkOp.toFixed(3));
       const sheenX = -34 + eo * 66;
@@ -716,10 +720,13 @@
 
         if (atDesk) {
           mac.style.transform = `translate3d(${Math.round(x1)}px, ${Math.round(y1)}px, 0) scale(1)`;
+          pose = { tx: Math.round(x1), ty: Math.round(y1), s: 1 };
         } else {
           mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
+          pose = { tx: +mx.toFixed(1), ty: +my.toFixed(1), s: +ms.toFixed(3) };
         }
         mac.style.opacity = macOp.toFixed(3);
+        Object.assign(pose, { rx: +heroRx.toFixed(2), ry: +heroRy.toFixed(2), rz: +heroRz.toFixed(2), op: +macOp.toFixed(3) });
 
         // Handoff: Instagram lifts off the desktop, the lid shuts behind it (the sleep light starts to breathe),
         // the icon arcs over to where the phone will be, and opens into it the way iOS launches an app.
@@ -762,7 +769,9 @@
         mac.style.setProperty('--ry', '0deg');
         mac.style.setProperty('--rz', '0deg');
         mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
-        mac.style.opacity = (1 - smoothstep(0.82, 1, ep) * (1 - ea)).toFixed(3);
+        const macOp = 1 - smoothstep(0.82, 1, ep) * (1 - ea);
+        mac.style.opacity = macOp.toFixed(3);
+        pose = { tx: +mx.toFixed(1), ty: +my.toFixed(1), s: +ms.toFixed(3), rx: 0, ry: 0, rz: 0, op: +macOp.toFixed(3) };
 
         mScreen.style.clipPath = 'none';
         if (aside <= 0.01) {
@@ -783,6 +792,8 @@
         pocket.style.setProperty('--pk-o', smoothstep(0, 0.22, ea).toFixed(3));
         pocket.style.setProperty('--pk-r', `${((1 - ea) * 46).toFixed(1)}px`);
       }
+      // the WebGL body takes the very numbers the CSS screen was just given, so the two stay in register
+      if (macGl && inStage) macGl.render({ W, lid: lidDeg, lit: 1 - darkOp, ...pose });
 
       syncPlayers();
     }

@@ -2463,5 +2463,24 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
 .mac-ledge--r { left: 100%; background: linear-gradient(90deg, var(--alu-mid), var(--alu-top)); }
 .mac-ledge--t { top: 0; left: calc(var(--W) * .02); right: calc(var(--W) * .02); height: var(--LT); transform-origin: 50% 0; transform: rotateX(-90deg); background: linear-gradient(180deg, var(--alu-edge), var(--alu-mid)); }
 
+/* Where WebGL runs, assets/mac-gl.js draws the body (shell, wedge, keyboard, shadow) on a canvas just under the
+   laptop, with the same projection; only the screen face, the hinges and the sleep light stay HTML. The CSS
+   planes stay in place, see-through, so clicks and the lid drag land on the laptop as before. */
+.mac-gl {
+  position: absolute; inset: 0; z-index: 4;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  transition: filter .45s var(--ease);
+}
+.mac--gl .mac-shadow, .mac--gl .mac-notch { display: none; }
+.mac--gl .mac-back, .mac--gl .mac-deck, .mac--gl .mac-side, .mac--gl .mac-rear, .mac--gl .mac-ledge { opacity: 0; }
+.mac--gl .mac-front { background: none; box-shadow: none; }
+.mac--gl .mac-face { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 0 0 1px rgba(255, 255, 255, .25); }
+/* the CSS deck lifted the lid a hair to stop the two planes fighting; with the deck in WebGL the lid sits on its hinge */
+.mac--gl .mac-lid { transform: rotateX(var(--lid, -90deg)); }
+.desk.is-phone .mac-gl { filter: blur(2.2px); }
+.desk.is-phone .mac:hover ~ .mac-gl { filter: none; }
+@media (max-width: 900px) { .desk.is-phone .mac-gl { filter: none; } }
+
 /* an article is always a scrolling page, whatever width it's shown at (the reader's pane is narrower than a phone breakpoint) */
 html:not(.is-home), html:not(.is-home) body { height: auto; overflow-y: visible; }
