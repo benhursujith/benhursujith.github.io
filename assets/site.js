@@ -543,6 +543,10 @@
     const dtFront = $('[data-dt-front]', desk);
     const dtClock = $('[data-clock]', desk);
     const dtWins = $('[data-dt-wins]', desk);
+    // Crumple's way in (assets/toss.js): a small fan in the desktop's corner, which flies into the game when it opens
+    const deskFanBtn = $('[data-deskfan]', desk);
+    const deskFan = window.Toss?.deskFan?.(deskFanBtn, { scope: desktop, link: $('.dt-app[data-open="toss"]', desk), trash: $('.dt-trash', desk) }) || null;
+    deskFanBtn?.addEventListener('click', () => openWin('toss', deskFanBtn));
     const mScreen = $('[data-m-screen]', desk);
     const pocket = $('[data-pocket]', desk);
     const pkPhone = $('[data-pk-phone]', desk);
@@ -1124,6 +1128,7 @@
     function syncPlayers() {
       cancelAnimationFrame(mkTimer);
       const canPlay = inStage && !document.hidden;
+      deskFan?.run(canPlay && atDesk);
       // Laptop windows: only the front window plays when atDesk
       const frontWin = wins[wins.length - 1];
       wins.forEach((w) => {
@@ -1198,7 +1203,7 @@
         const raw = makePlayer(note, body, !wide.matches);
         return summarised(raw, note, introEl);
       }
-      if (key === 'toss') return window.Toss?.(body, { onScore: () => $('.dt-trash', desktop)?.classList.add('is-full') }) || null;
+      if (key === 'toss') return window.Toss?.(body, { deskFan, onScore: () => $('.dt-trash', desktop)?.classList.add('is-full') }) || null;
       body.classList.add('win-body--scroll');
       if (key === 'mis') {
         body.append(tpls.mis.content.cloneNode(true));
@@ -1474,6 +1479,7 @@
       const idx = wins.indexOf(w);
       if (idx < 0) return;
       wins.splice(idx, 1);
+      w.player?.closing?.(immediate);
       if (w.theater) {
         w.theater = false;
         w.el.classList.remove('is-theater');

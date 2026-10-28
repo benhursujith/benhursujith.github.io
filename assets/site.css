@@ -1003,8 +1003,33 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
     radial-gradient(24% 17% at 50% 54%, #E8E8E2 0 45%, #B4B4AD 85%, transparent 100%),
     linear-gradient(90deg, rgba(160, 172, 186, .7), rgba(244, 247, 250, .85) 50%, rgba(150, 160, 172, .7));
 }
-/* Crumple (toss.js): a crumpled page standing on the shelf */
-.dt-icon--toss canvas { display: block; width: 100%; height: 100%; }
+/* Crumple (toss.js): a crumpled page standing on the shelf. A gust from the desk fan rocks it toward the Trash;
+   while the fan is spun up (hovering the fan or the page) it sways. */
+.dt-icon--toss canvas { display: block; width: 100%; height: 100%; transform-origin: 50% 85%; }
+.desktop.is-breezy .dt-icon--toss canvas { animation: toss-sway 1.1s ease-in-out infinite; }
+.desktop.is-gust .dt-icon--toss canvas { animation: toss-gust 1.4s var(--ease); }
+@keyframes toss-sway { 50% { transform: translateX(4%) rotate(9deg); } }
+@keyframes toss-gust { 22% { transform: translateX(18%) rotate(44deg); } 48% { transform: translateX(5%) rotate(10deg); } 68% { transform: translateX(11%) rotate(24deg); } 86% { transform: translateX(2%) rotate(4deg); } }
+/* the page the first gust blows into the Trash, and the Trash taking it */
+.dt-deskfan-page { position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none; filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .35)); }
+.dt-trash.is-hit .dt-icon--trash { animation: trash-hit .5s var(--ease); }
+@keyframes trash-hit { 30% { transform: scale(1.1, .9); } 60% { transform: scale(.96, 1.05); } }
+
+/* The way into Crumple: a small desk fan in the desktop's bottom-left corner, its breeze drifting toward the Dock.
+   It flies into the game when the game opens (toss.js), so the corner is empty while it's away. */
+.dt-deskfan {
+  position: absolute; left: calc(52 * var(--u)); bottom: calc(8 * var(--u)); z-index: 4;
+  height: max(30px, calc(62 * var(--u)));
+  padding: 0; border: 0; background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.dt-deskfan-cv { position: absolute; left: 0; top: 0; height: 100%; pointer-events: none; }
+.dt-deskfan.is-away { visibility: hidden; }
+.dt-deskfan .dt-name { bottom: calc(100% + 8 * var(--u)); }
+.dt-deskfan:hover .dt-name, .dt-deskfan:focus-visible .dt-name { opacity: 1; }
+.dt-deskfan:focus-visible { outline: 2px solid rgba(120, 180, 255, .9); outline-offset: 3px; border-radius: 6px; }
+.toss-flyer { position: fixed; z-index: 2147483000; pointer-events: none; transform-origin: 0 0; }
 
 /* ---------- Crumple: the paper-toss game, a canvas under a small HUD ---------- */
 .win-body:has(.toss) { background: #22123A; }
@@ -1051,7 +1076,8 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   pointer-events: none;
   transition: opacity .4s;
 }
-.toss-tip.is-gone { opacity: 0; }
+.toss-tip.is-gone, .toss:not(.is-on) .toss-tip, .toss:not(.is-on) .toss-wind { opacity: 0; }
+.toss-wind { transition: opacity .4s; }
 
 /* ---------- Windows (.dt-wins): Aqua windows, full screen inside the MacBook by default ---------- */
 
@@ -1816,6 +1842,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   .m-screen .dt-apps > li:hover .dt-icon, .m-screen .dt-apps > li:hover + li .dt-icon, .m-screen .dt-apps > li:has(+ li:hover) .dt-icon { transform: none; }
   .m-screen .dt-apps > li:hover { margin: 0 2px; }
   .m-screen .dt-name { display: none; }
+  .m-screen .dt-deskfan { left: 14px; bottom: 72px; height: 52px; }
 
   /* Full-screen sheets for opened desktop apps/files on phones */
   .m-screen .dt-wins {

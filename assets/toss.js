@@ -7,7 +7,7 @@
   'use strict';
 
   const G = 9.8, DRAG = 0.42, EYE = 2.4, FLIGHT = 0.98, WIND = 0.55;
-  const BIN = { z: 4, r0: 0.3, r1: 0.36, h: 1, rim: 0.03, floor: 0.03 };
+  const BIN = { z: 4, r0: 0.315, r1: 0.38, h: 1, rim: 0.03, floor: 0.03 };
   const RB = 0.105;
   const HAND = { x: 0, y: 1.35, z: 1.15 };
   const FLOOR = { w: 2.6, far: 8 };
@@ -75,6 +75,85 @@
     return c;
   }
 
+  const pathPoly = (x, pts) => { x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]))); x.closePath(); };
+  const strokePts = (x, pts) => { x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]))); x.stroke(); };
+
+  /* ---------- the desk fan: one painter for the game, the desktop's corner and the flight between them ----------
+     A silver fan with Aqua-blue blades, turned 35° toward the eye and blowing away from `side` (-1 stands on the
+     left and blows right). P projects world points; o = { fx, fz, side, angle, speed, mirror }. */
+  function paintFan(x, P, o) {
+    const m = o.mirror ? -1 : 1, fx = o.fx, fz = o.fz, dir = -o.side;
+    const a = 0.62, n = [dir * Math.cos(a), 0, -Math.sin(a)], U = [Math.sin(a), 0, dir * Math.cos(a)];
+    const k = 1.25, C = [fx, 0.74 * k, fz], R = 0.27;
+    const at = (u, v, w) => P(C[0] + (U[0] * u + n[0] * w) * k, (C[1] + v * k) * m, C[2] + (U[2] * u + n[2] * w) * k);
+    const circ = (r, w, k = 32) => [...Array(k + 1)].map((_, i) => at(r * Math.cos((i / k) * TAU), r * Math.sin((i / k) * TAU), w));
+    const s0 = P(fx, 0, fz)[2] * k;
+    // base and stem
+    const base = (y) => [...Array(29)].map((_, i) => P(fx + 0.2 * k * Math.cos((i / 28) * TAU), y * k * m, fz + 0.2 * k * Math.sin((i / 28) * TAU)));
+    let g = x.createLinearGradient(P(fx - 0.2 * k, 0, fz)[0], 0, P(fx + 0.2 * k, 0, fz)[0], 0);
+    g.addColorStop(0, '#8C96A4'); g.addColorStop(0.4, '#E9EDF2'); g.addColorStop(1, '#7C8696');
+    x.fillStyle = g;
+    pathPoly(x, [...base(0).slice(14), ...base(0.055).slice(14).reverse()]); x.fill();
+    x.fillStyle = '#DDE2E9';
+    pathPoly(x, base(0.055)); x.fill();
+    x.strokeStyle = 'rgba(60,68,82,.5)'; x.lineWidth = 0.8; x.stroke();
+    const sb = P(fx, 0.05 * k * m, fz), st = P(fx, 0.66 * k * m, fz), sw = 0.022 * s0;
+    g = x.createLinearGradient(sb[0] - sw, 0, sb[0] + sw, 0);
+    g.addColorStop(0, '#7E8898'); g.addColorStop(0.45, '#F2F5F8'); g.addColorStop(1, '#717C8C');
+    x.fillStyle = g;
+    x.fillRect(sb[0] - sw, Math.min(sb[1], st[1]), sw * 2, Math.abs(sb[1] - st[1]));
+    // the motor, behind the blades
+    const mc = at(0, 0, -0.2);
+    g = x.createRadialGradient(mc[0] - 0.03 * s0, mc[1] - 0.04 * s0, 0, mc[0], mc[1], 0.13 * s0);
+    g.addColorStop(0, '#F4F6F9'); g.addColorStop(1, '#848E9E');
+    x.fillStyle = g;
+    for (let w = -0.2; w <= -0.06; w += 0.035) { pathPoly(x, circ(0.105 + (w + 0.2) * 0.12, w, 24)); x.fill(); }
+    // blades: translucent, Aqua blue, smearing into a disc as they speed up
+    const sp = clamp(o.speed / 30);
+    if (sp > 0.05) {
+      x.fillStyle = `rgba(150,190,232,${(0.32 * sp).toFixed(3)})`;
+      pathPoly(x, circ(R * 0.92, 0, 40)); x.fill();
+    }
+    x.fillStyle = `rgba(120,168,222,${(0.78 - 0.5 * sp).toFixed(3)})`;
+    x.strokeStyle = `rgba(40,80,140,${(0.5 - 0.35 * sp).toFixed(3)})`;
+    x.lineWidth = 0.7;
+    for (let k = 0; k < 3; k++) {
+      const base0 = o.angle + (k * TAU) / 3, pts = [];
+      for (let i = 0; i <= 10; i++) { const t = i / 10, r = 0.045 + 0.2 * t, hw = 0.08 + 0.42 * Math.sin(Math.PI * (0.12 + 0.88 * t)); pts.push(at(r * Math.cos(base0 - hw), r * Math.sin(base0 - hw), 0)); }
+      for (let i = 10; i >= 0; i--) { const t = i / 10, r = 0.045 + 0.2 * t, hw = 0.08 + 0.42 * Math.sin(Math.PI * (0.12 + 0.88 * t)); pts.push(at(r * Math.cos(base0 + hw + 0.25 * t), r * Math.sin(base0 + hw + 0.25 * t), 0)); }
+      pathPoly(x, pts); x.fill(); x.stroke();
+    }
+    // the cage
+    x.lineWidth = Math.max(0.5, 0.006 * s0);
+    for (let pass = 0; pass < 2; pass++) {
+      x.strokeStyle = pass ? 'rgba(246,248,251,.9)' : 'rgba(50,58,72,.45)';
+      const o = pass ? 0 : 0.7;
+      x.beginPath();
+      [0.27, 0.2, 0.13].forEach((r) => circ(r, 0.045, 36).forEach((p, i) => (i ? x.lineTo(p[0] + o, p[1] + o) : x.moveTo(p[0] + o, p[1] + o))));
+      for (let k = 0; k < 16; k++) { const th = (k / 16) * TAU, p0 = at(0.05 * Math.cos(th), 0.05 * Math.sin(th), 0.05), p1 = at(R * Math.cos(th), R * Math.sin(th), 0.045); x.moveTo(p0[0] + o, p0[1] + o); x.lineTo(p1[0] + o, p1[1] + o); }
+      x.stroke();
+    }
+    x.lineWidth = Math.max(1, 0.018 * s0); x.strokeStyle = '#E4E8EE';
+    strokePts(x, circ(R, 0.045, 40));
+    const bc = at(0, 0, 0.055);
+    g = x.createRadialGradient(bc[0] - 0.012 * s0, bc[1] - 0.014 * s0, 0, bc[0], bc[1], 0.045 * s0);
+    g.addColorStop(0, '#fff'); g.addColorStop(1, '#9AA4B2');
+    x.fillStyle = g;
+    pathPoly(x, circ(0.042, 0.055, 18)); x.fill();
+  }
+
+  // The fan's on-screen box under projection P, for cropping it and flying it about
+  function fanBox(P, fx, fz, side) {
+    const a = 0.62, dir = -side, k = 1.25, n = [dir * Math.cos(a), 0, -Math.sin(a)], U = [Math.sin(a), 0, dir * Math.cos(a)];
+    const pts = [];
+    for (let i = 0; i < 24; i++) {
+      const t = (i / 24) * TAU;
+      for (const w of [-0.24, 0.06]) pts.push(P(fx + (U[0] * 0.29 * Math.cos(t) + n[0] * w) * k, (0.74 + 0.29 * Math.sin(t)) * k, fz + (U[2] * 0.29 * Math.cos(t) + n[2] * w) * k));
+      for (const y of [0, 0.055]) pts.push(P(fx + 0.2 * k * Math.cos(t), y * k, fz + 0.2 * k * Math.sin(t)));
+    }
+    return [Math.min(...pts.map((q) => q[0])), Math.min(...pts.map((q) => q[1])), Math.max(...pts.map((q) => q[0])), Math.max(...pts.map((q) => q[1]))];
+  }
+
   /* ---------- Sound: crumples, whooshes and clinks made from noise and sine partials ---------- */
   const snd = (() => {
     let ac = null, out = null, noise = null, on = true;
@@ -84,9 +163,11 @@
         const AC = window.AudioContext || window.webkitAudioContext;
         if (!AC) return;
         ac = new AC();
+        const lim = ac.createDynamicsCompressor();
+        lim.threshold.value = -16; lim.knee.value = 10; lim.ratio.value = 8; lim.attack.value = 0.002; lim.release.value = 0.18;
         out = ac.createGain();
-        out.gain.value = 0.55;
-        out.connect(ac.destination);
+        out.gain.value = 0.9;
+        out.connect(lim).connect(ac.destination);
         noise = ac.createBuffer(1, ac.sampleRate, ac.sampleRate);
         const ch = noise.getChannelData(0);
         for (let i = 0; i < ch.length; i++) ch[i] = Math.random() * 2 - 1;
@@ -130,36 +211,36 @@
       crumple(len = 0.42) {
         if (!live()) return;
         const t = ac.currentTime;
-        for (let i = 0; i < 26; i++) burst(t + Math.random() * len, 0.01 + Math.random() * 0.03, 'bandpass', 1500 + Math.random() * 4800, 1.3, 0.05 + Math.random() * 0.14);
-        burst(t, len + 0.05, 'lowpass', 1300, 0.7, 0.04);
+        for (let i = 0; i < 26; i++) burst(t + Math.random() * len, 0.01 + Math.random() * 0.03, 'bandpass', 1500 + Math.random() * 4800, 1.3, 0.3 + Math.random() * 0.5);
+        burst(t, len + 0.05, 'lowpass', 1300, 0.7, 0.22);
       },
       whoosh(p) {
         if (!live()) return;
-        burst(ac.currentTime, 0.28, 'bandpass', 420, 1.2, 0.09 * p, 1800);
+        burst(ac.currentTime, 0.28, 'bandpass', 420, 1.2, 0.5 * p, 1800);
       },
       rim(i) {
         if (!live() || i < 0.25) return;
         const t = ac.currentTime, a = Math.min(1, i / 3);
-        [[1830, 0.32], [2790, 0.22], [4410, 0.14], [6020, 0.08]].forEach(([fq, k]) => tone(t, fq * (0.98 + Math.random() * 0.04), 0.18 + k, 0.09 * a * k * 3));
-        burst(t, 0.02, 'highpass', 4000, 0.7, 0.06 * a);
+        [[1830, 0.32], [2790, 0.22], [4410, 0.14], [6020, 0.08]].forEach(([fq, k]) => tone(t, fq * (0.98 + Math.random() * 0.04), 0.18 + k, 0.2 * a * k * 3));
+        burst(t, 0.02, 'highpass', 4000, 0.7, 0.3 * a);
       },
       wall(i) {
         if (!live() || i < 0.25) return;
         const t = ac.currentTime, a = Math.min(1, i / 3);
-        burst(t, 0.07, 'bandpass', 2400, 2.5, 0.08 * a);
-        tone(t, 1240, 0.09, 0.025 * a);
+        burst(t, 0.07, 'bandpass', 2400, 2.5, 0.5 * a);
+        tone(t, 1240, 0.09, 0.08 * a);
       },
       land() {
         if (!live()) return;
         const t = ac.currentTime;
-        burst(t, 0.12, 'lowpass', 650, 0.8, 0.14);
-        burst(t + 0.01, 0.06, 'bandpass', 3100, 2, 0.04);
+        burst(t, 0.12, 'lowpass', 650, 0.8, 0.75);
+        burst(t + 0.01, 0.06, 'bandpass', 3100, 2, 0.3);
       },
       glass(i) {
         if (!live() || i < 0.3) return;
         const t = ac.currentTime, a = Math.min(1, i / 3);
-        tone(t, 3350, 0.06, 0.035 * a);
-        burst(t, 0.03, 'bandpass', 900, 1, 0.07 * a);
+        tone(t, 3350, 0.06, 0.12 * a);
+        burst(t, 0.03, 'bandpass', 900, 1, 0.35 * a);
       },
     };
   })();
@@ -193,7 +274,7 @@
     let best = 0;
     try { best = +localStorage.getItem('toss-best') || 0; } catch (e) {}
     let streak = 0, total = 0;
-    let wind = 0, fanSide = -1, fanFade = 1, fanSwap = null, fanAngle = 0, fanSpeed = 0;
+    let wind = 0, fanSide = -1, fanFade = hooks.deskFan ? 0 : 1, fanSwap = null, fanAngle = 0, fanSpeed = 0;
     let state = 'page', stateT = 0, sprite = sprites[0];
     let ball = null;
     const pile = [];
@@ -256,7 +337,6 @@
       const zn = Math.max(0.35, (f * EYE) / (H + 40 - yh));
       return [P(-FLOOR.w, 0, zn), P(FLOOR.w, 0, zn), P(FLOOR.w, 0, FLOOR.far), P(-FLOOR.w, 0, FLOOR.far)];
     }
-    const pathPoly = (x, pts) => { x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]))); x.closePath(); };
 
     function bake() {
       if (!W) return;
@@ -330,7 +410,6 @@
       for (let i = 0; i <= n; i++) pts.push(binPt(a0 + ((a1 - a0) * i) / n, y, r, m));
       return pts;
     }
-    function strokePts(x, pts) { x.beginPath(); pts.forEach((p, i) => (i ? x.lineTo(p[0], p[1]) : x.moveTo(p[0], p[1]))); x.stroke(); }
 
     function drawBinShape(x, mirror) {
       // the silhouette only, for the reflection in the shelf
@@ -423,66 +502,9 @@
 
     /* ---------- the desk fan ---------- */
     function drawFan(x, mirror) {
-      const m = mirror ? -1 : 1, fx = fanSide * fanX, fz = BIN.z + 0.25, dir = -fanSide;
-      const a = 0.62, n = [dir * Math.cos(a), 0, -Math.sin(a)], U = [Math.sin(a), 0, dir * Math.cos(a)];
-      const k = 1.25, C = [fx, 0.74 * k, fz], R = 0.27;
-      const at = (u, v, w) => P(C[0] + (U[0] * u + n[0] * w) * k, (C[1] + v * k) * m, C[2] + (U[2] * u + n[2] * w) * k);
-      const circ = (r, w, k = 32) => [...Array(k + 1)].map((_, i) => at(r * Math.cos((i / k) * TAU), r * Math.sin((i / k) * TAU), w));
-      const s0 = P(fx, 0, fz)[2] * k;
       x.save();
       x.globalAlpha *= fanFade;
-      // base and stem
-      const base = (y) => [...Array(29)].map((_, i) => P(fx + 0.2 * k * Math.cos((i / 28) * TAU), y * k * m, fz + 0.2 * k * Math.sin((i / 28) * TAU)));
-      let g = x.createLinearGradient(P(fx - 0.2 * k, 0, fz)[0], 0, P(fx + 0.2 * k, 0, fz)[0], 0);
-      g.addColorStop(0, '#8C96A4'); g.addColorStop(0.4, '#E9EDF2'); g.addColorStop(1, '#7C8696');
-      x.fillStyle = g;
-      pathPoly(x, [...base(0).slice(14), ...base(0.055).slice(14).reverse()]); x.fill();
-      x.fillStyle = '#DDE2E9';
-      pathPoly(x, base(0.055)); x.fill();
-      x.strokeStyle = 'rgba(60,68,82,.5)'; x.lineWidth = 0.8; x.stroke();
-      const sb = P(fx, 0.05 * k * m, fz), st = P(fx, 0.66 * k * m, fz), sw = 0.022 * s0;
-      g = x.createLinearGradient(sb[0] - sw, 0, sb[0] + sw, 0);
-      g.addColorStop(0, '#7E8898'); g.addColorStop(0.45, '#F2F5F8'); g.addColorStop(1, '#717C8C');
-      x.fillStyle = g;
-      x.fillRect(sb[0] - sw, Math.min(sb[1], st[1]), sw * 2, Math.abs(sb[1] - st[1]));
-      // the motor, behind the blades
-      const mc = at(0, 0, -0.2);
-      g = x.createRadialGradient(mc[0] - 0.03 * s0, mc[1] - 0.04 * s0, 0, mc[0], mc[1], 0.13 * s0);
-      g.addColorStop(0, '#F4F6F9'); g.addColorStop(1, '#848E9E');
-      x.fillStyle = g;
-      for (let w = -0.2; w <= -0.06; w += 0.035) { pathPoly(x, circ(0.105 + (w + 0.2) * 0.12, w, 24)); x.fill(); }
-      // blades: translucent, Aqua blue, smearing into a disc as they speed up
-      const sp = calm ? 0 : clamp(fanSpeed / 30);
-      if (sp > 0.05) {
-        x.fillStyle = `rgba(150,190,232,${(0.32 * sp).toFixed(3)})`;
-        pathPoly(x, circ(R * 0.92, 0, 40)); x.fill();
-      }
-      x.fillStyle = `rgba(120,168,222,${(0.78 - 0.5 * sp).toFixed(3)})`;
-      x.strokeStyle = `rgba(40,80,140,${(0.5 - 0.35 * sp).toFixed(3)})`;
-      x.lineWidth = 0.7;
-      for (let k = 0; k < 3; k++) {
-        const base0 = fanAngle + (k * TAU) / 3, pts = [];
-        for (let i = 0; i <= 10; i++) { const t = i / 10, r = 0.045 + 0.2 * t, hw = 0.08 + 0.42 * Math.sin(Math.PI * (0.12 + 0.88 * t)); pts.push(at(r * Math.cos(base0 - hw), r * Math.sin(base0 - hw), 0)); }
-        for (let i = 10; i >= 0; i--) { const t = i / 10, r = 0.045 + 0.2 * t, hw = 0.08 + 0.42 * Math.sin(Math.PI * (0.12 + 0.88 * t)); pts.push(at(r * Math.cos(base0 + hw + 0.25 * t), r * Math.sin(base0 + hw + 0.25 * t), 0)); }
-        pathPoly(x, pts); x.fill(); x.stroke();
-      }
-      // the cage
-      x.lineWidth = Math.max(0.5, 0.006 * s0);
-      for (let pass = 0; pass < 2; pass++) {
-        x.strokeStyle = pass ? 'rgba(246,248,251,.9)' : 'rgba(50,58,72,.45)';
-        const o = pass ? 0 : 0.7;
-        x.beginPath();
-        [0.27, 0.2, 0.13].forEach((r) => circ(r, 0.045, 36).forEach((p, i) => (i ? x.lineTo(p[0] + o, p[1] + o) : x.moveTo(p[0] + o, p[1] + o))));
-        for (let k = 0; k < 16; k++) { const th = (k / 16) * TAU, p0 = at(0.05 * Math.cos(th), 0.05 * Math.sin(th), 0.05), p1 = at(R * Math.cos(th), R * Math.sin(th), 0.045); x.moveTo(p0[0] + o, p0[1] + o); x.lineTo(p1[0] + o, p1[1] + o); }
-        x.stroke();
-      }
-      x.lineWidth = Math.max(1, 0.018 * s0); x.strokeStyle = '#E4E8EE';
-      strokePts(x, circ(R, 0.045, 40));
-      const bc = at(0, 0, 0.055);
-      g = x.createRadialGradient(bc[0] - 0.012 * s0, bc[1] - 0.014 * s0, 0, bc[0], bc[1], 0.045 * s0);
-      g.addColorStop(0, '#fff'); g.addColorStop(1, '#9AA4B2');
-      x.fillStyle = g;
-      pathPoly(x, circ(0.042, 0.055, 18)); x.fill();
+      paintFan(x, P, { fx: fanSide * fanX, fz: BIN.z + 0.25, side: fanSide, angle: fanAngle, speed: calm ? 0 : fanSpeed, mirror });
       x.restore();
     }
 
@@ -498,7 +520,7 @@
     }
 
     function drawShadow(x, b) {
-      if (b.inside || b.y > 3.5) return;
+      if (b.inside || b.y > 3.5 || b.y < 0) return;
       const p = P(b.x, 0, b.z), rx = RB * p[2] * (1 + b.y * 0.6), ry = (f * EYE * RB * (1 + b.y * 0.6)) / (b.z * b.z);
       x.save();
       x.globalAlpha = 0.5 * Math.exp(-b.y * 1.1);
@@ -561,10 +583,10 @@
     /* ---------- the round: wind, the page, the throw ---------- */
     function newRound(first) {
       const maxW = Math.min(6, 1.1 + streak * 0.75);
-      let w = first ? rand() * 1.2 : rand() * maxW;
+      let w = first ? 0.5 + rand() * 0.8 : rand() * maxW;
       if (!first && rand() < 0.08) w = 0;
       w = Math.round(w * 10) / 10;
-      const sign = rand() < 0.5 ? -1 : 1;
+      const sign = first && desk ? 1 : rand() < 0.5 ? -1 : 1;
       const next = w * sign;
       const side = next > 0 ? -1 : next < 0 ? 1 : fanSide;
       if (first) fanSide = side;
@@ -604,6 +626,7 @@
     function bounce(b, nx, ny, nz, e, fr, kind) {
       const vn = b.vx * nx + b.vy * ny + b.vz * nz;
       if (vn >= 0) return;
+      if (vn > -0.3) { b.vx -= vn * nx; b.vy -= vn * ny; b.vz -= vn * nz; return; }
       b.vx -= (1 + e) * vn * nx; b.vy -= (1 + e) * vn * ny; b.vz -= (1 + e) * vn * nz;
       const tx = b.vx - (b.vx * nx + b.vy * ny + b.vz * nz) * nx, ty = b.vy - (b.vx * nx + b.vy * ny + b.vz * nz) * ny, tz = b.vz - (b.vx * nx + b.vy * ny + b.vz * nz) * nz;
       b.vx -= tx * (1 - fr); b.vy -= ty * (1 - fr); b.vz -= tz * (1 - fr);
@@ -628,7 +651,7 @@
       if (dist < min) {
         nx /= dist; ny /= dist; nz /= dist;
         b.x += nx * (min - dist); b.y += ny * (min - dist); b.z += nz * (min - dist);
-        bounce(b, nx, ny, nz, 0.38, 0.85, 'rim');
+        bounce(b, nx, ny, nz, 0.38, 0.85, b.inside && ny < 0.3 ? 'wall' : 'rim');
       }
       // the mesh walls
       if (b.y < BIN.h && b.y > -RB) {
@@ -729,7 +752,7 @@
       const fb = P(fanSide * fanX, 0, BIN.z + 0.25)[1];
       reflect(x, fb, fb + (fb - P(fanSide * fanX, 1.3, BIN.z + 0.25)[1]) * 0.7, 0.22, (c) => drawFan(c, true));
       x.globalAlpha = 0.16;
-      if (ball && !ball.inside) drawBall(x, { ...ball, y: -ball.y }, ball.fade * Math.exp(-ball.y * 0.6));
+      if (ball && !ball.inside && ball.y > 0) drawBall(x, { ...ball, y: -ball.y }, ball.fade * Math.exp(-ball.y * 0.6));
       x.restore();
       // the fan's shadow
       const fs = P(fanSide * fanX, 0, BIN.z + 0.25);
@@ -800,19 +823,21 @@
     cv.addEventListener('pointerdown', (e) => {
       if (e.button > 0) return;
       snd.init();
+      if (state === 'page' && stateT > 0.55) { state = 'ready'; stateT = 0; }
       if (state !== 'ready' || hold) return;
       e.preventDefault();
       cv.focus({ preventScroll: true });
       cv.setPointerCapture(e.pointerId);
       keyAim = false;
       const [lx, ly] = local(e);
-      hold = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lx, ly, pts: [{ x: e.clientX, y: e.clientY, t: performance.now() }], dx: 0, lift: 0 };
+      hold = { id: e.pointerId, x0: e.clientX, y0: e.clientY, lx, ly, pts: [{ x: e.clientX, y: e.clientY, t: performance.now() }], path: [], dx: 0, lift: 0 };
       root.classList.add('is-holding');
     });
     cv.addEventListener('pointermove', (e) => {
       if (!hold || e.pointerId !== hold.id) return;
       const now = performance.now();
       hold.pts.push({ x: e.clientX, y: e.clientY, t: now });
+      if (hold.path.length < 400) hold.path.push([e.clientX, e.clientY]);
       while (hold.pts.length > 2 && now - hold.pts[0].t > 140) hold.pts.shift();
       const [lx, ly] = local(e), s = f / HAND.z;
       hold.dx = clamp(((lx - hold.lx) * 0.3) / s, -0.12, 0.12);
@@ -834,7 +859,14 @@
         const sp = Math.hypot(vx, vy);
         p = 1 + 0.075 * Math.tanh((sp - 1300) / 900);
       }
-      throwBall(clamp(Math.atan2(vx, -vy), -0.9, 0.9), p);
+      // aim along the stroke from where the ball was picked up to about two thirds of the way up,
+      // because a thumb's flick curls off at the end
+      let aimX = vx, aimY = vy;
+      if (ty < -40) {
+        const k = hold.path.find(([, y]) => hold.y0 - y >= -ty * 0.65) || [z.x, z.y];
+        aimX = k[0] - hold.x0; aimY = k[1] - hold.y0;
+      }
+      throwBall(clamp(Math.atan2(aimX, -aimY), -0.9, 0.9), p);
     };
     cv.addEventListener('pointerup', release);
     cv.addEventListener('pointercancel', (e) => { if (hold && e.pointerId === hold.id) { hold = null; root.classList.remove('is-holding'); } });
@@ -855,8 +887,35 @@
     const ro = new ResizeObserver(() => { layout(); if (!running) draw(); });
     ro.observe(root);
 
+    /* ---------- the fan comes in from the desktop's corner, and goes back there when the game closes ---------- */
+    const desk = hooks.deskFan || null;
+    let arrived = !desk, flight = null;
+    function fanShot() {
+      const fx = fanSide * fanX, fz = BIN.z + 0.25, b = fanBox(P, fx, fz, fanSide), pad = 4;
+      const r = cv.getBoundingClientRect(), vis = r.width / W || 1, box = [b[0] - pad, b[1] - pad, b[2] + pad, b[3] + pad];
+      return {
+        rect: { left: r.left + box[0] * vis, top: r.top + box[1] * vis, width: (box[2] - box[0]) * vis, height: (box[3] - box[1]) * vis },
+        P: (X, Y, Z) => { const q = P(X, Y, Z); return [(q[0] - box[0]) * vis, (q[1] - box[1]) * vis, q[2] * vis]; },
+        fan: { fx, fz, side: fanSide, angle: fanAngle },
+      };
+    }
+    function arrive() {
+      arrived = true; flight = null;
+      fanFade = 1; fanSpeed = 0;
+      root.classList.add('is-on');
+      newRound(true);
+    }
+    function fetchFan() {
+      const from = desk.rect();
+      desk.hide();
+      if (calm || !from) { arrive(); return; }
+      fanFade = 0;
+      flight = Toss.fly(from, fanShot(), true, arrive);
+    }
+
     setScore();
-    newRound(true);
+    if (arrived) { root.classList.add('is-on'); newRound(true); }
+    else state = 'wait';
 
     const go = () => {
       if (running) return;
@@ -864,6 +923,7 @@
       running = true;
       last = performance.now();
       raf = requestAnimationFrame(tick);
+      if (!arrived && !flight) fetchFan();
     };
     return {
       running: false,
@@ -871,8 +931,152 @@
       resume() { go(); },
       still() { calm = true; go(); },
       pause() { running = false; cancelAnimationFrame(raf); hold = null; },
+      closing(immediate) {
+        if (!desk) return;
+        if (flight) { flight.cancel(); flight = null; }
+        const to = desk.rect();
+        if (immediate || calm || !arrived || !W || !to) { desk.show(); return; }
+        const g = fanShot();
+        fanFade = 0; draw();
+        Toss.fly(to, g, false, () => desk.show());
+      },
     };
   }
+
+  /* A fan flying between the desktop's corner (small) and its place in the game (big, g = fanShot()). It is drawn at
+     the big size and scaled, along a shallow arc, spinning as it goes. */
+  Toss.fly = (small, g, inward, done) => {
+    const big = g.rect, c = document.createElement('canvas'), pr = Math.min(2, window.devicePixelRatio || 1);
+    c.className = 'toss-flyer';
+    c.width = Math.max(1, Math.round(big.width * pr)); c.height = Math.max(1, Math.round(big.height * pr));
+    Object.assign(c.style, { left: `${big.left}px`, top: `${big.top}px`, width: `${big.width}px`, height: `${big.height}px` });
+    document.body.append(c);
+    const x = c.getContext('2d'), t0 = performance.now(), dur = 780;
+    const lift = Math.min(140, Math.hypot(big.left - small.left, big.top - small.top) * 0.2);
+    let angle = g.fan.angle, last = t0, raf = 0;
+    const step = (now) => {
+      const p = clamp((now - t0) / dur), e = p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+      const q = inward ? e : 1 - e;
+      const s = (small.height + (big.height - small.height) * q) / big.height;
+      const lx = small.left + (big.left - small.left) * q, ly = small.top + (big.top - small.top) * q - Math.sin(Math.PI * q) * lift;
+      c.style.transform = `translate(${(lx - big.left).toFixed(1)}px, ${(ly - big.top).toFixed(1)}px) scale(${s.toFixed(4)}) rotate(${(-7 * Math.sin(Math.PI * q)).toFixed(2)}deg)`;
+      angle += (24 * (now - last)) / 1000; last = now;
+      x.setTransform(pr, 0, 0, pr, 0, 0);
+      x.clearRect(0, 0, big.width, big.height);
+      paintFan(x, g.P, { ...g.fan, angle, speed: 24 });
+      if (p < 1) raf = requestAnimationFrame(step);
+      else { c.remove(); done?.(); }
+    };
+    raf = requestAnimationFrame(step);
+    return { cancel() { cancelAnimationFrame(raf); c.remove(); } };
+  };
+
+  /* The way in: a small fan in the desktop's bottom-left corner, blowing a breeze toward the Dock. Hovering it, or the
+     page in the Dock, spins it up and sets the page swaying; every so often a gust rocks the page toward the Trash. */
+  Toss.deskFan = (btn, opts = {}) => {
+    if (!btn) return null;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const cv = document.createElement('canvas'), x = cv.getContext('2d');
+    cv.className = 'dt-deskfan-cv';
+    btn.prepend(cv);
+    const FX = -1.5, FZ = BIN.z + 0.25, BREEZE = 3.4;
+    const P0 = (X, Y, Z) => [X / Z, (EYE - Y) / Z, 1 / Z];
+    const b0 = fanBox(P0, FX, FZ, -1), bh = b0[3] - b0[1];
+    btn.style.aspectRatio = ((b0[2] - b0[0]) / bh).toFixed(4);
+    let w = 0, h = 0, pr = 1, sc = 1, angle = 0, speed = 0, raf = 0, last = 0, on = false, away = false, hover = 0, gust = 0, gustAt = 0;
+    const streaks = [...Array(8)].map(() => ({ x: Math.random(), y: 0.18 + Math.random() * 0.4, k: 0.6 + Math.random() * 0.8 }));
+    const P = (X, Y, Z) => { const q = P0(X, Y, Z); return [(q[0] - b0[0]) * sc, (q[1] - b0[1]) * sc, q[2] * sc]; };
+    const scope = opts.scope;
+    function size() {
+      w = btn.clientWidth; h = btn.clientHeight;
+      if (!w || !h) return false;
+      const vis = btn.getBoundingClientRect().height / h || 1;
+      pr = Math.min(2, Math.max(1, (window.devicePixelRatio || 1) * vis));
+      sc = h / bh;
+      cv.style.width = `${w * (1 + BREEZE)}px`;
+      cv.width = Math.round(w * (1 + BREEZE) * pr); cv.height = Math.round(h * pr);
+      return true;
+    }
+    function draw() {
+      if (!w && !size()) return;
+      x.setTransform(pr, 0, 0, pr, 0, 0);
+      x.clearRect(0, 0, w * (1 + BREEZE), h);
+      if (away) return;
+      const a = clamp(speed / 26);
+      x.lineCap = 'round'; x.lineWidth = 1;
+      for (const s of streaks) {
+        const sx = w * 0.95 + s.x * w * BREEZE, sy = h * s.y, len = w * (0.14 + 0.34 * a) * s.k;
+        x.strokeStyle = `rgba(255,255,255,${((1 - s.x) * (0.1 + 0.42 * a)).toFixed(3)})`;
+        x.beginPath(); x.moveTo(sx, sy); x.lineTo(sx - len, sy); x.stroke();
+      }
+      paintFan(x, P, { fx: FX, fz: FZ, side: -1, angle, speed });
+    }
+    function tick(now) {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      if (!away && now > gustAt) {
+        gust = 1.5; gustAt = now + 9000 + Math.random() * 6000;
+        if (!shown) { shown = true; blowPage(); }
+        scope?.classList.add('is-gust');
+        setTimeout(() => scope?.classList.remove('is-gust'), 1500);
+      }
+      gust = Math.max(0, gust - dt);
+      const want = hover ? 28 : gust > 0 ? 22 : 7;
+      speed += (want - speed) * Math.min(1, dt * 2.2);
+      angle += speed * dt;
+      for (const s of streaks) { s.x += (0.05 + speed * 0.012) * s.k * dt; if (s.x > 1) { s.x -= 1; s.y = 0.18 + Math.random() * 0.4; } }
+      draw();
+      raf = requestAnimationFrame(tick);
+    }
+    // The first gust of a visit blows a crumpled page out of the corner, over the Dock and into the Trash:
+    // the whole game in one breath, before anyone has read a word.
+    let shown = false;
+    function blowPage() {
+      const trash = opts.trash, icon = trash?.querySelector('.dt-icon') || trash;
+      if (!scope || !icon) return;
+      const hr = scope.getBoundingClientRect(), fr = btn.getBoundingClientRect(), tr = icon.getBoundingClientRect();
+      const vis = hr.width / scope.clientWidth || 1, d = (fr.height * 0.34) / vis;
+      const c = document.createElement('canvas'), q = Math.round(d * 2);
+      c.width = c.height = q;
+      c.getContext('2d').drawImage(paintBall(64, 29), 0, 0, q, q);
+      c.className = 'dt-deskfan-page';
+      Object.assign(c.style, { width: `${d}px`, height: `${d}px` });
+      scope.append(c);
+      const sx = (fr.right - hr.left) / vis - d * 0.4, sy = (fr.top - hr.top) / vis + fr.height * 0.18 / vis;
+      const ex = (tr.left + tr.width / 2 - hr.left) / vis - d / 2, ey = (tr.top - hr.top) / vis + tr.height * 0.12 / vis - d / 2;
+      const arc = Math.max(40, Math.abs(ex - sx) * 0.22), frames = [];
+      for (let i = 0; i <= 24; i++) {
+        const t = i / 24, e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        const y = sy + (ey - sy) * t * t - arc * Math.sin(Math.PI * Math.min(1, t * 1.15));
+        frames.push({ transform: `translate(${(sx + (ex - sx) * e).toFixed(1)}px, ${y.toFixed(1)}px) rotate(${Math.round(t * 760)}deg) scale(${(t > 0.9 ? 1 - (t - 0.9) * 4 : 0.7 + Math.min(1, t * 6) * 0.3).toFixed(3)})`, opacity: t < 0.06 ? t / 0.06 : t > 0.94 ? (1 - t) / 0.06 : 1 });
+      }
+      c.animate(frames, { duration: 1900, easing: 'linear' }).finished.then(() => {
+        c.remove();
+        trash.classList.add('is-full', 'is-hit');
+        setTimeout(() => trash.classList.remove('is-hit'), 500);
+      });
+    }
+    const breezy = (v) => () => { hover = v; scope?.classList.toggle('is-breezy', !!v && !still); };
+    [btn, opts.link].forEach((el) => {
+      if (!el) return;
+      el.addEventListener('click', () => snd.init());
+      el.addEventListener('pointerenter', breezy(1)); el.addEventListener('pointerleave', breezy(0));
+      el.addEventListener('focus', breezy(1)); el.addEventListener('blur', breezy(0));
+    });
+    new ResizeObserver(() => { if (size()) draw(); }).observe(btn);
+    return {
+      run(v) {
+        if (v === on) return;
+        on = v;
+        cancelAnimationFrame(raf);
+        if (on && !still) { last = performance.now(); if (!gustAt) gustAt = last + 3500 + Math.random() * 2500; raf = requestAnimationFrame(tick); }
+        else if (on) draw();
+      },
+      rect() { const r = btn.getBoundingClientRect(); return r.width && r.height ? r : null; },
+      hide() { away = true; btn.classList.add('is-away'); draw(); },
+      show() { away = false; btn.classList.remove('is-away'); draw(); },
+    };
+  };
 
   // The Dock icon: one crumpled page standing on the shelf
   Toss.icon = (el) => {
