@@ -1184,6 +1184,7 @@
       if (key === 'mis' || key === 'ai') return { w: 0.64, h: 0.72 };
       if (key === 'writing') return { w: 0.8, h: 0.86 };
       if (key === 'kit') return { w: 0.48, h: 0.66 };
+      if (key === 'toss') return { w: 0.6, h: 0.76 };
       if (key === 'pixis') return { w: 0.56, h: 0.66 };
       return { w: 0.42, h: 0.48 };
     }
@@ -1197,6 +1198,7 @@
         const raw = makePlayer(note, body, !wide.matches);
         return summarised(raw, note, introEl);
       }
+      if (key === 'toss') return window.Toss?.(body, { onScore: () => $('.dt-trash', desktop)?.classList.add('is-full') }) || null;
       body.classList.add('win-body--scroll');
       if (key === 'mis') {
         body.append(tpls.mis.content.cloneNode(true));
