@@ -1037,9 +1037,15 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   position: absolute; inset: 0; overflow: hidden;
   touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
 }
-.toss-cv { position: absolute; inset: 0; display: block; width: 100%; height: 100%; outline: none; cursor: grab; }
+.toss-bg, .toss-cv { position: absolute; inset: 0; display: block; width: 100%; height: 100%; }
+.toss-bg { pointer-events: none; }
+.toss-cv { outline: none; cursor: grab; }
 .toss.is-holding .toss-cv { cursor: grabbing; }
-.toss-cv:focus-visible { box-shadow: inset 0 0 0 3px rgba(120, 180, 255, .85); }
+/* the focus ring sits above both canvases, and only for the keyboard: a flick focuses the canvas too */
+.toss:not(.by-pointer):has(.toss-cv:focus-visible)::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  box-shadow: inset 0 0 0 3px rgba(120, 180, 255, .85);
+}
 .toss-hud {
   position: absolute; left: 0; right: 0; top: 0;
   display: flex; align-items: center; justify-content: space-between; gap: 8px;
