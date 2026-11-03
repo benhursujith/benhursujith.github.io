@@ -2209,6 +2209,11 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 }
 .foot button { background: none; border: 0; padding: 0; cursor: pointer; color: inherit; text-decoration: underline; text-decoration-color: var(--rule); text-underline-offset: .25em; }
 .foot button:hover { color: var(--ink); }
+/* below the keynote the page stays dark, so the stage scrolls away onto the theatre's black, not an ivory page */
+html.kn-dark body { background: #000; }
+html.kn-dark .foot { border-top-color: rgba(255, 255, 255, .1); color: #8E8E96; }
+html.kn-dark .foot button { text-decoration-color: rgba(255, 255, 255, .25); }
+html.kn-dark .foot button:hover { color: #fff; }
 
 /* ---------- Articles ---------- */
 
