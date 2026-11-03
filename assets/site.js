@@ -548,10 +548,8 @@
     const deskFan = window.Toss?.deskFan?.(deskFanBtn, { scope: desktop, link: $('.dt-app[data-open="toss"]', desk), trash: $('.dt-trash', desk) }) || null;
     deskFanBtn?.addEventListener('click', () => openWin('toss', deskFanBtn));
     const mScreen = $('[data-m-screen]', desk);
-    const pocket = $('[data-pocket]', desk);
-    const pkPhone = $('[data-pk-phone]', desk);
-    const pkScreen = $('.device-screen', pkPhone);
-    const pkStatusTime = $('.phone-status span', pkPhone);
+    // the second act: the work as a keynote (assets/keynote.js), reached by putting the Air back in its envelope
+    const knEl = $('[data-kn]', desk);
     const mk = $('[data-mk]', desk), mkText = $('span', mk);
     const notesByKey = Object.fromEntries($$('.desk-data .note', desk).map((n) => [n.dataset.key, n]));
     const tpls = Object.fromEntries($$('.desk-data template[data-tpl]', desk).map((t) => [t.dataset.tpl, t]));
@@ -577,12 +575,10 @@
 
     // Live Mumbai clock in the laptop's menu bar and the phone's status bar.
     const fmtMenu = new Intl.DateTimeFormat('en-US', { timeZone: 'Asia/Kolkata', weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
-    const fmtPhone = new Intl.DateTimeFormat('en-GB', { timeZone: 'Asia/Kolkata', hour: '2-digit', minute: '2-digit', hour12: false });
     const tickClock = () => {
       const now = new Date();
       const parts = Object.fromEntries(fmtMenu.formatToParts(now).map((p) => [p.type, p.value]));
       if (dtClock) { dtClock.textContent = `${parts.weekday} ${parts.hour}:${parts.minute} ${parts.dayPeriod}`; dtClock.title = 'Mumbai time'; }
-      if (pkStatusTime) pkStatusTime.textContent = fmtPhone.format(now);
       // iCal's Dock icon always showed today's date
       const cal = $('.dt-icon--cal', desktop);
       if (cal) {
@@ -599,18 +595,16 @@
     let open = 0, push = 0, aside = 0, atDesk = false, atPhone = false, inStage = true;
     // Phones don't scroll the page: the scene has three states (cover, desktop, phone) and a swipe or a button plays
     // an eased transition between them, so it can never stop half way (iOS Safari's momentum and toolbar did that).
-    let vP = 0, tweenRaf = 0, tweening = false, igOrigin = [innerWidth / 2, innerHeight * 0.6], flyFrom = null;
-    const igFly = $('[data-ig-fly]', desk);
+    let vP = 0, tweenRaf = 0, tweening = false;
     let lastScrollY = scrollY, scrollDir = 1, snapTimer = 0, snapping = false, pointerDown = false;
     let nudgeDeg = 0, interacted = false;
     let wins = [], zCounter = 10, cascadeIdx = 0;
-    let curPk = null, mkTimer = 0, activeMarks = [], activeMarkIdx = -1, activePlayer = null, activeMkHost = null;
+    let kn = null, mkTimer = 0, activeMarks = [], activeMarkIdx = -1, activePlayer = null, activeMkHost = null;
 
     // Re-parent the desktop when crossing the 900px breakpoint.
     function syncBreakpoint() {
       if (fanBtn) setFan(false);
       closeAllWins(true);
-      closeStory(true);
       if (wide.matches) {
         if (desktop.parentElement !== macScreen) macScreen.prepend(desktop);
       } else if (desktop.parentElement !== mScreen) mScreen.append(desktop);
@@ -672,7 +666,7 @@
       desk.classList.toggle('is-desk', atDesk);
       desk.classList.toggle('is-phone', atPhone);
       desktop.inert = !atDesk;
-      pocket.inert = !atPhone;
+      knEl.inert = !atPhone;
 
       // Identity copy fade
       const meOp = 1 - smoothstep(0.02, 0.46, open);
@@ -683,7 +677,7 @@
       // Lid angle, glass reflection sweep, and studio lighting
       const eo = smoothstep(0, 1, open);
       const ea = smoothstep(0, 1, aside);
-      const shut = wide.matches ? smoothstep(0.1, 0.5, aside) : 0;
+      const shut = wide.matches ? smoothstep(0.02, 0.3, aside) : 0;
       const lidDeg = clamp(-90 * (1 - eo) - 90 * shut + (onCover ? nudgeDeg : 0), -90, 0);
       macLid.style.setProperty('--lid', `${lidDeg.toFixed(2)}deg`);
       mac.style.setProperty('--deck-op', (smoothstep(0.05, 0.35, open) * (1 - shut)).toFixed(3));
@@ -702,17 +696,22 @@
         const x1 = (stageW - W) * 0.5;
         const y1 = Math.max(66, (H - Hl) * 0.42);
         const s1 = 1;
-        const x2 = 0.17 * stageW - 0.5 * W;
-        const y2 = (H - Hl) * 0.5;
-        const s2 = 0.45;
+        // the keynote's way in: the shut Air shrinks to the middle, an interoffice envelope rises under it, and the
+        // Air slides down into it, the way it came out of one at its launch in 2008. Then the house lights go down.
+        const s2 = 0.42, mouth = H * 0.5;
+        const x2 = (stageW - W) * 0.5;
+        // a shut laptop shows below its box: its hinge at the box's foot, its front lip about a third of a depth lower
+        const y2 = mouth - 10 - Hl * 0.5 - Hl * 0.84 * s2;
+        const cK = smoothstep(0, 0.32, aside), dropK = smoothstep(0.34, 0.62, aside);
+        const drop = (Hl * 0.34 * s2 + 34) * dropK;
 
-        const mx = x0 + (x1 - x0) * eo + (x2 - x1) * ea;
-        const my = y0 + (y1 - y0) * eo + (y2 - y1) * ea;
-        const ms = s0 + (s1 - s0) * eo + (s2 - s1) * ea;
+        const mx = x0 + (x1 - x0) * eo + (x2 - x1) * cK;
+        const my = y0 + (y1 - y0) * eo + (y2 - y1) * cK + drop;
+        const ms = s0 + (s1 - s0) * eo + (s2 - s1) * cK;
 
         // 3D hero camera angle on the cover, orbiting to front-and-center as the lid opens, then angling aside
         const heroRx = 5.5 * (1 - eo);
-        const heroRy = -9.5 * (1 - eo) + 20 * ea;
+        const heroRy = -9.5 * (1 - eo);
         const heroRz = 0.8 * (1 - eo);
         mac.style.setProperty('--rx', `${heroRx.toFixed(2)}deg`);
         mac.style.setProperty('--ry', `${heroRy.toFixed(2)}deg`);
@@ -720,7 +719,7 @@
         mac.style.setProperty('--sh-y', `${(28 - 10 * eo).toFixed(1)}px`);
         mac.style.setProperty('--sh-s', (0.94 + 0.06 * eo).toFixed(3));
 
-        const macOp = 1 - 0.15 * ea;
+        const macOp = 1;
 
         if (atDesk) {
           mac.style.transform = `translate3d(${Math.round(x1)}px, ${Math.round(y1)}px, 0) scale(1)`;
@@ -732,30 +731,16 @@
         mac.style.opacity = macOp.toFixed(3);
         Object.assign(pose, { rx: +heroRx.toFixed(2), ry: +heroRy.toFixed(2), rz: +heroRz.toFixed(2), op: +macOp.toFixed(3) });
 
-        // Handoff: Instagram lifts off the desktop, the lid shuts behind it (the sleep light starts to breathe),
-        // the icon arcs over to where the phone will be, and opens into it the way iOS launches an app.
-        const cb = pocket.offsetParent;
-        if (aside <= 0.001 || !flyFrom) {
-          const ic = $('[data-ig-app-icon]', desktop)?.getBoundingClientRect(), r = cb?.getBoundingClientRect();
-          if (ic && ic.width && r) flyFrom = { x: ic.left + ic.width / 2 - r.left, y: ic.top + ic.height / 2 - r.top, s: ic.width };
-        }
-        const fl = smoothstep(0, 0.52, aside), op = smoothstep(0.42, 1, aside);
-        if (flyFrom && cb && aside > 0.001 && op < 0.999) {
-          const tx = cb.clientWidth * 0.53, ty = cb.clientHeight * 0.5;
-          const fx = flyFrom.x + (tx - flyFrom.x) * fl;
-          const fy = flyFrom.y + (ty - flyFrom.y) * fl - Math.sin(Math.PI * fl) * H * 0.16;
-          const size = flyFrom.s * (1 + 0.45 * fl);
-          igFly.style.width = igFly.style.height = `${size.toFixed(1)}px`;
-          igFly.style.transform = `translate3d(${(fx - size / 2).toFixed(1)}px, ${(fy - size / 2).toFixed(1)}px, 0) rotate(${(-10 * Math.sin(Math.PI * fl)).toFixed(2)}deg)`;
-          igFly.style.opacity = (smoothstep(0, 0.04, aside) * (1 - smoothstep(0.5, 0.66, aside))).toFixed(3);
-          igFly.style.visibility = 'visible';
-        } else igFly.style.visibility = 'hidden';
-        mac.style.setProperty('--ig-lift', aside > 0.001 ? '0' : '1');
-        pocket.style.setProperty('--pk-tx', '0px');
-        pocket.style.setProperty('--pk-ty', '0px');
-        pocket.style.setProperty('--pk-sc', (0.08 + 0.92 * (1 - Math.pow(1 - op, 3))).toFixed(4));
-        pocket.style.setProperty('--pk-op', smoothstep(0.42, 0.52, aside).toFixed(3));
-        pocket.style.setProperty('--pk-launch', (1 - smoothstep(0.55, 0.85, aside)).toFixed(3));
+        const ew = W * s2 * 1.42, eh = ew * 0.62;
+        const envUp = smoothstep(0.12, 0.38, aside), lights = smoothstep(0.58, 0.86, aside);
+        stage.style.setProperty('--env-x', `${((stageW - ew) / 2).toFixed(1)}px`);
+        stage.style.setProperty('--env-y', `${mouth.toFixed(1)}px`);
+        stage.style.setProperty('--env-w', `${ew.toFixed(1)}px`);
+        stage.style.setProperty('--env-h', `${eh.toFixed(1)}px`);
+        stage.style.setProperty('--env-dy', `${((1 - envUp) * (H - mouth + eh * 0.2 + 40)).toFixed(1)}px`);
+        stage.style.setProperty('--env-op', aside > 0.001 ? '1' : '0');
+        knEl.style.setProperty('--kn-dark', lights.toFixed(3));
+        knEl.style.setProperty('--kn-in', smoothstep(0.78, 1, aside).toFixed(3));
       } else {
         // Phones: the closed laptop sits just under the words (Sujith's pick); opening it, the camera
         // zooms into its screen (transform only, so it stays on the GPU) and the real desktop fades in over it.
@@ -782,20 +767,16 @@
           mScreen.style.opacity = smoothstep(0.72, 0.95, ep).toFixed(3);
           mScreen.style.transform = `scale(${(1.06 - 0.06 * smoothstep(0.62, 1, ep)).toFixed(4)})`;
         } else {
-          // opening Instagram: the desktop sinks back while the app grows out of its icon
+          // the keynote: the desktop sinks back as the house lights go down
           mScreen.style.opacity = (1 - smoothstep(0.3, 0.9, ea)).toFixed(3);
           mScreen.style.transform = `scale(${(1 - 0.07 * ea).toFixed(4)})`;
         }
-        if (aside <= 0.01) {
-          const ic = $('[data-ig-app-icon]', desktop)?.getBoundingClientRect();
-          if (ic && ic.width) igOrigin = [ic.left + ic.width / 2, ic.top + ic.height / 2];
-        }
-        pocket.style.setProperty('--pk-ox', `${igOrigin[0].toFixed(0)}px`);
-        pocket.style.setProperty('--pk-oy', `${igOrigin[1].toFixed(0)}px`);
-        pocket.style.setProperty('--pk-s', (0.16 + 0.84 * ea).toFixed(4));
-        pocket.style.setProperty('--pk-o', smoothstep(0, 0.22, ea).toFixed(3));
-        pocket.style.setProperty('--pk-r', `${((1 - ea) * 46).toFixed(1)}px`);
+        knEl.style.setProperty('--kn-dark', smoothstep(0.1, 0.6, ea).toFixed(3));
+        knEl.style.setProperty('--kn-in', smoothstep(0.45, 1, ea).toFixed(3));
       }
+      // the masthead goes dark with the house lights; with the lights fully up the theatre isn't drawn at all
+      root.classList.toggle('kn-dark', aside > 0.6);
+      knEl.style.visibility = aside > 0.001 ? 'visible' : 'hidden';
       // the WebGL body takes the very numbers the CSS screen was just given, so the two stay in register
       if (macGl && inStage) macGl.render({ W, lid: lidDeg, lit: 1 - darkOp, ...pose });
 
@@ -809,11 +790,11 @@
       cancelAnimationFrame(tweenRaf);
       const from = vP;
       if (immediate || reduce || from === target) { vP = target; tweening = false; frame(); return; }
-      // the lid and the zoom get room to breathe; opening Instagram is quicker
+      // the lid and the zoom get room to breathe; the lights going down is quicker
       const span = Math.abs(target - from);
       const dur = span > 1.5 ? 2200 : Math.min(from, target) >= 1 ? 900 * span : 1600 * span;
       const t0 = performance.now();
-      // opening Instagram eases out (moves on the tap, settles softly, like iOS); the lid and the zoom ease in and out
+      // the keynote eases out (moves on the tap, settles softly); the lid and the zoom ease in and out
       const appOpen = Math.min(from, target) >= 1;
       const ease = appOpen ? (p) => 1 - Math.pow(1 - p, 3) : (p) => 0.5 - Math.cos(Math.PI * p) / 2;
       tweening = true;
@@ -830,12 +811,11 @@
       if (tweening) return;
       const next = clamp(Math.round(vP) + dir, 0, 2);
       if (next === Math.round(vP)) return;
-      if (next < 2) closeStory(true);
       if (next !== 1) closeAllWins(true);
       tweenTo(next);
     }
-    // a vertical swipe anywhere outside the scrolling parts (the feed, a story, an open window) changes state
-    const SCROLLERS = '.ig-views, .igs, .ig-sheet, .win, .dt-wins, input, textarea, [data-slide-file]';
+    // a vertical swipe anywhere outside the scrolling parts (the keynote's chapters, an open window) changes state
+    const SCROLLERS = '.kn-bar, .win, .dt-wins, input, textarea, [data-slide-file]';
     let swipe = null;
     stage.addEventListener('touchstart', (e) => {
       if (wide.matches || e.touches.length !== 1 || e.target.closest(SCROLLERS)) { swipe = null; return; }
@@ -927,17 +907,15 @@
     // The masthead's Laptop and Phone links are shortcuts too.
     const shortcut = (sel, fn) => $$(sel).forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); setMenu(false); fn(); }));
     shortcut('[data-desk-open]', () => {
-      closeStory(true);
       scrollToDesk(a1);
       setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
     });
     shortcut('[data-desk-phone]', () => {
       closeAllWins(true);
       scrollToDesk(b1);
-      setTimeout(() => $('.ig-ring', pocket)?.focus({ preventScroll: true }), reduce ? 20 : 940);
+      setTimeout(() => kn?.focus(), reduce ? 20 : 940);
     });
     $$('[data-desk-laptop]', desk).forEach((b) => b.addEventListener('click', () => {
-      closeStory(true);
       scrollToDesk(b0);
       setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
     }));
@@ -1093,7 +1071,7 @@
           mkText.textContent = activeMarks[m].text;
           mk.style.setProperty('--y', activeMarks[m].y);
           mk.classList.toggle('mk-top', activeMarks[m].y >= 50);
-          // Place beside the device on wide screens when margin >= 180px; otherwise as an ivory pill inside the window/sheet.
+          // Place beside the laptop on wide screens when margin >= 180px; otherwise as an ivory pill inside the window.
           if (!wide.matches) {
             if (activeMkHost && mk.parentElement !== activeMkHost) activeMkHost.append(mk);
             mk.classList.add('mk--pill');
@@ -1110,14 +1088,6 @@
               if (activeMkHost && mk.parentElement !== activeMkHost) activeMkHost.append(mk);
               mk.classList.add('mk--pill');
             }
-          } else if (atPhone) {
-            const phRect = pkPhone.getBoundingClientRect();
-            const stRect = stage.getBoundingClientRect();
-            const rightMargin = stRect.right - phRect.right;
-            if (mk.parentElement !== stage) stage.append(mk);
-            mk.classList.remove('mk--pill');
-            mk.style.setProperty('--mk-x', `${Math.round(phRect.right - stRect.left + 18)}px`);
-            mk.style.setProperty('--mk-w', `${Math.max(180, Math.round(rightMargin - 28))}px`);
           }
           mk.classList.add('on');
         }
@@ -1147,29 +1117,13 @@
         }
       });
 
-      // Phone app player: plays when atPhone
-      if (curPk?.player) {
-        const wantPk = canPlay && atPhone;
-        if (reduce && wantPk && !curPk.started) { curPk.started = true; curPk.player.still(); }
-        else if (wantPk && !reduce && !curPk.running) {
-          curPk.running = true;
-          curPk.player.running = true;
-          if (curPk.started) curPk.player.resume();
-          else { curPk.started = true; curPk.player.start(() => storyStep(1)); }
-        } else if ((!wantPk || reduce) && curPk.running) {
-          curPk.running = false;
-          curPk.player.running = false;
-          curPk.player.pause();
-        }
-      }
+      // The keynote plays while the house lights are down
+      kn?.run(canPlay && atPhone);
 
       // Drive timed ink notes for whichever player is active
       if (atDesk && frontWin?.player && frontWin.t >= 0.95) {
         setActiveInk(frontWin.player, frontWin.note, frontWin.body, !wide.matches);
         if (frontWin.running) mkTimer = requestAnimationFrame(tickInk);
-      } else if (atPhone && curPk?.player) {
-        setActiveInk(curPk.player, curPk.note, story, !wide.matches);
-        if (curPk.running) mkTimer = requestAnimationFrame(tickInk);
       } else {
         setActiveInk(null, null, null, false);
       }
@@ -1490,7 +1444,7 @@
         w.el.remove();
         if (!wins.length) {
           if (dtFront) dtFront.textContent = 'Finder';
-          if (!wide.matches && !curPk) { root.classList.remove('sheet-open'); lenis?.start(); }
+          if (!wide.matches) { root.classList.remove('sheet-open'); lenis?.start(); }
         } else {
           focusWin(wins[wins.length - 1]);
         }
@@ -1665,320 +1619,24 @@
       page.append(iframe);
     }
 
-    /* ---------- Phone: my work as Instagram (stories, a feed of metric cards, search, results, profile) ----------
-       Every product is one post and one story segment. A post is its numbers, set as a card, with Watch; stories
-       play the same recordings and recreations as the laptop, through makePlayer + titled. */
+    /* ---------- The keynote (assets/keynote.js): the work after the laptop, one idea per slide ----------
+       It reads the same notes as the laptop and plays the same recordings and recreations, through makePlayer. */
 
-    const ig = $('[data-ig]', pocket);
-    const igViews = $('[data-ig-views]', ig);
-    const igTitle = $('[data-ig-title]', ig);
-    const story = $('[data-story]', ig);
-    const stBars = $('[data-story-bars]', story);
-    const stAv = $('[data-story-av]', story), stUser = $('[data-story-user]', story), stSub = $('[data-story-sub]', story);
-    const stMedia = $('[data-story-media]', story), stCard = $('[data-story-card]', story);
-    const stIntro = $('[data-story-intro]', story), stNote = $('[data-story-note]', story);
-    const sheet = $('[data-ig-sheet]', ig);
-    stIntro.innerHTML = INTRO_HTML;
-
-    // a logo either fills its circle, or (a mark drawn to its edges) sits inside it with room around it
-    const ME = '<img src="assets/brand/sujith.jpg" alt="" width="40" height="40">';
-    const mark = (src, inset) => `<img src="assets/brand/${src}" alt="" width="40" height="40"${inset ? ' class="is-mark"' : ''}>`;
-    const STORIES = [
-      { label: 'Pixis', av: mark('pixis-mark.svg'), when: '2020–25', keys: ['ads', 'pixis'] },
-      { label: 'BorderPlus', av: mark('borderplus-mark.png'), when: '2026', keys: ['carepilot', 'ask', 'learn', 'mis', 'pathways'] },
-      { label: 'Zenea', av: mark('zenea-wordmark.png', true), when: '2026', keys: ['zenea-caregiver', 'zenea-parent'] },
-      { label: 'Personal', av: ME, when: '2026', keys: ['money-plan', 'trade', 'eatouts'] },
-      { label: 'Church', av: mark('gbf-icon.png'), when: '2026', keys: ['gbf'] },
-      { label: 'Say hi', av: '<span>Hi</span>', me: true, when: 'Oct 2026', keys: ['kit', 'hi'] },
-    ];
-    const FEED = ['ads', 'pixis', 'mis', 'carepilot', 'ask', 'learn', 'pathways', 'zenea-caregiver', 'zenea-parent', 'trade', 'eatouts', 'money-plan', 'gbf'];
-    const TINT = { borderplus: '#E4EEE8', pixis: '#E9E6F6', personal: '#F7E9E1', ai: '#F3ECDA' };
-    const where = (key) => STORIES.findIndex((st) => st.keys.includes(key));
-    // A story's cards: a playable product gets its summary, then its demo as the next card; the rest are one card.
-    const segs = (i) => STORIES[i].keys.flatMap((k) => (playable(notesByKey[k]) ? [{ key: k, part: 'sum' }, { key: k, part: 'demo' }] : [{ key: k, part: 'card' }]));
-    const segAt = (i, key) => Math.max(0, segs(i).findIndex((g) => g.key === key));
-    const product = (note) => (note.dataset.title || '').split('·')[0].trim();
-    const txt = (note, sel) => $(sel, note)?.textContent.trim().replace(/\s+/g, ' ') || '';
-    const playable = (note) => !!(note.dataset.video || note.dataset.html);
-    const metrics = (note) => (note.dataset.facts || '').split('|').filter(Boolean).map((f) => f.split(': ')).slice(0, 2);
-    const playIcon = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l10.5-6.5z"/></svg>';
-
-    // A post's square: its numbers, set as a card. Big for the feed; the grids reuse it, smaller.
-    function card(key) {
-      const note = notesByKey[key];
-      const m = metrics(note);
-      return `<span class="ig-card" style="--w:${TINT[note.dataset.chapter] || TINT.borderplus}">
-        <span class="ig-card-k">${txt(note, '.note-kick')}</span>
-        <span class="ig-card-t">${txt(note, '.note-title')}</span>
-        <span class="ig-card-big">${txt(note, '.note-stat')}</span>
-        <span class="ig-card-l">${txt(note, '.note-lab')}</span>
-        ${m.length ? `<span class="ig-card-m">${m.map(([l, v]) => `<span><b>${v}</b>${l}</span>`).join('')}</span>` : ''}
-        <span class="ig-watch">${playIcon}${playable(note) ? 'Watch' : 'View'}</span>
-      </span>`;
-    }
-
-    // Stories tray, and the same rings as profile highlights
-    const rings = STORIES.map((st, i) =>
-      `<li><button class="ig-ring" type="button" data-story-open="${i}"><span class="ig-av${st.me ? ' ig-av--me' : ''}">${st.av}</span><span class="ig-ring-l">${st.label}</span></button></li>`).join('');
-    $('[data-ig-stories]', ig).innerHTML = rings;
-    $('[data-ig-highlights]', ig).innerHTML = rings;
-
-    // Feed
-    const icon = {
-      heart: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20.3S3.6 15.2 3.6 9.1A4.4 4.4 0 0 1 12 7a4.4 4.4 0 0 1 8.4 2.1c0 6.1-8.4 11.2-8.4 11.2z"/></svg>',
-      chat: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 11.6a8.4 8.4 0 0 1-12.4 7.4L3.5 20.5l1.5-4.4a8.4 8.4 0 1 1 15.5-4.5z"/></svg>',
-      send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3.5 3.5 10.3l6.6 2.6L21 3.5zM10.1 12.9l2.6 7.6L21 3.5"/></svg>',
-      save: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18.5 20.5 12 15.6l-6.5 4.9V4.3a.8.8 0 0 1 .8-.8h11.4a.8.8 0 0 1 .8.8z"/></svg>',
+    const greetTalk = (el) => {
+      const first = ($('[data-visitor]')?.value || '').trim().split(/\s+/)[0];
+      const t = $('[data-visitor-talk]', el);
+      if (t) t.textContent = first ? `Let's talk, ${first}.` : "Let's talk.";
     };
-    $('[data-ig-feed]', ig).innerHTML = FEED.map((key) => {
-      const note = notesByKey[key];
-      const st = STORIES[where(key)];
-      const tags = (note.dataset.tags || '').split('|').filter(Boolean);
-      return `<article class="ig-post" data-post="${key}">
-        <header class="ig-ph"><span class="ig-av">${ME}</span><span class="ig-ph-who"><b>sujithbenhur</b><span>${txt(note, '.note-kick')}</span></span><span class="ig-ph-time">${st.when}</span></header>
-        <button class="ig-pm" type="button" data-post-media="${key}" aria-label="${playable(note) ? 'Watch' : 'View'} ${product(note)}">${card(key)}<span class="ig-burst" aria-hidden="true">${icon.heart}</span></button>
-        <div class="ig-pb">
-          <div class="ig-acts"><button class="ig-act" type="button" data-like aria-label="Like">${icon.heart}</button><button class="ig-act" type="button" data-post-media="${key}" aria-label="Watch">${icon.chat}</button><button class="ig-act" type="button" data-ig-hi aria-label="Say hi">${icon.send}</button><span class="ig-act ig-act--save" aria-hidden="true">${icon.save}</span></div>
-          ${tags.length ? `<p class="ig-cap"><b>sujithbenhur</b> Built with ${tags.join(', ')}.</p>` : ''}
-          ${note.dataset.honest ? `<p class="ig-honest">${note.dataset.honest}</p>` : ''}
-        </div>
-      </article>`;
-    }).join('');
+    kn = window.Keynote?.(knEl, { notes: $$('.desk-data .note', desk), makePlayer, narrow: () => !wide.matches, greet: greetTalk }) || null;
+    syncPlayers();
 
-    // Search and profile grids
-    $$('[data-ig-grid]', ig).forEach((g) => {
-      g.innerHTML = FEED.map((key) => `<button class="ig-cell" type="button" data-post-media="${key}" aria-label="${product(notesByKey[key])}">${card(key)}</button>`).join('');
-    });
-
-    // Results: each headline number and fact, one line each
-    $('[data-ig-news]', ig).innerHTML = FEED.flatMap((key) => {
-      const note = notesByKey[key];
-      const st = STORIES[where(key)];
-      const row = (html) => `<li><span class="ig-av${st.me ? ' ig-av--me' : ''}">${st.av}</span><p>${html}</p><button class="ig-news-th" type="button" data-post-media="${key}" aria-label="${playable(note) ? 'Watch' : 'View'} ${product(note)}">${playIcon}</button></li>`;
-      return [row(`<b>${product(note)}</b> <b>${txt(note, '.note-stat')}</b> ${txt(note, '.note-lab')}`),
-        ...metrics(note).map(([l, v]) => row(`<b>${product(note)}</b> ${l}: <b>${v}</b>`))];
-    }).join('');
-
-    $('[data-ig-stats]', ig).innerHTML = [[FEED.length, 'posts'], ['5,900+', 'nurses'], ['300+', 'brands']]
-      .map(([n, l]) => `<div><dt>${l}</dt><dd>${n}</dd></div>`).join('');
-
-    // Tabs: Reels plays every story from the start
-    const TITLES = { search: 'Search', activity: 'Results', profile: 'sujithbenhur' };
-    function setTab(name) {
-      if (name === 'reels') { openStory(0, 0, $('[data-tab="reels"]', ig)); return; }
-      const view = $(`.ig-view[data-view="${name}"]`, ig);
-      if (view.classList.contains('is-on')) { igViews.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }); return; }
-      $$('.ig-view', ig).forEach((v) => v.classList.toggle('is-on', v === view));
-      $$('.ig-tab', ig).forEach((t) => t.classList.toggle('is-on', t.dataset.tab === name));
-      igTitle.innerHTML = TITLES[name] ? `<span class="ig-title-t">${TITLES[name]}</span>` : '<span class="ig-logo">Instagram</span>';
-      igViews.scrollTop = 0;
-      if (!reduce) { view.classList.remove('is-in'); void view.offsetWidth; view.classList.add('is-in'); }
-    }
-    $$('[data-tab]', ig).forEach((t) => t.addEventListener('click', () => setTab(t.dataset.tab)));
-
-    function openSheet() {
-      sheet.hidden = false;
-      requestAnimationFrame(() => sheet.classList.add('is-on'));
-      $('.ig-sbtn', sheet)?.focus({ preventScroll: true });
-    }
-    function closeSheet() {
-      if (sheet.hidden) return;
-      sheet.classList.remove('is-on');
-      setTimeout(() => { sheet.hidden = true; }, reduce ? 0 : 300);
-    }
-    $('[data-sheet-close]', sheet).addEventListener('click', closeSheet);
-    sheet.addEventListener('click', (e) => { if (e.target === sheet) closeSheet(); });
-
-    // A post: one tap opens its story, a double tap likes it
-    let tapTimer = 0, tapKey = null;
-    function like(post) {
-      if (!post) return;
-      post.classList.add('is-liked');
-      const burst = $('.ig-burst', post);
-      burst.classList.remove('on');
-      void burst.offsetWidth;
-      burst.classList.add('on');
-    }
-    ig.addEventListener('click', (e) => {
-      if (e.target.closest('[data-ig-hi]')) { openSheet(); return; }
-      const ring = e.target.closest('[data-story-open]');
-      if (ring) { openStory(+ring.dataset.storyOpen, 0, ring); return; }
-      const likeBtn = e.target.closest('[data-like]');
-      if (likeBtn) { const post = likeBtn.closest('.ig-post'); post.classList.contains('is-liked') ? post.classList.remove('is-liked') : like(post); return; }
-      const m = e.target.closest('[data-post-media]');
-      if (!m) return;
-      const key = m.dataset.postMedia;
-      const post = m.classList.contains('ig-pm') ? m.closest('.ig-post') : null;
-      if (post && tapKey === key) { clearTimeout(tapTimer); tapKey = null; like(post); return; }
-      const go = () => { tapKey = null; const si = where(key); openStory(si, segAt(si, key), m); };
-      if (!post) { go(); return; }
-      tapKey = key;
-      tapTimer = setTimeout(go, 260);
-    });
-
-    /* Story viewer */
-    let stI = 0, stSeg = 0, barRaf = 0, held = false, holdTimer = 0, stFrom = null;
-    const still = (ms) => {
-      const c = clock({ duration: ms, steps: [], reset() {}, still() {} });
-      return { el: null, get elapsed() { return c.elapsed; }, get duration() { return ms; }, start: (onEnd) => c.start(onEnd), resume: () => c.resume(), pause: () => c.pause(), still() {} };
-    };
-
-    function tickBars() {
-      cancelAnimationFrame(barRaf);
-      if (story.hidden) return;
-      const p = curPk?.player;
-      const fill = p && p.duration ? clamp(p.elapsed / p.duration) : 0;
-      $$('i', stBars).forEach((b, i) => b.style.setProperty('--p', i < stSeg ? 1 : i === stSeg ? fill.toFixed(4) : 0));
-      barRaf = requestAnimationFrame(tickBars);
-    }
-
-    function showSeg() {
-      const st = STORIES[stI];
-      const sg = segs(stI)[stSeg];
-      const key = sg.key;
-      const note = notesByKey[key];
-      if (curPk?.player) curPk.player.pause();
-      stVideoReset();
-      stAv.innerHTML = st.av;
-      stAv.classList.toggle('ig-av--me', !!st.me);
-      stUser.textContent = st.label;
-      stSub.textContent = `${product(note)} · ${st.when}`;
-      $$('.dv-video, .dv-html, .card, .igs-card', stMedia).forEach((el) => { el.hidden = true; el.classList.remove('is-on'); });
-      stIntro.classList.remove('on');
-      let player;
-      if (sg.part === 'sum') {
-        fillIntro(note, stIntro);
-        stIntro.classList.add('on');
-        player = still(6000);
-      } else if (sg.part === 'demo') {
-        player = makePlayer(note, stMedia, true);
-      } else if (key === 'mis') {
-        const cardEl = $('.card[data-card="mis"]', stMedia);
-        cardEl.hidden = false;
-        void cardEl.offsetWidth;
-        cardEl.classList.add('is-on');
-        player = still(7000);
-      } else {
-        stCard.innerHTML = '';
-        stCard.append(tpls[key].content.cloneNode(true));
-        if (key === 'hi') greetTxt(stCard);
-        stCard.hidden = false;
-        stCard.scrollTop = 0;
-        player = still(key === 'hi' ? 6000 : 9000);
-      }
-      stNote.textContent = note.dataset.honest || '';
-      story.classList.toggle('is-card', sg.part === 'card');
-      story.classList.toggle('is-wide', 'wide' in note.dataset && !note.dataset.mVideo);
-      curPk = { key, note: sg.part === 'demo' ? note : null, player, started: false, running: false };
-      $('.ig-ring', $$('[data-ig-stories] li', ig)[stI])?.classList.add('is-seen');
-      syncPlayers();
-      tickBars();
-    }
-    function stVideoReset() {
-      const v = $('video', stMedia);
-      if (v) v.pause();
-    }
-
-    function openStory(i, seg = 0, fromEl = null) {
-      if (!STORIES[i]) return;
-      closeSheet();
-      stI = i;
-      stSeg = Math.max(0, seg);
-      if (fromEl) {
-        stFrom = fromEl;
-        // grow the story out of whatever was tapped
-        const ir = ig.getBoundingClientRect(), fr = fromEl.getBoundingClientRect();
-        if (ir.width) {
-          story.style.setProperty('--ox', `${(((fr.left + fr.width / 2) - ir.left) / ir.width * 100).toFixed(1)}%`);
-          story.style.setProperty('--oy', `${(((fr.top + fr.height / 2) - ir.top) / ir.height * 100).toFixed(1)}%`);
-        }
-      }
-      stBars.innerHTML = segs(i).map(() => '<i></i>').join('');
-      const wasHidden = story.hidden;
-      story.hidden = false;
-      desk.classList.add('has-story');
-      pkScreen.classList.add('band-dark');
-      if (wasHidden && !reduce) {
-        story.classList.add('is-opening');
-        requestAnimationFrame(() => requestAnimationFrame(() => story.classList.remove('is-opening')));
-      }
-      if (!wide.matches) { root.classList.add('sheet-open'); lenis?.stop(); }
-      showSeg();
-      $('.igs-close', story)?.focus({ preventScroll: true });
-    }
-
-    function storyStep(dir) {
-      if (story.hidden) return;
-      const count = segs(stI).length;
-      if (stSeg + dir >= 0 && stSeg + dir < count) { stSeg += dir; showSeg(); return; }
-      const next = stI + dir;
-      if (next < 0) { stSeg = 0; showSeg(); return; }
-      if (next >= STORIES.length) { closeStory(); return; }
-      openStory(next, dir < 0 ? segs(next).length - 1 : 0);
-    }
-
-    function closeStory(immediate = false) {
-      if (story.hidden) return;
-      if (curPk?.player) curPk.player.pause();
-      stVideoReset();
-      curPk = null;
-      cancelAnimationFrame(barRaf);
-      stIntro.classList.remove('on');
-      story.hidden = true;
-      story.classList.remove('is-held');
-      desk.classList.remove('has-story');
-      pkScreen.classList.remove('band-dark');
-      if (!wide.matches && !wins.length) { root.classList.remove('sheet-open'); lenis?.start(); }
-      syncPlayers();
-      if (!immediate) stFrom?.focus({ preventScroll: true });
-    }
-
-    $('[data-story-close]', story).addEventListener('click', () => closeStory());
-    // Tap the left third for back, the rest for next; hold to pause; swipe down to close.
-    let stTouch = null;
-    story.addEventListener('pointerdown', (e) => {
-      if (e.button > 0 || e.target.closest('.igs-close, .igs-card a')) return;
-      stTouch = { id: e.pointerId, sx: e.clientX, sy: e.clientY };
-      held = false;
-      clearTimeout(holdTimer);
-      holdTimer = setTimeout(() => {
-        held = true;
-        story.classList.add('is-held');
-        curPk?.player?.pause();
-      }, 240);
-    });
-    const endTouch = (e) => {
-      clearTimeout(holdTimer);
-      if (!stTouch || e.pointerId !== stTouch.id) return;
-      const dx = e.clientX - stTouch.sx, dy = e.clientY - stTouch.sy;
-      stTouch = null;
-      if (held) {
-        story.classList.remove('is-held');
-        if (curPk?.running) curPk.player.resume();
-      }
-      if (dy > 80 && Math.abs(dy) > Math.abs(dx) && !(stCard.scrollTop > 0)) { held = true; closeStory(); }
-      else if (Math.abs(dx) > 60 && Math.abs(dx) > Math.abs(dy)) { held = true; storyStep(dx < 0 ? 1 : -1); }
-    };
-    story.addEventListener('pointerup', endTouch);
-    story.addEventListener('pointercancel', endTouch);
-    $('[data-story-prev]', story).addEventListener('click', () => { if (!held) storyStep(-1); held = false; });
-    $('[data-story-next]', story).addEventListener('click', () => { if (!held) storyStep(1); held = false; });
-
-    // Keyboard controls: Esc closes the story, sheet or front window; arrows step through stories
+    // Esc closes the front window, or takes it out of theater mode
     addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') {
-        if (!story.hidden) { e.preventDefault(); closeStory(); }
-        else if (!sheet.hidden) { e.preventDefault(); closeSheet(); }
-        else if (wins.length) {
-          e.preventDefault();
-          const front = wins[wins.length - 1];
-          if (front.theater) toggleWinTheater(front, false);
-          else closeWin(front);
-        }
-      } else if (!story.hidden && (e.key === 'ArrowRight' || e.key === 'ArrowLeft')) {
-        e.preventDefault();
-        storyStep(e.key === 'ArrowRight' ? 1 : -1);
-      }
+      if (e.key !== 'Escape' || !wins.length) return;
+      e.preventDefault();
+      const front = wins[wins.length - 1];
+      if (front.theater) toggleWinTheater(front, false);
+      else closeWin(front);
     });
 
     document.addEventListener('visibilitychange', syncPlayers);

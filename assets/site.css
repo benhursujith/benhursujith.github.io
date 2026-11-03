@@ -217,8 +217,8 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   --aqua: "Lucida Grande", "Lucida Sans Unicode", "Lucida Sans", Geneva, Verdana, sans-serif;
   --brush-light: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 16' preserveAspectRatio='none'%3E%3Cfilter id='f'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.08' numOctaves='2' seed='5'/%3E%3CfeDisplacementMap in='SourceGraphic' scale='2.6'/%3E%3C/filter%3E%3Cpath d='M5 9.5C60 6.2 125 10.6 190 8.2S262 6.4 294 7.6' fill='none' stroke='%23141413' stroke-width='5.5' stroke-linecap='round' filter='url(%23f)'/%3E%3C/svg%3E");
 }
-/* The laptop and the phone show period screens, which had no dark mode: they keep the light tokens either way. */
-.desktop, .win, .ig {
+/* The laptop shows a period screen, which had no dark mode: it keeps the light tokens either way. */
+.desktop, .win {
   --paper: #FAF9F5; --panel: #F3F1EA; --screen: #FFFFFF; --ink: #141413; --ink-2: #5E5D58; --stone: #8F8D85;
   --rule: #E3E0D6; --clay: #D27650; --sage: #CFDDD5; --lilac: #DCD8EE; --blush: #F1D9CC; --sand: #EDE3CB;
   --on-ink: #FAF9F5; --brush: var(--brush-light);
@@ -703,24 +703,14 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .dt-icon--folder svg { fill: #000; }
 .dt-ficon--folder svg { fill: none; stroke: #000; stroke-width: 2.4; stroke-linejoin: round; filter: none; opacity: .3; }
 
-/* Instagram on the Mac desktop too (a modern app on a 2009 Mac, on purpose): it opens the phone out of the icon */
-.dt-phone-btn { cursor: pointer; }
-.ig-app-icon {
-  display: grid; place-items: center;
-  width: max(34px, calc(58 * var(--u))); height: max(34px, calc(58 * var(--u)));
-  border-radius: 23%;
-  background: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
-  box-shadow: 0 calc(8 * var(--u)) calc(18 * var(--u)) calc(-5 * var(--u)) rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .35);
-  animation: ig-app-nudge 2.6s cubic-bezier(.4, 0, .2, 1) infinite;
-  transition: transform .2s var(--ease);
-}
-.ig-app-icon svg { width: 62%; height: 62%; fill: none; stroke: #fff; stroke-width: 1.9; }
-.ig-app-icon svg circle:last-child { fill: #fff; stroke: none; }
-.dt-phone-btn:hover .ig-app-icon { animation: none; transform: translateY(-2px) scale(1.04); }
-.dt-phone-btn:active .ig-app-icon { transform: scale(.9); animation: none; }
-.dt-phone-btn .dt-fname { margin-top: calc(6 * var(--u)); }
-@keyframes ig-app-nudge { 0%, 70%, 100% { transform: translateY(0); } 80% { transform: translateY(-6px); } 90% { transform: translateY(0); } }
-.desk.is-phone .ig-app-icon { animation: none; }
+/* A Keynote document on the desktop: a page with Keynote's blue lectern on it. Opening it plays the keynote. */
+.dt-key-btn { cursor: pointer; }
+.dt-ficon--key { display: grid; place-items: center; }
+.dt-ficon--key svg { width: 62%; height: auto; margin-top: 8%; filter: drop-shadow(0 1px 1px rgba(0, 0, 0, .35)); }
+.dt-ficon--key .k-top { fill: #5FA2E8; }
+.dt-ficon--key .k-post { fill: #2F6FC2; }
+.dt-ficon--key .k-foot { fill: #1E4F93; }
+.dt-key-btn:hover .dt-ficon--key { transform: translateY(-2px); }
 
 /* The Writing stack: a pile of pages; clicking throws them out into a grid */
 .dt-stack {
@@ -1235,7 +1225,6 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .win-txt a { color: inherit; text-decoration: none; }
 .win-txt a:hover { text-decoration: underline; }
 .win-txt::after { content: ""; display: inline-block; width: 1px; height: 1.1em; margin-left: 1px; vertical-align: -2px; background: #000; animation: ads-caret 1s steps(1) infinite; }
-.igs-card:has(.win-txt) { background: #fff; }
 .win-ai .hx-stats { padding-top: 0; border-top: 0; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .win-ai .hx-stats dd { font-size: clamp(1.4rem, 3.6cqw, 2.1rem); }
 .win-ai .hx-stats dt { font-size: .76rem; margin-top: 4px; }
@@ -1317,360 +1306,201 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 }
 .intro-x:hover { background: rgba(20, 20, 19, .14); }
 
-/* ---------- Phone: today's Instagram on the iPhone (.pocket) ----------
-   White chrome, SF type, gradient story rings. Each post is its product's numbers, set as a soft card with a
-   Watch button; stories play the work. Sizes are in --pt, one iOS point of a 390-point-wide screen. */
-
-.pocket {
-  position: absolute; top: 50%; left: 53%; z-index: 6;
-  transform: translate(-50%, -50%) translate(var(--pk-tx, 0px), var(--pk-ty, 0px)) scale(var(--pk-sc, .07));
-  opacity: var(--pk-op, 0);
-  pointer-events: none;
-}
-.desk.is-phone .pocket { pointer-events: auto; }
-.pk-stage {
-  --px: 50%;
-  position: relative;
-  height: min(79svh, 730px);
-  width: calc(min(79svh, 730px) * 0.476);
-  container-type: size;
-}
-.pk-stage .device.phone .device-screen { container-type: inline-size; background: #fff; }
-.pk-hint {
-  position: absolute; left: calc(100% + 44px); top: 50%;
-  width: 190px;
-  transform: translateY(-50%);
-  font-size: .92rem; line-height: 1.45; color: var(--ink-2);
-  transition: opacity .3s;
-}
-.desk.has-story .pk-hint { opacity: 0; }
-
-.ig {
-  --pt: min(calc(100cqw / 390), 1.15px);
-  --ig-top: 15.1cqw;
-  --ig-bot: 7.5cqw;
-  --sf: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --ig-line: #DBDBDB;
-  --ig-mute: #737373;
-  --spring: cubic-bezier(.2, 1.3, .3, 1);
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  background: #fff; color: #0C0C0C;
-  font: 400 calc(14 * var(--pt))/1.32 var(--sf);
-  text-align: left;
-  overflow: hidden;
-  user-select: none; -webkit-user-select: none;
-}
-.ig button { font-family: var(--sf); color: inherit; }
-
-.ig-nav {
-  position: relative; z-index: 3; flex: none;
-  display: flex; align-items: center; gap: calc(6 * var(--pt));
-  box-sizing: content-box;
-  height: calc(46 * var(--pt));
-  padding: var(--ig-top) calc(12 * var(--pt)) 0 calc(14 * var(--pt));
-  background: rgba(255, 255, 255, .94);
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-}
-.ig-title { flex: 1; min-width: 0; }
-.ig-logo { position: relative; top: calc(2 * var(--pt)); font: 400 calc(30 * var(--pt))/1 "Grand Hotel", cursive; letter-spacing: .01em; }
-.ig-title-t { font: 700 calc(19 * var(--pt))/1 var(--sf); letter-spacing: -.01em; }
-.ig-nav-acts { display: flex; gap: calc(14 * var(--pt)); }
-.ig-icon { display: grid; place-items: center; width: calc(28 * var(--pt)); height: calc(28 * var(--pt)); padding: 0; border: 0; background: none; cursor: pointer; }
-.ig-icon svg, .ig-tab svg, .ig-act svg { width: 100%; height: 100%; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; transition: transform .35s var(--spring); }
-.ig-icon:active svg, .ig-tab:active svg, .ig-act:active svg { transform: scale(.82); }
-.ig-back { width: calc(26 * var(--pt)); margin-left: calc(-6 * var(--pt)); }
-
-.ig-views { position: relative; flex: 1; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: none; }
-.ig-views::-webkit-scrollbar { display: none; }
-.ig-view { display: none; }
-.ig-view.is-on { display: block; }
-.ig-view.is-in { animation: ig-view-in .42s var(--ease) both; }
-@keyframes ig-view-in { from { opacity: 0; transform: translateY(calc(10 * var(--pt))); } }
-
-/* Avatars */
-.ig-av {
-  position: relative; z-index: 0; flex: none;
-  display: grid; place-items: center;
-  width: calc(32 * var(--pt)); height: calc(32 * var(--pt));
-  border-radius: 50%;
-  background: #fff;
-  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .14);
-  font-size: calc(14 * var(--pt));
-  overflow: visible;
-}
-.ig-av img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #fff; }
-.ig-av img.is-mark { object-fit: contain; padding: 0 13%; }
-.ig-av--me { background: linear-gradient(150deg, #2E6E53, #1F4D3A); }
-.ig-av > span { font: 500 1em/1 var(--display); color: #F4F1EA; letter-spacing: -.02em; }
-
-/* Stories tray (and profile highlights) */
-.ig-stories {
-  display: flex; gap: calc(14 * var(--pt));
-  margin: 0; padding: calc(6 * var(--pt)) calc(12 * var(--pt)) calc(12 * var(--pt));
-  list-style: none;
-  overflow-x: auto; scrollbar-width: none;
-  border-bottom: .5px solid var(--ig-line);
-}
-.ig-stories::-webkit-scrollbar { display: none; }
-.ig-ring { display: flex; flex-direction: column; align-items: center; gap: calc(6 * var(--pt)); width: calc(70 * var(--pt)); padding: 0; border: 0; background: none; cursor: pointer; }
-/* the ring is the avatar's own background; a white gap, then the logo filling the circle */
-.ig-ring .ig-av {
-  width: calc(66 * var(--pt)); height: calc(66 * var(--pt));
-  background: conic-gradient(from 210deg, #FEDA75, #FA7E1E, #D62976, #962FBF, #4F5BD5, #FEDA75);
-  box-shadow: none;
-  font-size: calc(22 * var(--pt));
-  transition: transform .35s var(--spring);
-}
-.ig-ring .ig-av::before { content: ""; position: absolute; inset: calc(2.5 * var(--pt)); border-radius: 50%; background: #fff; }
-.ig-ring .ig-av > img, .ig-ring .ig-av > span {
-  position: absolute; top: calc(5 * var(--pt)); left: calc(5 * var(--pt));
-  width: calc(100% - 10 * var(--pt)); height: calc(100% - 10 * var(--pt));
-  border-radius: 50%;
-  box-shadow: 0 0 0 .5px rgba(0, 0, 0, .1);
-}
-.ig-ring .ig-av > span { display: grid; place-items: center; background: linear-gradient(150deg, #2E6E53, #1F4D3A); }
-.ig-ring.is-seen .ig-av, .ig-highlights .ig-av { background: #DBDBDB; }
-.ig-ring:hover .ig-av { transform: scale(1.06); }
-.ig-ring-l { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(12 * var(--pt)); color: #262626; }
-
-/* Posts: the card is the square */
-.ig-post { padding-bottom: calc(10 * var(--pt)); }
-.ig-ph { display: flex; align-items: center; gap: calc(10 * var(--pt)); height: calc(54 * var(--pt)); padding: 0 calc(12 * var(--pt)); }
-.ig-ph-who { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.22; }
-.ig-ph-who b { font-size: calc(13.5 * var(--pt)); font-weight: 600; }
-.ig-ph-who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(12 * var(--pt)); color: #262626; }
-.ig-ph-time { font-size: calc(12 * var(--pt)); color: var(--ig-mute); }
-.ig-pm, .ig-cell {
-  position: relative; display: block;
-  width: 100%; aspect-ratio: 1;
-  padding: 0; border: 0; background: none;
-  overflow: hidden; cursor: pointer;
-}
-.ig-card {
-  position: absolute; inset: 0;
-  display: flex; flex-direction: column;
-  padding: 8.5% 8.5% 8%;
-  background:
-    radial-gradient(120% 90% at 100% 0%, rgba(255, 255, 255, .85), transparent 55%),
-    var(--w, #E4EEE8);
-  color: #141413;
-  container-type: inline-size;
-  text-align: left;
-}
-.ig-card-k { font: 500 3.6cqw/1.2 var(--text); color: #5E5D58; }
-.ig-card-t { margin-top: 2.2cqw; max-width: 22ch; font: 500 6.6cqw/1.12 var(--display); letter-spacing: -.015em; }
-.ig-card-big { margin-top: auto; font: 500 13.5cqw/1 var(--display); letter-spacing: -.035em; }
-.ig-card-l { margin-top: 1.6cqw; max-width: 30ch; font: 400 3.9cqw/1.3 var(--text); color: #3D3C38; }
-.ig-card-m { display: flex; gap: 6cqw; margin-top: 4.4cqw; padding-top: 3.6cqw; border-top: 1px solid rgba(20, 20, 19, .12); }
-.ig-card-m span { flex: 1; min-width: 0; font: 400 3.1cqw/1.3 var(--text); color: #5E5D58; }
-.ig-card-m b { display: block; margin-bottom: .6cqw; font: 500 6.4cqw/1 var(--display); letter-spacing: -.02em; color: #141413; }
-.ig-watch {
-  position: absolute; right: 7%; top: 7.5%;
-  display: inline-flex; align-items: center; gap: 1.6cqw;
-  padding: 2cqw 3.6cqw 2cqw 2.8cqw;
-  border-radius: 999px;
-  background: #141413; color: #fff;
-  font: 600 3.5cqw/1 var(--sf);
-  box-shadow: 0 2cqw 5cqw -1.5cqw rgba(0, 0, 0, .45);
-  transition: transform .4s var(--spring);
-}
-.ig-watch svg { width: 3.4cqw; height: 3.4cqw; fill: currentColor; }
-.ig-pm:hover .ig-watch, .ig-pm:focus-visible .ig-watch { transform: scale(1.08); }
-.ig-pm .ig-card { transition: transform .5s var(--ease); }
-.ig-pm:hover .ig-card { transform: scale(1.012); }
-.ig-burst {
-  position: absolute; left: 50%; top: 50%; z-index: 2;
-  width: 30%;
-  opacity: 0;
-  transform: translate(-50%, -50%) scale(.2);
-  pointer-events: none;
-}
-.ig-burst svg { display: block; width: 100%; height: auto; fill: #fff; filter: drop-shadow(0 4px 18px rgba(0, 0, 0, .3)); }
-.ig-burst.on { animation: ig-burst .95s var(--ease) forwards; }
-@keyframes ig-burst {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(.2) rotate(-12deg); }
-  16% { opacity: 1; transform: translate(-50%, -50%) scale(1.2) rotate(0); }
-  30%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -80%) scale(.9); }
-}
-.ig-pb { padding: 0 calc(12 * var(--pt)); }
-.ig-acts { display: flex; align-items: center; gap: calc(14 * var(--pt)); height: calc(44 * var(--pt)); }
-.ig-act { display: grid; place-items: center; width: calc(25 * var(--pt)); height: calc(25 * var(--pt)); padding: 0; border: 0; background: none; cursor: pointer; }
-.ig-act--save { margin-left: auto; cursor: default; }
-.ig-post.is-liked [data-like] svg { fill: #FF3040; stroke: #FF3040; animation: ig-pop .45s var(--spring); }
-@keyframes ig-pop { 40% { transform: scale(1.3); } }
-.ig-cap { font-size: calc(13.5 * var(--pt)); line-height: 1.35; }
-.ig-cap b { font-weight: 600; }
-.ig-honest { margin-top: calc(4 * var(--pt)); font-size: calc(12 * var(--pt)); color: var(--ig-mute); }
-
-/* Search and profile grids: the same cards, smaller */
-.ig-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; }
-.ig-cell .ig-card { padding: 9%; }
-.ig-cell .ig-card-k, .ig-cell .ig-card-l, .ig-cell .ig-card-m, .ig-cell .ig-watch { display: none; }
-.ig-cell .ig-card-t { font-size: 9cqw; }
-.ig-cell .ig-card-big { font-size: 15cqw; }
-
-/* Results */
-.ig-news { margin: 0; padding: calc(4 * var(--pt)) 0; list-style: none; }
-.ig-news li { display: flex; align-items: center; gap: calc(12 * var(--pt)); padding: calc(8 * var(--pt)) calc(14 * var(--pt)); }
-.ig-news .ig-av { width: calc(40 * var(--pt)); height: calc(40 * var(--pt)); font-size: calc(16 * var(--pt)); }
-.ig-news p { flex: 1; min-width: 0; font-size: calc(13.5 * var(--pt)); line-height: 1.32; }
-.ig-news b { font-weight: 600; }
-.ig-news-th {
-  flex: none; display: grid; place-items: center;
-  width: calc(32 * var(--pt)); height: calc(32 * var(--pt));
-  padding: 0; border: 0; border-radius: 50%;
-  background: #EFEFEF; cursor: pointer;
-}
-.ig-news-th svg { width: 46%; height: 46%; fill: #0C0C0C; margin-left: 8%; }
-
-/* Profile */
-.ig-prof { display: flex; align-items: center; gap: calc(22 * var(--pt)); padding: calc(10 * var(--pt)) calc(16 * var(--pt)) calc(8 * var(--pt)); }
-.ig-prof-av { width: calc(86 * var(--pt)); height: calc(86 * var(--pt)); font-size: calc(38 * var(--pt)); }
-.ig-prof-stats { flex: 1; display: flex; justify-content: space-around; margin: 0; }
-.ig-prof-stats div { display: flex; flex-direction: column-reverse; align-items: center; }
-.ig-prof-stats dd { margin: 0; font: 700 calc(17 * var(--pt))/1.2 var(--sf); }
-.ig-prof-stats dt { font-size: calc(13 * var(--pt)); }
-.ig-bio { padding: 0 calc(16 * var(--pt)); font-size: calc(13.5 * var(--pt)); line-height: 1.38; }
-.ig-bio b { font-weight: 600; }
-.ig-prof-btns { display: flex; gap: calc(6 * var(--pt)); padding: calc(12 * var(--pt)) calc(16 * var(--pt)); }
-.ig-btn { flex: 1; display: grid; place-items: center; height: calc(32 * var(--pt)); border-radius: calc(8 * var(--pt)); background: #EFEFEF; color: #0C0C0C; font: 600 calc(13.5 * var(--pt))/1 var(--sf); text-decoration: none; }
-.ig-highlights { border-bottom: 0; padding-top: calc(4 * var(--pt)); }
-
-
-/* The tab bar */
-.ig-tabs {
-  position: relative; z-index: 3; flex: none;
-  display: flex; align-items: center;
-  box-sizing: content-box;
-  height: calc(48 * var(--pt));
-  padding-bottom: var(--ig-bot);
-  background: rgba(255, 255, 255, .96);
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-  border-top: .5px solid var(--ig-line);
-}
-.ig-tab { flex: 1; display: grid; place-items: center; height: 100%; padding: 0; border: 0; background: none; cursor: pointer; }
-.ig-tab svg { width: calc(26 * var(--pt)); height: calc(26 * var(--pt)); }
-.ig-tab.is-on svg { stroke-width: 2.4; }
-.ig-tab.is-on[data-tab="home"] svg { fill: currentColor; }
-.ig-tab-av { width: calc(26 * var(--pt)); height: calc(26 * var(--pt)); font-size: calc(12 * var(--pt)); }
-.ig-tab.is-on .ig-tab-av { box-shadow: 0 0 0 calc(1.5 * var(--pt)) #fff, 0 0 0 calc(3 * var(--pt)) #0C0C0C; }
-
-/* Story viewer */
-.igs {
-  position: absolute; inset: 0; z-index: 5;
-  background: #000; color: #fff;
-  transform-origin: var(--ox, 50%) var(--oy, 40%);
-  transition: transform .42s var(--ease), opacity .3s var(--ease), border-radius .42s var(--ease);
-}
-.igs[hidden] { display: none; }
-.igs.is-opening { transform: scale(.18); opacity: 0; border-radius: 50%; }
-.igs::before {
-  content: "";
-  position: absolute; left: 0; right: 0; top: 0; z-index: 3;
-  height: calc(var(--ig-top) + 90 * var(--pt));
-  background: linear-gradient(180deg, rgba(0, 0, 0, .55), transparent);
-  pointer-events: none;
-}
-.igs-media { position: absolute; inset: 0; z-index: 1; overflow: hidden; background: var(--paper); }
-.igs-media .dv-video { object-position: 50% 100%; }
-.igs .card-in { padding-top: 140px; }
-/* the camera, status bar and home bar stay above an open story */
-.pocket .phone-status { z-index: 8; }
-.pocket .phone-island, .pocket .phone-home { z-index: 9; }
-.igs.is-wide .igs-media { background: #0B0B0C; }
-.igs.is-wide .igs-media .dv-video { object-fit: contain; object-position: 50% 50%; background: #0B0B0C; }
-.igs-bars {
-  position: absolute; z-index: 4;
-  left: calc(8 * var(--pt)); right: calc(8 * var(--pt)); top: calc(var(--ig-top) + 2 * var(--pt));
-  display: flex; gap: calc(3 * var(--pt));
-  transition: opacity .2s;
-}
-.igs-bars i { position: relative; flex: 1; height: calc(2.5 * var(--pt)); border-radius: 2px; background: rgba(255, 255, 255, .38); overflow: hidden; }
-.igs-bars i::after { content: ""; position: absolute; inset: 0; background: #fff; transform-origin: 0 50%; transform: scaleX(var(--p, 0)); }
-.igs-head {
-  position: absolute; z-index: 6;
-  left: 0; right: 0; top: calc(var(--ig-top) + 12 * var(--pt));
-  display: flex; align-items: center; gap: calc(8 * var(--pt));
-  padding: 0 calc(6 * var(--pt)) 0 calc(12 * var(--pt));
-  text-shadow: 0 1px 3px rgba(0, 0, 0, .4);
-  transition: opacity .2s;
-}
-.igs-av { width: calc(32 * var(--pt)); height: calc(32 * var(--pt)); }
-.igs-who { flex: 1; min-width: 0; display: flex; flex-direction: column; line-height: 1.2; }
-.igs-who b { font-size: calc(13.5 * var(--pt)); font-weight: 600; }
-.igs-who span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: calc(12 * var(--pt)); opacity: .85; }
-.igs-close:focus { outline: none; }
-.igs-close:focus-visible { border-radius: 50%; background: rgba(255, 255, 255, .18); }
-.igs-close { width: calc(36 * var(--pt)); height: calc(36 * var(--pt)); padding: 0; border: 0; background: none; color: #fff; font-size: calc(30 * var(--pt)); font-weight: 300; line-height: 1; cursor: pointer; }
-.igs.is-held .igs-bars, .igs.is-held .igs-head { opacity: 0; }
-.igs-tap:focus { outline: none; }
-.igs-tap {
-  position: absolute; z-index: 5;
-  top: calc(var(--ig-top) + 52 * var(--pt)); bottom: 0;
-  padding: 0; border: 0; background: none;
-  cursor: pointer; -webkit-tap-highlight-color: transparent;
-}
-.igs-tap--prev { left: 0; width: 33%; }
-.igs-tap--next { right: 0; width: 67%; }
-.igs.is-card .igs-tap { width: 11%; }
-.igs-note {
-  position: absolute; z-index: 4; left: 50%; top: calc(var(--ig-top) + 52 * var(--pt));
-  transform: translateX(-50%);
-  padding: calc(4 * var(--pt)) calc(10 * var(--pt));
-  border-radius: 999px;
-  background: rgba(0, 0, 0, .5);
-  -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px);
-  font-size: calc(11.5 * var(--pt)); white-space: nowrap;
-  pointer-events: none;
-}
-.igs-note:empty { display: none; }
-.igs-card {
-  position: absolute; inset: 0;
-  padding-top: calc(var(--ig-top) + 56 * var(--pt));
-  overflow-y: auto; overscroll-behavior: contain;
-  background: var(--paper); color: var(--ink);
-  font-family: var(--text);
-  user-select: text; -webkit-user-select: text;
-}
-.igs-card[hidden] { display: none; }
-.igs-card .win-pad { padding: calc(14 * var(--pt)) calc(18 * var(--pt)) calc(28 * var(--pt)); font-size: calc(14 * var(--pt)); }
-.igs-card .hx-stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: calc(12 * var(--pt)); padding-top: 0; border-top: 0; }
-.igs-card .hx-stats dd { font-size: calc(30 * var(--pt)); }
-.igs-card .hx-stats dt { font-size: calc(12 * var(--pt)); }
-.igs-card .hx-tree { margin-top: calc(14 * var(--pt)); padding: calc(10 * var(--pt)); }
-.igs-card .hx-tree li { display: block; }
-.igs-card .hx-path { font-size: calc(10.5 * var(--pt)); }
-.igs-card .hx-say { display: block; margin: 0 0 calc(4 * var(--pt)) calc(10 * var(--pt)); font-size: calc(11 * var(--pt)); }
-.igs-card .career { grid-template-columns: 1fr; gap: calc(14 * var(--pt)); margin-top: 0; }
-.igs-card .career-big { font-size: calc(32 * var(--pt)); }
-.igs-card .wk-tree li { flex-wrap: wrap; }
-
-/* Say hi: an iOS bottom sheet */
-.ig-sheet {
+/* ---------- The keynote (.kn, assets/keynote.js): the work after the laptop, on a dark stage ----------
+   The house lights go down (--kn-dark, from the scroll), then the screen comes up (--kn-in). Slides sit on a fixed
+   canvas (1600 × 900, or 780 × 1400 on a phone), scaled to the screen, the way Keynote does. */
+.kn {
+  --kn-dim: #8E8E96;
   position: absolute; inset: 0; z-index: 7;
-  display: flex; flex-direction: column; justify-content: flex-end;
-  background: rgba(0, 0, 0, 0);
-  transition: background .3s;
+  display: grid; place-items: center;
+  background: #000; color: #fff;
+  font-family: var(--text);
+  opacity: var(--kn-dark, 0);
+  pointer-events: none;
+  -webkit-font-smoothing: antialiased;
 }
-.ig-sheet[hidden] { display: none; }
-.ig-sheet.is-on { background: rgba(0, 0, 0, .4); }
-.ig-sheet-in {
-  display: grid; gap: calc(8 * var(--pt));
-  padding: calc(10 * var(--pt)) calc(18 * var(--pt)) calc(var(--ig-bot) + 14 * var(--pt));
-  border-radius: calc(16 * var(--pt)) calc(16 * var(--pt)) 0 0;
-  background: #fff;
-  transform: translateY(100%);
-  transition: transform .45s var(--spring);
+.desk.is-phone .kn { pointer-events: auto; }
+.kn::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 50% at 50% 38%, rgba(70, 80, 110, .22), transparent 70%); opacity: var(--kn-in, 0); pointer-events: none; }
+.kn-screen {
+  position: relative; overflow: hidden; border-radius: 3px; cursor: pointer; outline: none;
+  width: var(--kn-sw); height: var(--kn-sh); margin-top: -4vh;
+  background: #050506;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 30px 140px rgba(110, 130, 200, .16);
+  opacity: var(--kn-in, 0);
+  transform: scale(calc(.96 + .04 * var(--kn-in, 0)));
 }
-.ig-sheet.is-on .ig-sheet-in { transform: none; }
-.ig-grab { justify-self: center; width: calc(36 * var(--pt)); height: calc(5 * var(--pt)); margin-bottom: calc(10 * var(--pt)); border-radius: 99px; background: #D6D6D6; }
-.ig-sheet-h { font-size: calc(14 * var(--pt)); color: var(--ig-mute); }
-.ig-sheet-big { margin-bottom: calc(8 * var(--pt)); font: 500 calc(28 * var(--pt))/1.1 var(--display); letter-spacing: -.02em; }
-.ig-sbtn { display: grid; place-items: center; height: calc(46 * var(--pt)); border: 0; border-radius: calc(12 * var(--pt)); background: #EFEFEF; color: #0C0C0C; font: 600 calc(15 * var(--pt))/1 var(--sf); text-decoration: none; cursor: pointer; }
-.ig-sbtn--go { background: #0095F6; color: #fff; }
-.ig-sbtn--cancel { background: none; color: var(--ig-mute); }
+.kn-canvas { position: absolute; left: 0; top: 0; width: var(--kn-cw); height: var(--kn-ch); transform-origin: 0 0; transform: scale(var(--kn-s)); }
+.kn-floor { position: absolute; left: 50%; top: calc(50% - 4vh + var(--kn-sh) / 2); width: var(--kn-sw); height: 22vh; transform: translateX(-50%); background: radial-gradient(50% 60% at 50% 0, rgba(120, 130, 170, .1), transparent 70%); opacity: var(--kn-in, 0); pointer-events: none; }
+.kn-crowd { position: absolute; left: 0; right: 0; bottom: 0; height: 14vh; opacity: var(--kn-in, 0); pointer-events: none; }
+.kn-crowd svg { display: block; width: 100%; height: 100%; }
+
+/* slides: the 2008 dark gradient and white type; the old slide dips out before the new one comes up */
+.kn-sl { position: absolute; inset: 0; background: radial-gradient(75% 85% at 50% 42%, #24252B 0%, #0E0E11 62%, #050506 100%); opacity: 0; transition: opacity .28s ease; }
+.kn-sl.is-on { opacity: 1; transition: opacity .5s .2s ease; }
+.kn-b { opacity: 0; transform: translateY(14px); transition: opacity .6s ease, transform .7s cubic-bezier(.2, .7, .2, 1); }
+.kn-b.is-on { opacity: 1; transform: none; }
+.kn-ctr { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 0 120px; }
+.kn-big { margin: 0; font-weight: 500; font-size: 112px; line-height: 1.02; letter-spacing: -0.035em; }
+.kn-mid { margin: 0; font-weight: 400; font-size: 54px; line-height: 1.15; letter-spacing: -0.02em; }
+.kn-sub { margin: 26px 0 0; font-weight: 400; font-size: 34px; line-height: 1.3; color: var(--kn-dim); letter-spacing: -0.01em; }
+.kn-sub.kn-lead { margin: 0 0 30px; }
+.kn-ask { max-width: 1000px; }
+.kn-kick { position: absolute; left: 96px; top: 70px; display: flex; align-items: center; gap: 14px; margin: 0; font-size: 24px; color: var(--kn-dim); letter-spacing: .01em; }
+.kn-kick img { width: auto; height: 30px; }
+.kn-brush { position: relative; white-space: nowrap; }
+.kn-brush::after { content: ""; position: absolute; left: -2%; right: -2%; bottom: .02em; height: .14em; border-radius: 99px; background: var(--clay); transform: scaleX(0); transform-origin: 0 50%; transition: transform .9s .35s cubic-bezier(.2, .7, .2, 1); }
+.kn-b.is-on .kn-brush::after { transform: scaleX(1); }
+
+/* the opening: three products, one idea */
+.kn-three { display: flex; gap: 120px; margin-top: 70px; }
+.kn-three > div { display: flex; flex-direction: column; align-items: center; gap: 28px; width: 300px; }
+.kn-ico { display: grid; place-items: center; width: 170px; height: 170px; border-radius: 40px; background: linear-gradient(160deg, #3A3B44, #18181D); box-shadow: inset 0 1px 0 rgba(255, 255, 255, .12), 0 20px 40px rgba(0, 0, 0, .5); }
+.kn-ico svg { width: 92px; height: 92px; fill: none; stroke: #fff; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.kn-three p { margin: 0; font-size: 28px; line-height: 1.3; color: #D9D9DE; }
+.kn-mark { width: auto; height: 96px; margin-bottom: 40px; filter: drop-shadow(0 10px 30px rgba(0, 0, 0, .5)); }
+.kn-mark--me { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; }
+
+/* a demo: the name settles top-left, the demo rises on the right, and its notes build down the left as it plays */
+.kn-dm-title { position: absolute; left: 50%; top: 50%; width: 1300px; transform: translate(-50%, -50%); text-align: center; transition: all .9s cubic-bezier(.4, 0, .2, 1); }
+.kn-dm-title h2 { margin: 0; font: 500 128px/1 var(--text); letter-spacing: -0.04em; transition: font-size .9s cubic-bezier(.4, 0, .2, 1); }
+.kn-dm-title p { margin: 22px 0 0; font-size: 38px; color: var(--kn-dim); transition: font-size .9s cubic-bezier(.4, 0, .2, 1), margin .9s; }
+.kn-sl.is-set .kn-dm-title { left: 96px; top: 70px; width: 620px; transform: none; text-align: left; }
+.kn-sl.is-set .kn-dm-title h2 { font-size: 60px; }
+.kn-sl.is-set .kn-dm-title p { margin-top: 12px; font-size: 26px; }
+.kn-dev { position: absolute; opacity: 0; transform: translateY(40px); transition: opacity .8s .25s, transform 1s .25s cubic-bezier(.2, .7, .2, 1); }
+.kn-sl.is-set .kn-dev { opacity: 1; transform: none; }
+.kn-dev-in { position: relative; width: 100%; height: 100%; overflow: hidden; background: #fff; }
+.kn-dev .dv-video { display: block; }
+.kn-dev--phone { left: 1090px; top: 64px; width: 356px; height: 772px; padding: 12px; border-radius: 52px; background: linear-gradient(145deg, #5B5D63, #1D1E22 40%, #3A3B40); box-shadow: 0 40px 90px rgba(0, 0, 0, .65), inset 0 0 0 1px rgba(255, 255, 255, .15); }
+.kn-dev--phone .kn-dev-in { border-radius: 41px; }
+.kn-dev--wide { left: 300px; top: 170px; width: 1000px; height: 659px; padding-top: 34px; border-radius: 14px; overflow: hidden; background: #1B1B1F; box-shadow: 0 40px 90px rgba(0, 0, 0, .65), 0 0 0 1px rgba(255, 255, 255, .1); }
+.kn-dev--wide::before { content: ""; position: absolute; left: 16px; top: 12px; width: 10px; height: 10px; border-radius: 50%; background: #FF5F57; box-shadow: 18px 0 #FEBC2E, 36px 0 #28C840; }
+.kn-dev--wide .kn-dev-in { background: #0B0B0C; }
+.kn-dev--wide .dv-video { object-fit: contain; background: #0B0B0C; }
+.kn-dev .dv-html > .ads:not(.ads--phone) { width: calc(100% / var(--s, 1)); height: calc(100% / var(--s, 1)); }
+.kn-notes { position: absolute; left: 96px; top: 300px; width: 860px; display: flex; flex-direction: column; gap: 24px; margin: 0; padding: 0; list-style: none; }
+.kn-notes li { font-size: 40px; line-height: 1.3; letter-spacing: -0.015em; opacity: 0; transform: translateX(-12px); transition: opacity .5s, transform .6s cubic-bezier(.2, .7, .2, 1), color .6s; }
+.kn-notes li.is-on { opacity: 1; transform: none; }
+.kn-notes li.is-past { color: #6D6D75; }
+.kn-sl--wide .kn-notes { left: 200px; top: 838px; width: 1200px; display: block; }
+.kn-sl--wide .kn-notes li { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-size: 32px; }
+.kn-sl--wide .kn-notes li.is-past { opacity: 0; }
+.kn-sl--wide .kn-dm-title { width: 900px; }
+.kn-sl--wide.is-set .kn-dm-title { top: 64px; width: 1400px; }
+.kn-sl--wide.is-set .kn-dm-title h2 { display: inline; font-size: 52px; }
+.kn-sl--wide.is-set .kn-dm-title p { display: inline; margin-left: 22px; }
+
+/* a number: one figure, as big as the slide allows */
+.kn-stat { margin: 0; font-weight: 600; font-size: 230px; line-height: .95; letter-spacing: -0.05em; font-variant-numeric: tabular-nums; }
+.kn-stat.is-long { font-size: 150px; }
+.kn-from { display: block; margin-bottom: 18px; font-size: 64px; font-weight: 400; color: var(--kn-dim); letter-spacing: -0.02em; }
+.kn-from s { text-decoration-thickness: 3px; text-decoration-color: var(--clay); }
+.kn-lab { max-width: 1100px; margin: 34px 0 0; font-size: 40px; line-height: 1.25; color: #CFCFD5; letter-spacing: -0.01em; }
+.kn-facts { display: flex; gap: 110px; margin-top: 70px; }
+.kn-facts div { text-align: center; }
+.kn-facts b { display: block; font-size: 60px; font-weight: 500; letter-spacing: -0.03em; }
+.kn-facts span { font-size: 22px; color: var(--kn-dim); }
+.kn-foot { position: absolute; left: 0; right: 0; bottom: 56px; margin: 0; padding: 0 160px; text-align: center; font-size: 21px; line-height: 1.5; color: #6F6F78; }
+.kn-foot i { display: block; font: italic 22px/1.5 var(--display); }
+
+/* writing, and the end */
+.kn-wr { display: grid; grid-template-columns: 1fr 1fr; gap: 26px 90px; margin: 60px 0 0; padding: 0; list-style: none; text-align: left; }
+.kn-wr a { display: flex; align-items: baseline; gap: 18px; color: #fff; text-decoration: none; font-size: 34px; letter-spacing: -0.01em; }
+.kn-wr a::before { content: "→"; color: var(--clay); }
+.kn-wr a:hover { color: #D9D9DE; }
+.kn-more { margin: 0; font-size: 92px; font-weight: 400; letter-spacing: -0.03em; }
+.kn-hi { display: flex; gap: 26px; margin-top: 64px; }
+.kn-hi a { padding: 22px 46px; border: 1.5px solid rgba(255, 255, 255, .35); border-radius: 99px; color: #fff; font-size: 30px; text-decoration: none; }
+.kn-hi a:first-child { border-color: #fff; background: #fff; color: #000; }
+
+/* the chapters under the screen, the clicker's hint, the way back on a phone */
+.kn-bar { position: absolute; left: 0; right: 0; bottom: max(70px, env(safe-area-inset-bottom)); z-index: 3; display: flex; justify-content: center; gap: 6px; opacity: var(--kn-in, 0); }
+.kn-bar button { padding: 8px 12px; border: 0; border-radius: 99px; background: none; color: #6A6A72; font: 400 13px/1 var(--text); letter-spacing: .01em; cursor: pointer; }
+.kn-bar button:hover { color: #C8C8CF; }
+.kn-bar button:focus:not(:focus-visible) { outline: none; }
+.kn-bar button[aria-current="true"] { background: rgba(255, 255, 255, .08); color: #fff; }
+.kn-prog { position: absolute; left: 0; bottom: 0; z-index: 2; height: 3px; background: rgba(255, 255, 255, .55); transition: width .5s ease; }
+.kn-hint { position: absolute; right: var(--gutter); bottom: 76px; z-index: 3; margin: 0; font-size: 13px; color: #6A6A72; opacity: var(--kn-in, 0); transition: opacity .6s; }
+.kn-hint.is-gone { visibility: hidden; }
+.kn-back { position: absolute; left: 14px; top: max(14px, env(safe-area-inset-top)); z-index: 4; padding: 8px 10px; border: 0; background: none; color: #8A8A92; font: 400 14px/1 var(--text); cursor: pointer; }
+/* in the theatre the step back to the laptop and the masthead go dark too */
+.desk.is-phone .desk-step--laptop { border-color: rgba(255, 255, 255, .2); background: transparent; color: #C9C7BF; }
+.desk.is-phone .desk-step--laptop:hover { border-color: rgba(255, 255, 255, .6); }
+.kn-dark .masthead { color: #E9E7DF; }
+.kn-dark .masthead.is-scrolled { background: rgba(0, 0, 0, .72); }
+.kn-dark .nav a { color: #A9A7A0; }
+.kn-dark .nav a:hover, .kn-dark .nav a[aria-current="true"] { color: #fff; }
+
+/* a phone: the visitor's own screen is the slide */
+.kn--port .kn-screen { margin: 0; border-radius: 0; box-shadow: none; }
+.kn--port .kn-floor, .kn--port .kn-crowd, .kn--port .kn-hint { display: none; }
+.kn--port .kn-bar { justify-content: flex-start; bottom: max(8px, env(safe-area-inset-bottom)); padding: 0 10px; overflow-x: auto; scrollbar-width: none; touch-action: pan-x; }
+.kn--port .kn-bar::-webkit-scrollbar { display: none; }
+.kn--port .kn-bar button { font-size: 12px; white-space: nowrap; }
+.kn--port .kn-ctr { padding: 0 64px; }
+.kn--port .kn-big { font-size: 96px; }
+.kn--port .kn-mid { font-size: 52px; }
+.kn--port .kn-sub { font-size: 34px; }
+.kn--port .kn-kick { left: 56px; top: 150px; }
+.kn--port .kn-three { flex-direction: column; gap: 46px; margin-top: 60px; }
+.kn--port .kn-three > div { flex-direction: row; gap: 34px; width: 600px; text-align: left; }
+.kn--port .kn-ico { flex: none; width: 120px; height: 120px; border-radius: 30px; }
+.kn--port .kn-ico svg { width: 66px; height: 66px; }
+.kn--port .kn-dm-title { width: 680px; }
+.kn--port .kn-dm-title h2 { font-size: 104px; }
+/* clear of the way back to the laptop, even when the canvas fills the screen's full height */
+.kn--port .kn-sl.is-set .kn-dm-title, .kn--port .kn-sl--wide.is-set .kn-dm-title { left: 56px; top: 140px; width: 680px; }
+.kn--port .kn-sl.is-set .kn-dm-title h2, .kn--port .kn-sl--wide.is-set .kn-dm-title h2 { display: block; font-size: 52px; }
+.kn--port .kn-sl--wide.is-set .kn-dm-title p { display: block; margin: 10px 0 0; }
+.kn--port .kn-dev--phone { left: 204px; top: 290px; width: 372px; height: 806px; }
+.kn--port .kn-dev--wide { left: 40px; top: 360px; width: 700px; height: 470px; }
+.kn--port .kn-notes, .kn--port .kn-sl--wide .kn-notes { top: auto; left: 56px; bottom: 130px; display: block; width: 668px; height: 90px; }
+.kn--port .kn-notes li, .kn--port .kn-sl--wide .kn-notes li { position: absolute; left: 0; right: 0; top: 0; text-align: center; font-size: 34px; }
+.kn--port .kn-notes li.is-past { opacity: 0; }
+.kn--port .kn-stat { font-size: 170px; }
+.kn--port .kn-stat.is-long { font-size: 104px; }
+.kn--port .kn-lab { font-size: 38px; }
+.kn--port .kn-facts { flex-direction: column; gap: 40px; margin-top: 70px; }
+.kn--port .kn-foot { bottom: 120px; padding: 0 60px; }
+.kn--port .kn-wr { grid-template-columns: 1fr; gap: 26px; }
+.kn--port .kn-more { font-size: 76px; }
+.kn--port .kn-hi { flex-direction: column; width: 560px; }
+.kn--port .kn-hi a { text-align: center; }
+@media (prefers-reduced-motion: reduce) {
+  .kn-sl, .kn-b, .kn-dm-title, .kn-dm-title h2, .kn-dm-title p, .kn-dev, .kn-notes li, .kn-brush::after { transition: none !important; }
+}
+
+/* ---------- The envelope: the Air goes back into one, as it came out of one in 2008 ----------
+   A manila interoffice envelope in two layers, its back under the laptop and its front over it, so the Air can
+   slide down between them. Placed by frame() (--env-x, --env-y is the mouth, --env-w, --env-h, --env-dy). */
+.env {
+  position: absolute; left: var(--env-x, 0); top: var(--env-y, 0); width: var(--env-w, 0); height: var(--env-h, 0);
+  transform: translateY(var(--env-dy, 120vh));
+  opacity: var(--env-op, 0);
+  pointer-events: none;
+}
+.env--back { z-index: 3; }
+/* the back panel, a little taller than the front, and its flap folded open above it */
+.env--back::before { content: ""; position: absolute; left: 0; right: 0; top: -9%; bottom: 0; border-radius: 3px; background: linear-gradient(#C9A46A, #B88F55); box-shadow: 0 30px 60px -20px rgba(60, 40, 10, .45); }
+.env--back::after { content: ""; position: absolute; left: 6%; right: 6%; top: -34%; height: 26%; border-radius: 6px 6px 2px 2px; background: linear-gradient(#D6B47D, #C7A26A); clip-path: polygon(0 100%, 7% 0, 93% 0, 100% 100%); }
+.env--front { z-index: 6; overflow: hidden; border-radius: 2px 2px 4px 4px;
+  background:
+    repeating-linear-gradient(90deg, rgba(120, 85, 30, .05) 0 2px, transparent 2px 7px),
+    linear-gradient(176deg, #E3C68F 0%, #D8B87E 55%, #CCA96E 100%);
+  box-shadow: inset 0 2px 0 rgba(255, 245, 220, .5), inset 0 -10px 30px rgba(120, 85, 30, .15), 0 24px 50px -18px rgba(60, 40, 10, .5); }
+/* the routing grid printed on the front: who it went to, a line at a time */
+.env-grid { position: absolute; left: 30%; right: 7%; top: 18%; bottom: 10%;
+  background:
+    linear-gradient(90deg, rgba(110, 60, 30, .55) 1px, transparent 1px) 0 0 / 50% 100%,
+    repeating-linear-gradient(180deg, transparent 0 calc(16.66% - 1px), rgba(110, 60, 30, .5) calc(16.66% - 1px) 16.66%);
+  border: 1px solid rgba(110, 60, 30, .6); }
+/* the holes punched down its side, so you can see whether anything is inside */
+.env-holes { position: absolute; left: 9%; top: 22%; bottom: 14%; width: 4.5%;
+  background: radial-gradient(circle at 50% 50%, rgba(40, 26, 8, .78) 0 36%, transparent 40%) 0 0 / 100% 20%; }
+/* the string-and-button tie */
+.env-tie { position: absolute; left: 47%; top: 4%; width: 6%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #C0392B, #7F1D14); box-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
+.env-tie::after { content: ""; position: absolute; left: 50%; top: 50%; width: 260%; height: 2px; background: #8E2A1E; transform: rotate(-24deg); transform-origin: 0 50%; }
+@media (max-width: 900px) { .env { display: none; } }
 
 /* ---------- Timed cinema callouts (.mk) ---------- */
 
@@ -1839,8 +1669,6 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
     width: auto; margin: 22px 4px 0;
     font-size: 13px;
   }
-  .ig-app-icon { width: 54px; height: 54px; }
-  .dt-phone-btn .dt-fname { margin-top: 5px; }
   .m-screen .dt-dock { position: relative; left: auto; bottom: auto; order: 4; align-self: center; margin-top: auto; transform: none; padding: 0 10px; }
   .m-screen .dt-icon { width: 42px; height: 42px; }
   .m-screen .dt-apps > li { margin: 0 2px; }
@@ -1870,40 +1698,9 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   .m-screen .win-ai .hx-tree li { display: block; }
   .m-screen .win-pixis .career { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 
-  /* Full-bleed Instagram on phones (no drawn phone frame, no fake status bar) */
-  .pocket {
-    top: 0; left: 0; right: 0; bottom: 0;
-    transform: scale(var(--pk-s, .12));
-    transform-origin: var(--pk-ox, 50%) var(--pk-oy, 70%);
-    opacity: var(--pk-o, 0);
-    border-radius: var(--pk-r, 0px);
-    overflow: hidden;
-  }
-  .pk-stage { width: 100%; height: 100%; container-type: normal; }
-  .pk-hint { display: none; }
-  .pocket .device.phone {
-    position: relative; left: 0; top: 0; width: 100%; height: 100%;
-    transform: none; padding: 0; border-radius: 0;
-    background: transparent; box-shadow: none;
-  }
-  .pocket .device.phone::before, .pocket .device.phone::after { display: none; }
-  .pocket .device.phone .device-screen {
-    width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; box-shadow: none;
-  }
-  .pocket .phone-status, .pocket .phone-island, .pocket .phone-home { display: none; }
-  .ig { --ig-top: env(safe-area-inset-top, 0px); --ig-bot: env(safe-area-inset-bottom, 0px); --pt: 1px; }
-  /* the app has its own way back to the laptop, so the site's masthead steps aside while the phone is up */
+  /* the keynote has its own way back to the laptop, so the site's masthead steps aside once the laptop opens */
   body:has(.desk:not(.on-cover)) .masthead { transform: translateY(-110%); visibility: hidden; transition: transform .3s var(--ease), visibility 0s .3s; }
   .desk-nav { display: none; }
-  .igs, .ig-sheet { position: fixed; z-index: 70; }
-  .igs .dv-html > .trd { position: absolute; left: 0; bottom: 0; transform-origin: 0 100%; }
-  .igs .card-in { position: relative; width: 100%; height: 100%; padding: 96px 22px 24px; transform: none; }
-  .igs .intro { padding: 0 24px; }
-  .igs .intro-kick { font-size: .86rem; }
-  .igs .intro-title { font-size: clamp(1.85rem, 7.8vw, 2.3rem); margin-top: 8px; }
-  .igs .intro-stat { font-size: clamp(2.4rem, 11vw, 3.2rem); margin-top: 22px; }
-  .igs .intro-lab { font-size: .94rem; margin-top: 8px; }
-  .igs .intro .intro-tags { margin-top: 22px; }
 }
 
 @media (max-width: 900px) and (max-height: 700px) {
@@ -2461,16 +2258,13 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
   .prose table { display: block; overflow-x: auto; }
 }
 
-/* inside a story the timed notes sit low, clear of the header and the honesty pill */
-.igs .mk.mk--pill, .igs .mk.mk--pill.mk-top { top: auto; bottom: calc(var(--ig-bot, 0px) + 28px); }
-
 /* ---------- Phones: the scene doesn't scroll; swipes and buttons play transitions between three states ---------- */
 @media (max-width: 900px) {
   html.is-home, html.is-home body { height: 100%; overflow: hidden; overscroll-behavior: none; }
   .desk-stage { touch-action: none; }
-  .ig-views, .igs-card, .win-body--scroll, .m-screen .dt-workspace { touch-action: pan-y; }
+  .win-body--scroll, .m-screen .dt-workspace { touch-action: pan-y; }
   html.is-home .foot { display: none; }
-  .mac, .m-screen, .pocket { will-change: transform, opacity; }
+  .mac, .m-screen, .kn { will-change: transform, opacity; }
   .mac { transition: none; }
   .desk.is-phone .mac, .desk.is-phone .mac:hover { filter: none; }
   .mac-shadow {
@@ -2484,29 +2278,6 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
   }
 }
 
-/* ---------- Handoff: laptop → phone (wide screens) ----------
-   The desktop's Instagram icon hands itself to .ig-fly, which arcs across while the lid shuts; the phone then
-   opens out of it, its screen starting as the icon (.pk-launch) and fading into the app, like an iOS launch. */
-.ig-fly {
-  position: absolute; left: 0; top: 0; z-index: 7;
-  display: grid; place-items: center;
-  border-radius: 23%;
-  background: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
-  box-shadow: 0 18px 40px -8px rgba(80, 20, 60, .55), 0 0 0 .5px rgba(255, 255, 255, .25) inset;
-  visibility: hidden; pointer-events: none;
-  will-change: transform, opacity;
-}
-.ig-fly svg, .pk-launch svg { width: 62%; height: 62%; fill: none; stroke: #fff; stroke-width: 1.9; }
-.ig-fly svg circle:last-child, .pk-launch svg circle:last-child { fill: #fff; stroke: none; }
-.mac .ig-app-icon { opacity: var(--ig-lift, 1); }
-.pk-launch {
-  position: absolute; inset: 0; z-index: 7;
-  display: grid; place-items: center;
-  background: radial-gradient(circle at 30% 107%, #FDF497 0%, #FDF497 5%, #FD5949 45%, #D6249F 60%, #285AEB 90%);
-  opacity: var(--pk-launch, 0);
-  pointer-events: none;
-}
-.pk-launch svg { width: 30%; height: auto; }
 /* the 2009 sleep light, on the front lip, breathing once the lid is shut */
 .mac-sleep {
   position: absolute; right: 14%; top: 34%;
@@ -2516,8 +2287,8 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
 }
 .desk.is-phone .mac-sleep { animation: mac-breathe 4.6s ease-in-out infinite; }
 @keyframes mac-breathe { 0%, 100% { opacity: .08; } 45%, 55% { opacity: .95; } }
-@media (max-width: 900px) { .ig-fly, .pk-launch, .mac-sleep { display: none; } }
-@media (prefers-reduced-motion: reduce) { .ig-fly { display: none; } .desk.is-phone .mac-sleep { animation: none; opacity: .6; } }
+@media (max-width: 900px) { .mac-sleep { display: none; } }
+@media (prefers-reduced-motion: reduce) { .desk.is-phone .mac-sleep { animation: none; opacity: .6; } }
 @media (max-width: 900px) {
   .rd { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .rd-side { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; padding: 8px 10px; border-right: 0; border-bottom: 1px solid #A5A5A5; scrollbar-width: none; }
