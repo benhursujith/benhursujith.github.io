@@ -87,7 +87,7 @@
             <div class="kn-b"><span class="kn-ico">${ICON.ask}</span><p>Answers for nurses, in German and English</p></div>
             <div class="kn-b"><span class="kn-ico">${ICON.globe}</span><p>Work abroad, worked out in a chat</p></div>
           </div></div>`;
-        case 'idea': return `<div class="kn-ctr"><p class="kn-sub kn-b kn-lead">The pain point I keep solving for:</p><p class="kn-big kn-b">Hours lost to work that should take <span class="kn-brush">minutes</span>.</p></div>`;
+        case 'idea': return `<div class="kn-ctr"><p class="kn-sub kn-b kn-lead">The outcome I keep delivering:</p><p class="kn-big kn-b">Giving people their <span class="kn-brush">hours back</span>.</p></div>`;
         case 'chapter': return `<div class="kn-ctr"><img class="kn-mark kn-b${g.mark ? '' : ' kn-mark--me'}" src="${brand(g.mark || 'sujith.jpg')}" alt=""><p class="kn-big kn-b">${esc(g.label)}</p><p class="kn-sub kn-b">${esc(g.when)} · ${esc(g.role)}</p></div>`;
         case 'demo': {
           const name = demoName(it, narrow);
