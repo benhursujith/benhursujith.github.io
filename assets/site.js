@@ -102,6 +102,7 @@
       const first = visitor.value.trim().split(/\s+/)[0] || '';
       sizer.textContent = visitor.value || visitor.placeholder;
       $$('[data-visitor-cta]').forEach((el) => { el.textContent = first ? `Open my laptop, ${first}` : 'Open my laptop'; });
+      $$('[data-env-to]').forEach((el) => { el.textContent = first || 'you'; });
       const hi = $('[data-visitor-hi]');
       if (hi) { hi.hidden = !first; hi.textContent = first ? `Hi ${first}!` : ''; }
       const talk = $('[data-visitor-talk]');
@@ -548,7 +549,10 @@
     const deskFan = window.Toss?.deskFan?.(deskFanBtn, { scope: desktop, link: $('.dt-app[data-open="toss"]', desk), trash: $('.dt-trash', desk) }) || null;
     deskFanBtn?.addEventListener('click', () => openWin('toss', deskFanBtn));
     const mScreen = $('[data-m-screen]', desk);
-    // the second act: the work as a keynote (assets/keynote.js), reached by putting the Air back in its envelope
+    // the Air arrives in an interoffice envelope: its back, its front, the flap and the string tied round two buttons
+    const envBack = $('[data-env-back]', desk), envFront = $('[data-env]', desk);
+    const envFlap = $('[data-env-flap]', desk), envWound = $('[data-env-wound]', desk), envTail = $('.env-tail', desk);
+    // the second act: My work.key (assets/keynote.js), played from the desktop out into the whole window
     const knEl = $('[data-kn]', desk);
     const mk = $('[data-mk]', desk), mkText = $('span', mk);
     const notesByKey = Object.fromEntries($$('.desk-data .note', desk).map((n) => [n.dataset.key, n]));
@@ -600,6 +604,10 @@
     let nudgeDeg = 0, interacted = false;
     let wins = [], zCounter = 10, cascadeIdx = 0;
     let kn = null, mkTimer = 0, activeMarks = [], activeMarkIdx = -1, activePlayer = null, activeMkHost = null;
+    // where the envelope sits on the cover, how small the Air is inside it, the display in the lid (in the .mac's own
+    // unscaled box), how far the camera goes in for the keynote to fill the window, and where My work.key's icon is
+    let envX = 0, mouth = 0, envW = 0, envH = 0, envS = 0.46, scr = null, zoomZ = 1, keyAt = null;
+    let knScreen = null, knUi = [], lastU = -1;
 
     // Re-parent the desktop when crossing the 900px breakpoint.
     function syncBreakpoint() {
@@ -613,7 +621,7 @@
     function measure() {
       H = stage.clientHeight || innerHeight;
       stageW = stage.clientWidth || innerWidth;
-      a1 = Math.round((wide.matches ? 0.6 : 0.8) * H);
+      a1 = Math.round((wide.matches ? 1 : 0.8) * H);
       b0 = Math.round(a1 + 0.35 * H);
       b1 = Math.round(b0 + 0.8 * H);
       end = Math.round(b1 + 0.35 * H);
@@ -627,7 +635,43 @@
       }
       Hl = Math.round(0.69 * W);
       mac.style.setProperty('--W', `${W}px`);
+      // the laptop faces the camera square on throughout; only its place, its size and its lid move
+      for (const v of ['--rx', '--ry', '--rz']) mac.style.setProperty(v, '0deg');
+      mac.style.setProperty('--sh-y', '18px');
+      mac.style.setProperty('--sh-s', '1');
       macGl?.resize(stageW, H);
+
+      // the cover: the Air waits in its envelope, right of the words (under them on a phone, as big as the room allows)
+      if (wide.matches) {
+        envS = 0.46;
+        envW = W * envS * 1.42;
+        envX = Math.min(0.7 * stageW, stageW - envW / 2 - 40) - envW / 2;
+        envH = envW * 0.62;
+        mouth = 0.53 * H - envH / 2;
+      } else {
+        const meBottom = deskMe.offsetTop + deskMe.offsetHeight, room = H - meBottom;
+        envW = Math.min(0.8 * stageW, 300, (room - 56) / 1.09 / 0.62);
+        envH = envW * 0.62;
+        envS = envW / (1.42 * W);
+        envX = (stageW - envW) / 2;
+        mouth = meBottom + (room - 1.09 * envH) / 2 + 0.09 * envH;
+      }
+      for (const e of [envBack, envFront]) Object.assign(e.style, { left: `${envX.toFixed(1)}px`, top: `${mouth.toFixed(1)}px`, width: `${envW.toFixed(1)}px`, height: `${envH.toFixed(1)}px` });
+      envFront.style.setProperty('--env-w', `${envW.toFixed(1)}px`);
+
+      // the display in the lid; on a laptop the keynote's screen is that display grown until it covers the window
+      let sx = 0, sy = 0;
+      for (let n = macScreen; n && n !== mac; n = n.offsetParent) { sx += n.offsetLeft; sy += n.offsetTop; }
+      scr = macScreen.offsetWidth ? { x: sx, y: sy, w: macScreen.offsetWidth, h: macScreen.offsetHeight } : null;
+      if (wide.matches && scr) {
+        zoomZ = Math.max(stageW / scr.w, H / scr.h) * 1.01;
+        knEl.style.setProperty('--kn-bw', `${(scr.w * zoomZ).toFixed(1)}px`);
+        knEl.style.setProperty('--kn-bh', `${(scr.h * zoomZ).toFixed(1)}px`);
+      } else {
+        knEl.style.removeProperty('--kn-bw');
+        knEl.style.removeProperty('--kn-bh');
+      }
+      keyAt = null; lastU = -1;
       deskTop = scrollY + desk.getBoundingClientRect().top;
       frame();
       // phones: the shadow goes right under the closed laptop's front edge, wherever the 3D projection puts it
@@ -637,6 +681,21 @@
       }
     }
 
+    // where My work.key's icon sits on the screen, as fractions of it: the keynote grows out of it
+    function keyIcon() {
+      const ic = $('.dt-key-btn .dt-ficon', desktop)?.getBoundingClientRect();
+      const sr = (wide.matches ? macScreen : stage).getBoundingClientRect();
+      if (!ic?.width || !sr.width) return { x: 0.5, y: 0.5 };
+      return { x: (ic.left + ic.width / 2 - sr.left) / sr.width, y: (ic.top + ic.height / 2 - sr.top) / sr.height };
+    }
+
+    // The arrival's beats, as stretches of u: the string unwinds, the flap opens, the Air lifts out, the envelope
+    // goes, the Air comes forward and its lid opens; on a phone the camera then goes into its screen.
+    const ARRIVE = {
+      wide: { untie: [0.02, 0.16], flap: [0.16, 0.3], lift: [0.28, 0.48], away: [0.42, 0.66], fly: [0.46, 0.82], open: [0.58, 1] },
+      narrow: { untie: [0.02, 0.13], flap: [0.13, 0.24], lift: [0.22, 0.38], away: [0.34, 0.52], fly: [0.36, 0.6], open: [0.44, 0.72], push: [0.68, 1] },
+    };
+
     function frame() {
       const rect = desk.getBoundingClientRect();
       deskTop = scrollY + rect.top;
@@ -644,23 +703,21 @@
       const y = wide.matches ? clamp(-rect.top, 0, end) : yOf(vP);
       if (!wide.matches) inStage = true;
 
-      if (reduce) {
-        if (y < a1 * 0.5) { open = 0; push = 0; aside = 0; }
-        else if (y < (b0 + b1) * 0.5) { open = 1; push = 1; aside = 0; }
-        else { open = 1; push = 1; aside = 1; }
-      } else if (wide.matches) {
-        open = clamp(y / a1);
-        push = 0;
-        aside = clamp((y - b0) / (b1 - b0));
-      } else {
-        open = clamp(y / (a1 * 0.5));
-        push = clamp((y - a1 * 0.5) / (a1 * 0.5));
-        aside = clamp((y - b0) / (b1 - b0));
-      }
+      // u runs through the arrival; aside runs through My work.key playing, out of the screen and into the window
+      let u = clamp(y / a1);
+      aside = clamp((y - b0) / (b1 - b0));
+      if (reduce) { u = y < a1 * 0.5 ? 0 : 1; aside = y < (b0 + b1) * 0.5 ? 0 : 1; }
+      const B = wide.matches ? ARRIVE.wide : ARRIVE.narrow;
+      const untie = smoothstep(...B.untie, u), flapK = smoothstep(...B.flap, u), lift = smoothstep(...B.lift, u);
+      const away = smoothstep(...B.away, u), fly = smoothstep(...B.fly, u);
+      open = clamp((u - B.open[0]) / (B.open[1] - B.open[0]));
+      push = B.push ? clamp((u - B.push[0]) / (B.push[1] - B.push[0])) : 0;
 
-      const onCover = open <= 0.02;
+      const onCover = u <= 0.02;
       atDesk = (wide.matches ? open >= 0.98 : push >= 0.98) && aside <= 0.02;
       atPhone = aside >= 0.98;
+      // the visitor may have moved the file since; read it afresh next time
+      if (atDesk) keyAt = null;
 
       desk.classList.toggle('on-cover', onCover);
       desk.classList.toggle('is-desk', atDesk);
@@ -669,113 +726,133 @@
       knEl.inert = !atPhone;
 
       // Identity copy fade
-      const meOp = 1 - smoothstep(0.02, 0.46, open);
-      const meY = -smoothstep(0, 0.5, open) * 26;
+      const meOp = 1 - smoothstep(0.02, 0.3, u);
+      const meY = -smoothstep(0, 0.34, u) * 26;
       deskMe.style.setProperty('--me-op', meOp.toFixed(3));
       deskMe.style.setProperty('--me-y', `${meY.toFixed(1)}px`);
+
+      // The envelope: the string unwinds off its buttons, the flap folds up and back, then it drops away
+      if (u !== lastU) {
+        lastU = u;
+        const envT = `translate3d(0, ${(away * (H - mouth + 0.36 * envH + 40)).toFixed(1)}px, 0)`;
+        envBack.style.transform = envT;
+        envFront.style.transform = envT;
+        envBack.style.visibility = envFront.style.visibility = away >= 0.999 ? 'hidden' : '';
+        // (a dash of no length still draws its round cap, so each string is hidden outright when it has none)
+        envWound.style.strokeDashoffset = untie.toFixed(3);
+        envWound.style.visibility = untie > 0.995 ? 'hidden' : '';
+        envTail.style.strokeDashoffset = (1 - untie).toFixed(3);
+        envTail.style.visibility = untie < 0.005 ? 'hidden' : 'visible';
+        envFlap.style.transform = `scaleY(${Math.max(0, 1 - 2 * flapK).toFixed(3)})`;
+        envBack.style.setProperty('--flap-up', Math.max(0, 2 * flapK - 1).toFixed(3));
+      }
 
       // Lid angle, glass reflection sweep, and studio lighting
       const eo = smoothstep(0, 1, open);
       const ea = smoothstep(0, 1, aside);
-      const shut = wide.matches ? smoothstep(0.02, 0.3, aside) : 0;
-      const lidDeg = clamp(-90 * (1 - eo) - 90 * shut + (onCover ? nudgeDeg : 0), -90, 0);
+      const lidDeg = -90 * (1 - eo);
       macLid.style.setProperty('--lid', `${lidDeg.toFixed(2)}deg`);
-      mac.style.setProperty('--deck-op', (smoothstep(0.05, 0.35, open) * (1 - shut)).toFixed(3));
+      mac.style.setProperty('--deck-op', smoothstep(0.05, 0.35, open).toFixed(3));
       let pose = null;
-      const darkOp = Math.max(1 - smoothstep(0.48, 0.88, open), smoothstep(0.08, 0.3, shut));
+      const darkOp = 1 - smoothstep(0.48, 0.88, open);
       mac.style.setProperty('--dark', darkOp.toFixed(3));
       const sheenX = -34 + eo * 66;
       const sheenOp = Math.sin(eo * Math.PI) * 0.85 + 0.12;
       mac.style.setProperty('--sheen', `${sheenX.toFixed(1)}%`);
       mac.style.setProperty('--sheen-op', sheenOp.toFixed(3));
 
+      // the shut Air in its envelope, its back just under the mouth, and lifted clear of it; its shadow on the
+      // desk only comes back as it lands
+      const s0 = envS;
+      const x0 = envX + envW / 2 - W / 2;
+      const yIn = mouth + 24 - Hl * 0.5 * (1 + s0);
+      const yOut = mouth - 12 - Hl * s0 * 0.52 - Hl * 0.5 * (1 + s0);
+      const shade = smoothstep(0.5, 1, fly);
+      mac.style.setProperty('--sh-op', (0.9 * shade).toFixed(3));
+      let knT = 'none', knOp = 0, dark = 0, ui = 0;
+
       if (wide.matches) {
-        const x0 = 0.72 * stageW - 0.5 * W;
-        const y0 = 0.44 * H - 0.82 * Hl;
-        const s0 = 0.63;
         const x1 = (stageW - W) * 0.5;
         const y1 = Math.max(66, (H - Hl) * 0.42);
-        const s1 = 1;
-        // the keynote's way in: the shut Air shrinks to the middle, an interoffice envelope rises under it, and the
-        // Air slides down into it, the way it came out of one at its launch in 2008. Then the house lights go down.
-        const s2 = 0.42, mouth = H * 0.5;
-        const x2 = (stageW - W) * 0.5;
-        // a shut laptop shows below its box: its hinge at the box's foot, its front lip about a third of a depth lower
-        const y2 = mouth - 10 - Hl * 0.5 - Hl * 0.84 * s2;
-        const cK = smoothstep(0, 0.32, aside), dropK = smoothstep(0.34, 0.62, aside);
-        const drop = (Hl * 0.34 * s2 + 34) * dropK;
+        let mx = x0 + (x1 - x0) * fly;
+        let my = yIn + (yOut - yIn) * lift + (y1 - yOut) * fly;
+        let ms = s0 + (1 - s0) * fly;
 
-        const mx = x0 + (x1 - x0) * eo + (x2 - x1) * cK;
-        const my = y0 + (y1 - y0) * eo + (y2 - y1) * cK + drop;
-        const ms = s0 + (s1 - s0) * eo + (s2 - s1) * cK;
-
-        // 3D hero camera angle on the cover, orbiting to front-and-center as the lid opens, then angling aside
-        const heroRx = 5.5 * (1 - eo);
-        const heroRy = -9.5 * (1 - eo);
-        const heroRz = 0.8 * (1 - eo);
-        mac.style.setProperty('--rx', `${heroRx.toFixed(2)}deg`);
-        mac.style.setProperty('--ry', `${heroRy.toFixed(2)}deg`);
-        mac.style.setProperty('--rz', `${heroRz.toFixed(2)}deg`);
-        mac.style.setProperty('--sh-y', `${(28 - 10 * eo).toFixed(1)}px`);
-        mac.style.setProperty('--sh-s', (0.94 + 0.06 * eo).toFixed(3));
-
-        const macOp = 1;
+        // My work.key plays: first on the laptop's own screen, growing out of its icon; then the camera pushes into
+        // the screen until it fills the window. The scale climbs evenly, so the push doesn't speed up as it nears.
+        if (aside > 0 && scr) {
+          const grow = smoothstep(0, 0.28, aside), zk = smoothstep(0.3, 0.94, aside);
+          const k = Math.pow(zoomZ, zk);
+          const c0x = x1 + scr.x + scr.w / 2, c0y = y1 + scr.y + scr.h / 2;
+          const cx = c0x + (stageW / 2 - c0x) * zk, cy = c0y + (H / 2 - c0y) * zk;
+          mx = cx - W / 2 - k * (scr.x + scr.w / 2 - W / 2);
+          my = cy - Hl / 2 - k * (scr.y + scr.h / 2 - Hl / 2);
+          ms = k;
+          // the keynote's screen rides on the display: the box is the display at full zoom, so it's scaled by k / Z
+          const at = keyAt || (keyAt = keyIcon());
+          const px = (at.x - 0.5) * scr.w * zoomZ, py = (at.y - 0.5) * scr.h * zoomZ, q = 0.06 + 0.94 * grow;
+          knT = `translate(${(cx - stageW / 2).toFixed(2)}px, ${(cy - H / 2).toFixed(2)}px) scale(${(k / zoomZ).toFixed(5)}) `
+            + `translate(${px.toFixed(1)}px, ${py.toFixed(1)}px) scale(${q.toFixed(4)}) translate(${(-px).toFixed(1)}px, ${(-py).toFixed(1)}px)`;
+          knOp = smoothstep(0, 0.06, aside);
+          dark = smoothstep(0.9, 0.97, aside);
+          ui = smoothstep(0.9, 1, aside);
+        }
 
         if (atDesk) {
           mac.style.transform = `translate3d(${Math.round(x1)}px, ${Math.round(y1)}px, 0) scale(1)`;
           pose = { tx: Math.round(x1), ty: Math.round(y1), s: 1 };
         } else {
-          mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
-          pose = { tx: +mx.toFixed(1), ty: +my.toFixed(1), s: +ms.toFixed(3) };
+          mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(4)})`;
+          pose = { tx: +mx.toFixed(1), ty: +my.toFixed(1), s: +ms.toFixed(4) };
         }
-        mac.style.opacity = macOp.toFixed(3);
-        Object.assign(pose, { rx: +heroRx.toFixed(2), ry: +heroRy.toFixed(2), rz: +heroRz.toFixed(2), op: +macOp.toFixed(3) });
-
-        const ew = W * s2 * 1.42, eh = ew * 0.62;
-        const envUp = smoothstep(0.12, 0.38, aside), lights = smoothstep(0.58, 0.86, aside);
-        stage.style.setProperty('--env-x', `${((stageW - ew) / 2).toFixed(1)}px`);
-        stage.style.setProperty('--env-y', `${mouth.toFixed(1)}px`);
-        stage.style.setProperty('--env-w', `${ew.toFixed(1)}px`);
-        stage.style.setProperty('--env-h', `${eh.toFixed(1)}px`);
-        stage.style.setProperty('--env-dy', `${((1 - envUp) * (H - mouth + eh * 0.2 + 40)).toFixed(1)}px`);
-        stage.style.setProperty('--env-op', aside > 0.001 ? '1' : '0');
-        knEl.style.setProperty('--kn-dark', lights.toFixed(3));
-        knEl.style.setProperty('--kn-in', smoothstep(0.78, 1, aside).toFixed(3));
+        // once the keynote fills the window the laptop behind it isn't drawn
+        const macOp = aside >= 0.99 ? 0 : 1;
+        mac.style.opacity = macOp;
+        Object.assign(pose, { rx: 0, ry: 0, rz: 0, op: macOp, shade });
+        if (knScreen) knScreen.style.transformOrigin = '';
       } else {
-        // Phones: the closed laptop sits just under the words (Sujith's pick); opening it, the camera
-        // zooms into its screen (transform only, so it stays on the GPU) and the real desktop fades in over it.
+        // Phones: the Air comes out of its envelope under the words and opens, then the camera zooms into its
+        // screen (transform only, so it stays on the GPU) and the real desktop fades in over it.
         const ep = smoothstep(0, 1, push);
-        const meBottom = deskMe.offsetTop + deskMe.offsetHeight;
-        const x0 = (stageW - W) * 0.5;
-        const y0 = Math.min(H - Hl - 48, meBottom - Hl + 32);
+        const x1 = (stageW - W) * 0.5;
         const y1 = (H - Hl) * 0.44;
         const zoom = Math.max(stageW / (W * 0.94), H / (Hl * 0.9)) * 1.04;
-        const ms = 1 + (zoom - 1) * ep * ep;
+        const ms = (s0 + (1 - s0) * fly) * (1 + (zoom - 1) * ep * ep);
         const yz = H * 0.5 - Hl * 0.5 + Hl * 0.03 * ms;
-        const mx = x0 - stageW * 0.92 * ea;
-        const my = y0 + (y1 - y0) * eo + (yz - y1) * ep;
-        mac.style.setProperty('--rx', '0deg');
-        mac.style.setProperty('--ry', '0deg');
-        mac.style.setProperty('--rz', '0deg');
+        const mx = x0 + (x1 - x0) * fly;
+        const my = yIn + (yOut - yIn) * lift + (y1 - yOut) * fly + (yz - y1) * ep;
         mac.style.transform = `translate3d(${mx.toFixed(1)}px, ${my.toFixed(1)}px, 0) scale(${ms.toFixed(3)})`;
-        const macOp = 1 - smoothstep(0.82, 1, ep) * (1 - ea);
+        const macOp = 1 - smoothstep(0.82, 1, ep);
         mac.style.opacity = macOp.toFixed(3);
-        pose = { tx: +mx.toFixed(1), ty: +my.toFixed(1), s: +ms.toFixed(3), rx: 0, ry: 0, rz: 0, op: +macOp.toFixed(3) };
+        pose = { tx: +mx.toFixed(1), ty: +my.toFixed(1), s: +ms.toFixed(3), rx: 0, ry: 0, rz: 0, op: +macOp.toFixed(3), shade };
 
         mScreen.style.clipPath = 'none';
         if (aside <= 0.01) {
           mScreen.style.opacity = smoothstep(0.72, 0.95, ep).toFixed(3);
           mScreen.style.transform = `scale(${(1.06 - 0.06 * smoothstep(0.62, 1, ep)).toFixed(4)})`;
         } else {
-          // the keynote: the desktop sinks back as the house lights go down
-          mScreen.style.opacity = (1 - smoothstep(0.3, 0.9, ea)).toFixed(3);
-          mScreen.style.transform = `scale(${(1 - 0.07 * ea).toFixed(4)})`;
+          // My work.key plays: the desktop sinks back as the keynote grows out of the file's icon to fill the screen
+          mScreen.style.opacity = (1 - smoothstep(0.35, 0.9, ea)).toFixed(3);
+          mScreen.style.transform = `scale(${(1 - 0.06 * ea).toFixed(4)})`;
         }
-        knEl.style.setProperty('--kn-dark', smoothstep(0.1, 0.6, ea).toFixed(3));
-        knEl.style.setProperty('--kn-in', smoothstep(0.45, 1, ea).toFixed(3));
+        if (aside > 0) {
+          const at = keyAt || (keyAt = keyIcon());
+          if (knScreen) knScreen.style.transformOrigin = `${(at.x * 100).toFixed(2)}% ${(at.y * 100).toFixed(2)}%`;
+          knT = `scale(${(0.1 + 0.9 * smoothstep(0, 0.8, aside)).toFixed(4)})`;
+          knOp = smoothstep(0, 0.1, aside);
+          dark = smoothstep(0.3, 0.8, aside);
+          ui = smoothstep(0.75, 1, aside);
+        }
       }
-      // the masthead goes dark with the house lights; with the lights fully up the theatre isn't drawn at all
-      root.classList.toggle('kn-dark', aside > 0.6);
+      // the keynote: its screen, the room going black behind it, then its chapters; the masthead goes dark with it
+      if (!knScreen && kn) { knScreen = $('[data-kn-screen]', knEl); knUi = $$('.kn-bar, .kn-hint, .kn-prog, .kn-back', knEl); }
+      if (knScreen) {
+        knScreen.style.transform = aside >= 0.999 ? 'none' : knT;
+        knScreen.style.opacity = knOp.toFixed(3);
+      }
+      knEl.style.backgroundColor = `rgba(0, 0, 0, ${dark.toFixed(3)})`;
+      knUi.forEach((n) => { n.style.opacity = ui.toFixed(3); });
+      root.classList.toggle('kn-dark', aside > 0.85);
       knEl.style.visibility = aside > 0.001 ? 'visible' : 'hidden';
       // the WebGL body takes the very numbers the CSS screen was just given, so the two stay in register
       if (macGl && inStage) macGl.render({ W, lid: lidDeg, lit: 1 - darkOp, ...pose });
@@ -789,13 +866,13 @@
     function tweenTo(target, immediate = false) {
       cancelAnimationFrame(tweenRaf);
       const from = vP;
-      if (immediate || reduce || from === target) { vP = target; tweening = false; frame(); return; }
-      // the lid and the zoom get room to breathe; the lights going down is quicker
-      const span = Math.abs(target - from);
-      const dur = span > 1.5 ? 2200 : Math.min(from, target) >= 1 ? 900 * span : 1600 * span;
+      if (immediate || reduce || from === target) { vP = target; tweening = false; frame(); return 0; }
+      // the arrival (the envelope, the lid, the way into the screen) gets room to breathe; the keynote opening is quicker
+      const lo = Math.min(from, target), hi = Math.max(from, target);
+      const dur = 2600 * Math.max(0, Math.min(hi, 1) - lo) + 1100 * Math.max(0, hi - Math.max(lo, 1));
       const t0 = performance.now();
-      // the keynote eases out (moves on the tap, settles softly); the lid and the zoom ease in and out
-      const appOpen = Math.min(from, target) >= 1;
+      // the keynote eases out (moves on the tap, settles softly); the arrival eases in and out
+      const appOpen = lo >= 1;
       const ease = appOpen ? (p) => 1 - Math.pow(1 - p, 3) : (p) => 0.5 - Math.cos(Math.PI * p) / 2;
       tweening = true;
       const step = (now) => {
@@ -806,6 +883,7 @@
         else { vP = target; tweening = false; frame(); }
       };
       tweenRaf = requestAnimationFrame(step);
+      return dur;
     }
     function stepState(dir) {
       if (tweening) return;
@@ -840,20 +918,32 @@
       stepState(e.deltaY > 0 ? 1 : -1);
     }, { passive: false });
 
-    // Scroll to a target offset inside section.desk
+    // Scroll to a target offset inside section.desk; returns how long it'll take (ms)
     function scrollToDesk(targetY, immediate = false) {
       interacted = true;
-      if (!wide.matches) { tweenTo(Math.round(pOf(clamp(targetY, 0, b1))), immediate); return; }
+      if (!wide.matches) return tweenTo(Math.round(pOf(clamp(targetY, 0, b1))), immediate);
       const top = deskTop + targetY;
       if (immediate || reduce) {
         if (lenis) lenis.scrollTo(top, { immediate: true });
         else window.scrollTo(0, top);
         frame();
-        return;
+        return 0;
       }
       snapping = true;
       clearTimeout(snapTimer);
-      if (lenis && wide.matches) lenis.scrollTo(top, { duration: 0.9 });
+      // nothing moves between the open laptop and the keynote, so a jump across starts from the far side of it
+      const at = scrollY - deskTop;
+      if (at >= a1 - 2 && at <= b0 + 2 && targetY > b0) {
+        if (lenis) lenis.scrollTo(deskTop + b0, { immediate: true }); else window.scrollTo(0, deskTop + b0);
+      } else if (at >= a1 - 2 && at <= b0 + 2 && targetY < a1 - 2) {
+        if (lenis) lenis.scrollTo(deskTop + a1, { immediate: true }); else window.scrollTo(0, deskTop + a1);
+      }
+      // each stretch at its own pace: three seconds for the envelope and the lid, two for the keynote coming out of
+      // the screen, a moment for the still stretch between; eased gently in and out
+      const from = scrollY - deskTop, lo = Math.min(from, targetY), hi = Math.max(from, targetY);
+      const part = (a, b) => Math.max(0, Math.min(hi, b) - Math.max(lo, a)) / (b - a);
+      const dur = Math.max(0.9, 3 * part(0, a1) + 0.4 * part(a1, b0) + 2.2 * part(b0, b1) + 0.4 * part(b1, end));
+      if (lenis && wide.matches) lenis.scrollTo(top, { duration: dur, easing: (t) => 0.5 - Math.cos(Math.PI * t) / 2 });
       else window.scrollTo({ top, behavior: 'smooth' });
       setTimeout(() => {
         if (wide.matches) {
@@ -862,7 +952,8 @@
         }
         snapping = false;
         frame();
-      }, 920);
+      }, dur * 1000 + 20);
+      return dur * 1000;
     }
 
     // Direction-aware snap after ~160ms idle
@@ -907,30 +998,29 @@
     // The masthead's Laptop and Phone links are shortcuts too.
     const shortcut = (sel, fn) => $$(sel).forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); setMenu(false); fn(); }));
     shortcut('[data-desk-open]', () => {
-      scrollToDesk(a1);
-      setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
+      const t = scrollToDesk(a1);
+      setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), t + 40);
     });
     shortcut('[data-desk-phone]', () => {
       closeAllWins(true);
-      scrollToDesk(b1);
-      setTimeout(() => kn?.focus(), reduce ? 20 : 940);
+      const t = scrollToDesk(b1);
+      setTimeout(() => kn?.focus(), t + 40);
     });
     $$('[data-desk-laptop]', desk).forEach((b) => b.addEventListener('click', () => {
-      scrollToDesk(b0);
-      setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), reduce ? 20 : 940);
+      const t = scrollToDesk(b0);
+      setTimeout(() => $('.dt-app', desktop)?.focus({ preventScroll: true }), t + 40);
     }));
 
-    // Lid drag or click on the closed/aside laptop
+    // Drag the Air up out of its envelope (or the lid open), or click it to open
     let lidDrag = null;
-    mac.addEventListener('pointerdown', (e) => {
+    const dragStart = (e) => {
       if (e.button > 0) return;
-      if (atDesk) return;
-      if (atPhone) { scrollToDesk(b0); return; }
+      if (atDesk || atPhone) return;
       if (e.pointerType === 'touch') return; // touch uses native scroll
       lidDrag = { id: e.pointerId, startY: e.clientY, startScroll: clamp(-desk.getBoundingClientRect().top, 0, a1), moved: false };
-      mac.setPointerCapture(e.pointerId);
-    });
-    mac.addEventListener('pointermove', (e) => {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    };
+    const dragMove = (e) => {
       if (!lidDrag || e.pointerId !== lidDrag.id) return;
       const dy = lidDrag.startY - e.clientY;
       if (Math.abs(dy) > 5) lidDrag.moved = true;
@@ -938,7 +1028,7 @@
       const target = clamp(lidDrag.startScroll + (dy / 300) * a1, 0, a1);
       scrollDir = dy >= 0 ? 1 : -1;
       scrollToDesk(target, true);
-    });
+    };
     const endLidDrag = (e) => {
       if (!lidDrag || e.pointerId !== lidDrag.id) return;
       const d = lidDrag;
@@ -946,8 +1036,14 @@
       if (!d.moved) scrollToDesk(a1);
       else checkSnap();
     };
-    mac.addEventListener('pointerup', endLidDrag);
-    mac.addEventListener('pointercancel', endLidDrag);
+    for (const el of [mac, envFront]) {
+      el.addEventListener('pointerdown', dragStart);
+      el.addEventListener('pointermove', dragMove);
+      el.addEventListener('pointerup', endLidDrag);
+      el.addEventListener('pointercancel', endLidDrag);
+    }
+    // a tap on the envelope opens it on a phone too
+    envFront.addEventListener('click', () => { if (!wide.matches && !tweening && Math.round(vP) === 0) tweenTo(1); });
 
     /* ---------- Players & Title Card (titled) ---------- */
 
@@ -1117,7 +1213,7 @@
         }
       });
 
-      // The keynote plays while the house lights are down
+      // The keynote plays while it fills the window
       kn?.run(canPlay && atPhone);
 
       // Drive timed ink notes for whichever player is active
@@ -1630,8 +1726,9 @@
     kn = window.Keynote?.(knEl, { notes: $$('.desk-data .note', desk), makePlayer, narrow: () => !wide.matches, greet: greetTalk }) || null;
     syncPlayers();
 
-    // Esc closes the front window, or takes it out of theater mode
+    // Esc closes the front window, or takes it out of theater mode; in the keynote it goes back to the laptop
     addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && !wins.length && atPhone) { e.preventDefault(); $('.desk-step--laptop', desk)?.click(); return; }
       if (e.key !== 'Escape' || !wins.length) return;
       e.preventDefault();
       const front = wins[wins.length - 1];

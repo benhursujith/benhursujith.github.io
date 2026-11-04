@@ -1,6 +1,6 @@
-/* The keynote: the landing's second act. The work is told the way the MacBook Air itself was launched in 2008, on a
-   dark stage, one idea per slide. Slides are laid out on a fixed canvas (1600 × 900, or 780 × 1400 on a phone) and
-   scaled to fit, the way Keynote does. Everything on them comes from the page's own notes (.desk-data .note), and
+/* The keynote: My work.key, played from the laptop's desktop. The work is told the way the MacBook Air itself was
+   launched in 2008, one idea per slide, full screen. Slides are laid out on a fixed canvas (1600 × 900, or 780 × 1400
+   on a phone) and scaled to fit, the way Keynote does. Everything on them comes from the page's own notes (.desk-data .note), and
    every demo plays through the site's own player, so recordings and recreations behave as they do on the laptop.
    window.Keynote(host, { notes, makePlayer, narrow }) builds it in host and returns { run, layout }. */
 (() => {
@@ -52,26 +52,12 @@
     host.insertAdjacentHTML('beforeend', `
       <div class="kn-screen" data-kn-screen tabindex="-1" role="group" aria-roledescription="slides" aria-label="My work, as a keynote">
         <div class="kn-canvas" data-kn-canvas aria-live="polite"></div>
-        <div class="kn-prog" data-kn-prog></div>
       </div>
-      <div class="kn-floor" aria-hidden="true"></div>
-      <div class="kn-crowd" aria-hidden="true"><svg viewBox="0 0 1600 150" preserveAspectRatio="none" data-kn-crowd></svg></div>
+      <div class="kn-prog" data-kn-prog></div>
       <nav class="kn-bar" data-kn-bar aria-label="Chapters"></nav>
       <p class="kn-hint" data-kn-hint aria-hidden="true">Click, or press →</p>`);
     const $ = (s) => host.querySelector(s);
     const screen = $('[data-kn-screen]'), canvas = $('[data-kn-canvas]'), bar = $('[data-kn-bar]'), prog = $('[data-kn-prog]'), hint = $('[data-kn-hint]');
-
-    // the audience, in silhouette against the screen's light
-    (() => {
-      let d = '', x = -20;
-      const r = (a) => { const s = Math.sin(a * 12.9898) * 43758.5453; return s - Math.floor(s); };
-      for (let i = 0; x < 1640; i++) {
-        const w = 70 + r(i) * 40, h = 58 + r(i + 7) * 26, y = 150 - h;
-        d += `M${x.toFixed(1)} 150C${x.toFixed(1)} ${(y + 34).toFixed(1)} ${(x + w * 0.18).toFixed(1)} ${(y + 30).toFixed(1)} ${(x + w * 0.3).toFixed(1)} ${(y + 26).toFixed(1)}C${(x + w * 0.26).toFixed(1)} ${y.toFixed(1)} ${(x + w * 0.74).toFixed(1)} ${y.toFixed(1)} ${(x + w * 0.7).toFixed(1)} ${(y + 26).toFixed(1)}C${(x + w * 0.82).toFixed(1)} ${(y + 30).toFixed(1)} ${(x + w).toFixed(1)} ${(y + 34).toFixed(1)} ${(x + w).toFixed(1)} 150Z`;
-        x += w * (0.78 + r(i + 3) * 0.2);
-      }
-      $('[data-kn-crowd]').innerHTML = `<defs><linearGradient id="kn-rim" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#262833"/><stop offset=".3" stop-color="#050506"/></linearGradient></defs><path d="${d}" fill="url(#kn-rim)"/>`;
-    })();
 
     /* ---------- the running order ---------- */
     const slides = [];
@@ -128,7 +114,7 @@
       return '';
     }
 
-    /* ---------- layout: a fixed canvas, scaled to the screen ---------- */
+    /* ---------- layout: a fixed canvas, scaled to the window ---------- */
     let port = false;
     function layout() {
       const W = host.clientWidth, H = host.clientHeight;
@@ -137,14 +123,11 @@
       port = opts.narrow() && H > W;
       host.classList.toggle('kn--port', port);
       const cw = port ? 780 : 1600, ch = port ? 1400 : 900;
-      let sw, sh;
-      if (port) { sw = W; sh = H; } else { sw = Math.min(W * 0.9, H * 0.74 * 16 / 9); sh = sw * 9 / 16; }
-      const s = port ? Math.min(sw / cw, sh / ch) : sw / cw;
-      host.style.setProperty('--kn-sw', `${sw.toFixed(1)}px`); host.style.setProperty('--kn-sh', `${sh.toFixed(1)}px`);
+      // as big as the window allows, leaving a band above for the masthead and one below for the chapters
+      const band = opts.narrow() ? 36 : 56;
+      const s = port ? Math.min(W / cw, H / ch) : Math.min((W - 32) / cw, (H - 2 * band) / ch);
       host.style.setProperty('--kn-cw', `${cw}px`); host.style.setProperty('--kn-ch', `${ch}px`);
       host.style.setProperty('--kn-s', s.toFixed(5));
-      canvas.style.left = port ? `${((sw - cw * s) / 2).toFixed(1)}px` : '0px';
-      canvas.style.top = port ? `${((sh - ch * s) / 2).toFixed(1)}px` : '0px';
       if (was !== port && cur >= 0) show(cur, { full: true });
     }
 
@@ -267,7 +250,7 @@
     show(0);
     new ResizeObserver(layout).observe(host);
     return {
-      // plays while the theatre is up; holds its place when the visitor goes back to the laptop
+      // plays while it fills the window; holds its place when the visitor goes back to the laptop
       run(on) {
         if (on === running) return;
         running = on;

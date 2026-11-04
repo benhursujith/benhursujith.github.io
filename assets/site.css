@@ -307,9 +307,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   transform-origin: 50% 50%;
   transition: filter .45s var(--ease);
 }
-.desk.on-cover .mac, .desk.is-phone .mac { cursor: pointer; }
-.desk.is-phone .mac { filter: blur(2.2px); }
-.desk.is-phone .mac:hover { filter: blur(0px); }
+.desk.on-cover .mac { cursor: pointer; }
 
 /* Studio floor contact + ambient shadow beneath the 3D unibody */
 .mac-shadow {
@@ -1306,33 +1304,29 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 }
 .intro-x:hover { background: rgba(20, 20, 19, .14); }
 
-/* ---------- The keynote (.kn, assets/keynote.js): the work after the laptop, on a dark stage ----------
-   The house lights go down (--kn-dark, from the scroll), then the screen comes up (--kn-in). Slides sit on a fixed
-   canvas (1600 × 900, or 780 × 1400 on a phone), scaled to the screen, the way Keynote does. */
+/* ---------- The keynote (.kn, assets/keynote.js): My work.key, played full screen from the laptop ----------
+   frame() moves the screen (.kn-screen) from the file's icon to the laptop's display, then pushes the camera into the
+   display until it fills the window; the room goes black behind it. On a laptop the screen is the display grown to
+   cover the window (--kn-bw, --kn-bh); slides sit on a fixed canvas (1600 × 900, or 780 × 1400 on a phone) in its
+   middle, scaled to the window, the way Keynote does. */
 .kn {
   --kn-dim: #8E8E96;
   position: absolute; inset: 0; z-index: 7;
-  display: grid; place-items: center;
-  background: #000; color: #fff;
+  color: #fff;
   font-family: var(--text);
-  opacity: var(--kn-dark, 0);
   pointer-events: none;
   -webkit-font-smoothing: antialiased;
 }
 .desk.is-phone .kn { pointer-events: auto; }
-.kn::before { content: ""; position: absolute; inset: 0; background: radial-gradient(60% 50% at 50% 38%, rgba(70, 80, 110, .22), transparent 70%); opacity: var(--kn-in, 0); pointer-events: none; }
 .kn-screen {
-  position: relative; overflow: hidden; border-radius: 3px; cursor: pointer; outline: none;
-  width: var(--kn-sw); height: var(--kn-sh); margin-top: -4vh;
-  background: #050506;
-  box-shadow: 0 0 0 1px rgba(255, 255, 255, .06), 0 30px 140px rgba(110, 130, 200, .16);
-  opacity: var(--kn-in, 0);
-  transform: scale(calc(.96 + .04 * var(--kn-in, 0)));
+  position: absolute; left: calc(50% - var(--kn-bw, 100%) / 2); top: calc(50% - var(--kn-bh, 100%) / 2);
+  width: var(--kn-bw, 100%); height: var(--kn-bh, 100%);
+  overflow: hidden; cursor: pointer; outline: none;
+  background: #000;
+  transform-origin: 50% 50%;
+  opacity: 0;
 }
-.kn-canvas { position: absolute; left: 0; top: 0; width: var(--kn-cw); height: var(--kn-ch); transform-origin: 0 0; transform: scale(var(--kn-s)); }
-.kn-floor { position: absolute; left: 50%; top: calc(50% - 4vh + var(--kn-sh) / 2); width: var(--kn-sw); height: 22vh; transform: translateX(-50%); background: radial-gradient(50% 60% at 50% 0, rgba(120, 130, 170, .1), transparent 70%); opacity: var(--kn-in, 0); pointer-events: none; }
-.kn-crowd { position: absolute; left: 0; right: 0; bottom: 0; height: 14vh; opacity: var(--kn-in, 0); pointer-events: none; }
-.kn-crowd svg { display: block; width: 100%; height: 100%; }
+.kn-canvas { position: absolute; left: calc(50% - var(--kn-cw) / 2); top: calc(50% - var(--kn-ch) / 2); width: var(--kn-cw); height: var(--kn-ch); transform-origin: 50% 50%; transform: scale(var(--kn-s)); }
 
 /* slides: the 2008 dark gradient and white type; the old slide dips out before the new one comes up */
 .kn-sl { position: absolute; inset: 0; background: radial-gradient(75% 85% at 50% 42%, #24252B 0%, #0E0E11 62%, #050506 100%); opacity: 0; transition: opacity .28s ease; }
@@ -1413,17 +1407,17 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .kn-hi a { padding: 22px 46px; border: 1.5px solid rgba(255, 255, 255, .35); border-radius: 99px; color: #fff; font-size: 30px; text-decoration: none; }
 .kn-hi a:first-child { border-color: #fff; background: #fff; color: #000; }
 
-/* the chapters under the screen, the clicker's hint, the way back on a phone */
-.kn-bar { position: absolute; left: 0; right: 0; bottom: max(70px, env(safe-area-inset-bottom)); z-index: 3; display: flex; justify-content: center; gap: 6px; opacity: var(--kn-in, 0); }
+/* the chapters under the slide, the clicker's hint, the way back on a phone (frame() fades them in) */
+.kn-bar { position: absolute; left: 0; right: 0; bottom: max(12px, env(safe-area-inset-bottom)); z-index: 3; display: flex; justify-content: center; gap: 6px; opacity: 0; }
 .kn-bar button { padding: 8px 12px; border: 0; border-radius: 99px; background: none; color: #6A6A72; font: 400 13px/1 var(--text); letter-spacing: .01em; cursor: pointer; }
 .kn-bar button:hover { color: #C8C8CF; }
 .kn-bar button:focus:not(:focus-visible) { outline: none; }
 .kn-bar button[aria-current="true"] { background: rgba(255, 255, 255, .08); color: #fff; }
-.kn-prog { position: absolute; left: 0; bottom: 0; z-index: 2; height: 3px; background: rgba(255, 255, 255, .55); transition: width .5s ease; }
-.kn-hint { position: absolute; right: var(--gutter); bottom: 76px; z-index: 3; margin: 0; font-size: 13px; color: #6A6A72; opacity: var(--kn-in, 0); transition: opacity .6s; }
+.kn-prog { position: absolute; left: 0; bottom: 0; z-index: 2; height: 2px; background: rgba(255, 255, 255, .45); opacity: 0; transition: width .5s ease; }
+.kn-hint { position: absolute; right: var(--gutter); bottom: 20px; z-index: 3; margin: 0; font-size: 13px; color: #6A6A72; opacity: 0; }
 .kn-hint.is-gone { visibility: hidden; }
-.kn-back { position: absolute; left: 14px; top: max(14px, env(safe-area-inset-top)); z-index: 4; padding: 8px 10px; border: 0; background: none; color: #8A8A92; font: 400 14px/1 var(--text); cursor: pointer; }
-/* in the theatre the step back to the laptop and the masthead go dark too */
+.kn-back { position: absolute; left: 14px; top: max(14px, env(safe-area-inset-top)); z-index: 4; padding: 8px 10px; border: 0; background: none; color: #8A8A92; font: 400 14px/1 var(--text); cursor: pointer; opacity: 0; }
+/* full screen, the step back to the laptop and the masthead go dark too */
 .desk.is-phone .desk-step--laptop { border-color: rgba(255, 255, 255, .2); background: transparent; color: #C9C7BF; }
 .desk.is-phone .desk-step--laptop:hover { border-color: rgba(255, 255, 255, .6); }
 .kn-dark .masthead { color: #E9E7DF; }
@@ -1432,8 +1426,7 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
 .kn-dark .nav a:hover, .kn-dark .nav a[aria-current="true"] { color: #fff; }
 
 /* a phone: the visitor's own screen is the slide */
-.kn--port .kn-screen { margin: 0; border-radius: 0; box-shadow: none; }
-.kn--port .kn-floor, .kn--port .kn-crowd, .kn--port .kn-hint { display: none; }
+.kn--port .kn-hint { display: none; }
 .kn--port .kn-bar { justify-content: flex-start; bottom: max(8px, env(safe-area-inset-bottom)); padding: 0 10px; overflow-x: auto; scrollbar-width: none; touch-action: pan-x; }
 .kn--port .kn-bar::-webkit-scrollbar { display: none; }
 .kn--port .kn-bar button { font-size: 12px; white-space: nowrap; }
@@ -1470,37 +1463,49 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   .kn-sl, .kn-b, .kn-dm-title, .kn-dm-title h2, .kn-dm-title p, .kn-dev, .kn-notes li, .kn-brush::after { transition: none !important; }
 }
 
-/* ---------- The envelope: the Air goes back into one, as it came out of one in 2008 ----------
+/* ---------- The envelope: the Air arrives in one, as it came out of one in 2008 ----------
    A manila interoffice envelope in two layers, its back under the laptop and its front over it, so the Air can
-   slide down between them. Placed by frame() (--env-x, --env-y is the mouth, --env-w, --env-h, --env-dy). */
+   slide up out from between them. measure() places and sizes it (the top is the mouth); frame() moves it and plays
+   the string unwinding and the flap opening. */
 .env {
-  position: absolute; left: var(--env-x, 0); top: var(--env-y, 0); width: var(--env-w, 0); height: var(--env-h, 0);
-  transform: translateY(var(--env-dy, 120vh));
-  opacity: var(--env-op, 0);
+  position: absolute; left: 0; top: 0;
   pointer-events: none;
+  will-change: transform;
 }
 .env--back { z-index: 3; }
-/* the back panel, a little taller than the front, and its flap folded open above it */
-.env--back::before { content: ""; position: absolute; left: 0; right: 0; top: -9%; bottom: 0; border-radius: 3px; background: linear-gradient(#C9A46A, #B88F55); box-shadow: 0 30px 60px -20px rgba(60, 40, 10, .45); }
-.env--back::after { content: ""; position: absolute; left: 6%; right: 6%; top: -34%; height: 26%; border-radius: 6px 6px 2px 2px; background: linear-gradient(#D6B47D, #C7A26A); clip-path: polygon(0 100%, 7% 0, 93% 0, 100% 100%); }
-.env--front { z-index: 6; overflow: hidden; border-radius: 2px 2px 4px 4px;
+/* the back panel, a little taller than the front, and its flap: folded over the front, then standing open behind */
+.env--back::before { content: ""; position: absolute; left: 0; right: 0; top: -9%; bottom: 0; border-radius: 3px; background: linear-gradient(#C9A46A, #B88F55); box-shadow: 0 30px 60px -20px rgba(20, 14, 4, .45); }
+.env--back::after { content: ""; position: absolute; left: 0; right: 0; top: -36%; height: 27%; border-radius: 6px 6px 2px 2px; background: linear-gradient(#D6B47D, #C7A26A); clip-path: polygon(0 100%, 4% 22%, 10% 0, 90% 0, 96% 22%, 100% 100%); transform-origin: 50% 100%; transform: scaleY(var(--flap-up, 0)); }
+.env--front { z-index: 6; border-radius: 2px 2px 4px 4px;
   background:
     repeating-linear-gradient(90deg, rgba(120, 85, 30, .05) 0 2px, transparent 2px 7px),
     linear-gradient(176deg, #E3C68F 0%, #D8B87E 55%, #CCA96E 100%);
-  box-shadow: inset 0 2px 0 rgba(255, 245, 220, .5), inset 0 -10px 30px rgba(120, 85, 30, .15), 0 24px 50px -18px rgba(60, 40, 10, .5); }
-/* the routing grid printed on the front: who it went to, a line at a time */
-.env-grid { position: absolute; left: 30%; right: 7%; top: 18%; bottom: 10%;
-  background:
-    linear-gradient(90deg, rgba(110, 60, 30, .55) 1px, transparent 1px) 0 0 / 50% 100%,
-    repeating-linear-gradient(180deg, transparent 0 calc(16.66% - 1px), rgba(110, 60, 30, .5) calc(16.66% - 1px) 16.66%);
-  border: 1px solid rgba(110, 60, 30, .6); }
+  box-shadow: inset 0 2px 0 rgba(255, 245, 220, .5), inset 0 -10px 30px rgba(120, 85, 30, .15), 0 24px 50px -18px rgba(20, 14, 4, .5); }
+.desk.on-cover .env--front { pointer-events: auto; cursor: pointer; }
+.env-flap { position: absolute; left: 0; right: 0; top: -9%; z-index: 2; height: 34%; transform-origin: 50% 0;
+  background: linear-gradient(#E6CB97, #D9BA80 80%, #C9A56B);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 95% 100%, 5% 100%, 0 62%);
+  filter: drop-shadow(0 2px 2px rgba(80, 50, 10, .35)); }
+.env-flap .env-btn { top: auto; bottom: 14.6%; }
+/* the string-and-button tie: wound round the two buttons, then hanging loose from the lower one */
+.env-btn { position: absolute; left: 47.5%; top: 27%; width: 5%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #C0392B, #7F1D14); box-shadow: 0 1px 2px rgba(0, 0, 0, .4), inset 0 0 0 1px rgba(255, 255, 255, .12); }
+.env-string { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; overflow: visible; pointer-events: none; filter: drop-shadow(0 .6px .6px rgba(70, 40, 5, .5)); }
+.env-string path { fill: none; stroke: #F2EADA; stroke-width: .4; stroke-linecap: round; stroke-dasharray: 1 1; }
+.env-tail { stroke-dashoffset: 1; visibility: hidden; }
+/* the routing slip printed on the front: who it went to, a line at a time, the last one you */
+.env-grid { position: absolute; left: 30%; right: 7%; top: 40%; bottom: 8%; display: grid; grid-template-rows: repeat(5, 1fr);
+  border: 1px solid rgba(110, 60, 30, .6);
+  background: linear-gradient(90deg, transparent calc(50% - .5px), rgba(110, 60, 30, .55) 0 calc(50% + .5px), transparent 0);
+  font-size: calc(var(--env-w, 600px) * .03); line-height: 1; color: #22283A; }
+.env-grid p { display: grid; grid-template-columns: 1fr 1fr; align-items: end; margin: 0; border-top: 1px solid rgba(110, 60, 30, .5); }
+.env-grid p:first-child { border-top: 0; align-items: center; font: 600 .62em/1 var(--text); letter-spacing: .12em; text-transform: uppercase; color: rgba(110, 60, 30, .8); }
+.env-grid span, .env-grid s { padding: 0 .5em .28em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.env-grid p:first-child span { padding-bottom: 0; }
+.env-grid p:not(:first-child) { font: italic 400 1em/1 var(--display); }
+.env-grid s { text-decoration-thickness: 1px; color: #3A3F52; }
 /* the holes punched down its side, so you can see whether anything is inside */
-.env-holes { position: absolute; left: 9%; top: 22%; bottom: 14%; width: 4.5%;
+.env-holes { position: absolute; left: 9%; top: 40%; bottom: 10%; width: 4.5%;
   background: radial-gradient(circle at 50% 50%, rgba(40, 26, 8, .78) 0 36%, transparent 40%) 0 0 / 100% 20%; }
-/* the string-and-button tie */
-.env-tie { position: absolute; left: 47%; top: 4%; width: 6%; aspect-ratio: 1; border-radius: 50%; background: radial-gradient(circle at 40% 35%, #C0392B, #7F1D14); box-shadow: 0 1px 2px rgba(0, 0, 0, .4); }
-.env-tie::after { content: ""; position: absolute; left: 50%; top: 50%; width: 260%; height: 2px; background: #8E2A1E; transform: rotate(-24deg); transform-origin: 0 50%; }
-@media (max-width: 900px) { .env { display: none; } }
 
 /* ---------- Timed cinema callouts (.mk) ---------- */
 
@@ -2271,7 +2276,6 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
   html.is-home .foot { display: none; }
   .mac, .m-screen, .kn { will-change: transform, opacity; }
   .mac { transition: none; }
-  .desk.is-phone .mac, .desk.is-phone .mac:hover { filter: none; }
   .mac-shadow {
     left: 2%; right: 2%;
     top: calc(var(--sh-top, var(--Hl)) - var(--W) * .045);
@@ -2283,17 +2287,14 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
   }
 }
 
-/* the 2009 sleep light, on the front lip, breathing once the lid is shut */
+/* the 2009 sleep light, on the front lip (kept off: the lid is only shut while the Air is in its envelope) */
 .mac-sleep {
   position: absolute; right: 14%; top: 34%;
   width: calc(var(--W) * .006); height: calc(var(--W) * .0035); border-radius: 50%;
   background: #F4F7FF; box-shadow: 0 0 6px 2px rgba(220, 232, 255, .9);
   opacity: 0;
 }
-.desk.is-phone .mac-sleep { animation: mac-breathe 4.6s ease-in-out infinite; }
-@keyframes mac-breathe { 0%, 100% { opacity: .08; } 45%, 55% { opacity: .95; } }
 @media (max-width: 900px) { .mac-sleep { display: none; } }
-@media (prefers-reduced-motion: reduce) { .desk.is-phone .mac-sleep { animation: none; opacity: .6; } }
 @media (max-width: 900px) {
   .rd { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); }
   .rd-side { display: flex; gap: 6px; overflow-x: auto; overflow-y: hidden; padding: 8px 10px; border-right: 0; border-bottom: 1px solid #A5A5A5; scrollbar-width: none; }
@@ -2349,9 +2350,6 @@ html.embed .article { padding-top: 28px; padding-bottom: 40px; }
 .mac--gl .mac-face { box-shadow: inset 0 1px 0 rgba(255, 255, 255, .8), inset 0 0 0 1px rgba(255, 255, 255, .25); }
 /* the CSS deck lifted the lid a hair to stop the two planes fighting; with the deck in WebGL the lid sits on its hinge */
 .mac--gl .mac-lid { transform: rotateX(var(--lid, -90deg)); }
-.desk.is-phone .mac-gl { filter: blur(2.2px); }
-.desk.is-phone .mac:hover ~ .mac-gl { filter: none; }
-@media (max-width: 900px) { .desk.is-phone .mac-gl { filter: none; } }
 
 /* an article is always a scrolling page, whatever width it's shown at (the reader's pane is narrower than a phone breakpoint) */
 html:not(.is-home), html:not(.is-home) body { height: auto; overflow-y: visible; }

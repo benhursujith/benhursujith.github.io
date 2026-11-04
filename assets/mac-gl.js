@@ -523,7 +523,7 @@ void main() { gl_FragColor = vec4(0.0, 0.0, 0.0, texture2D(tShadow, vUv).a * uK)
       gl.uniformMatrix4fv(flat.u.uMVP, false, mul(proj, mBase, T(0, D, 0)));
       gl.uniform1f(flat.u.uY, TMAX + 0.5 * MM);
       gl.uniform4fv(flat.u.uRect, shadowRect);
-      gl.uniform1f(flat.u.uK, 1);
+      gl.uniform1f(flat.u.uK, s.shade ?? 1);
       gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, tShadow); gl.uniform1i(flat.u.tShadow, 0);
       gl.bindBuffer(gl.ARRAY_BUFFER, quad);
       const aP = gl.getAttribLocation(flat.p, 'aP');
@@ -571,7 +571,7 @@ void main() { gl_FragColor = vec4(0.0, 0.0, 0.0, texture2D(tShadow, vUv).a * uK)
         canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
         if (last) this.render(last);
       },
-      // s: W, the .mac transform (tx, ty, s), the body's turn (rx, ry, rz), lid angle, lit (0..1), op
+      // s: W, the .mac transform (tx, ty, s), the body's turn (rx, ry, rz), lid angle, lit (0..1), op, shade (its shadow, 0..1)
       render(s) {
         last = s;
         if (lost || !cw) return;

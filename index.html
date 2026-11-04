@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400..600;1,6..72,400..600&family=DM+Sans:opsz,wght@9..40,400..600&family=Grand+Hotel&display=swap">
-<link rel="stylesheet" href="assets/site.css?v=56">
+<link rel="stylesheet" href="assets/site.css?v=57">
 </head>
 <body>
 <svg class="defs" width="0" height="0" aria-hidden="true" focusable="false">
@@ -192,10 +192,16 @@
 
     <div class="m-screen" data-m-screen></div>
 
-    <!-- the Air goes back into its envelope (it came out of one at its 2008 launch), the house lights go down, and
-         the work plays as a keynote (assets/keynote.js) -->
-    <div class="env env--back" aria-hidden="true"></div>
-    <div class="env env--front" aria-hidden="true"><i class="env-holes"></i><i class="env-grid"></i><i class="env-tie"></i></div>
+    <!-- the Air arrives in an interoffice envelope, the way it came out of one at its 2008 launch: the string unwinds,
+         the flap opens and the Air comes out and opens. Later My work.key plays from its screen (assets/keynote.js). -->
+    <div class="env env--back" data-env-back aria-hidden="true"></div>
+    <div class="env env--front" data-env aria-hidden="true">
+      <i class="env-holes"></i>
+      <div class="env-grid"><p><span>Name</span><span>Dept.</span></p><p><s>Sujith</s><s>Product</s></p><p><span data-env-to>you</span><span></span></p><p></p><p></p></div>
+      <i class="env-btn env-btn--body"></i>
+      <svg class="env-string" viewBox="0 0 100 62"><path class="env-tail" pathLength="1" d="M50 19.2C51 23 55.6 25 55 31.2S57.4 39.4 60.6 42"/><path class="env-wound" data-env-wound pathLength="1" d="M50 19.2C53.5 16.5 53.4 12.2 53.1 9.9S47.2 6.2 46.9 9.9 53.4 16 53.1 19.2 47.2 22.9 46.9 19.2 53.4 13 53.1 9.9 47.2 6.6 46.9 9.9 50 15 50.6 17.4"/></svg>
+      <i class="env-flap" data-env-flap><i class="env-btn"></i></i>
+    </div>
     <div class="kn" data-kn id="keynote" role="region" aria-label="My work, as a keynote">
       <button class="kn-back only-narrow" type="button" data-desk-laptop>← Laptop</button>
     </div>
@@ -207,7 +213,7 @@
 
     <div class="desk-nav">
       <button class="desk-step desk-step--laptop" type="button" data-desk-laptop><span aria-hidden="true">←</span> My laptop</button>
-      <button class="desk-step desk-step--phone" type="button" data-desk-phone>The keynote <span aria-hidden="true">→</span></button>
+      <button class="desk-step desk-step--phone" type="button" data-desk-phone>Play the keynote <span aria-hidden="true">→</span></button>
     </div>
 
     <div class="desk-data" hidden>
@@ -442,9 +448,9 @@ Mumbai</p></div>
 </footer>
 
 <script src="https://unpkg.com/lenis@1.3.4/dist/lenis.min.js" defer></script>
-<script src="assets/mac-gl.js?v=1" defer></script>
+<script src="assets/mac-gl.js?v=2" defer></script>
 <script src="assets/toss.js?v=3" defer></script>
-<script src="assets/keynote.js?v=1" defer></script>
-<script src="assets/site.js?v=45" defer></script>
+<script src="assets/keynote.js?v=2" defer></script>
+<script src="assets/site.js?v=46" defer></script>
 </body>
 </html>
