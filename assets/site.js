@@ -887,6 +887,8 @@
     }
     function stepState(dir) {
       if (tweening) return;
+      // in the keynote a swipe moves the slides; before the first one it goes back to the laptop
+      if (Math.round(vP) === 2 && kn && !kn.atEdge(dir)) { dir > 0 ? kn.next() : kn.prev(); return; }
       const next = clamp(Math.round(vP) + dir, 0, 2);
       if (next === Math.round(vP)) return;
       if (next !== 1) closeAllWins(true);
@@ -917,6 +919,25 @@
       wheelLock = performance.now() + 1100;
       stepState(e.deltaY > 0 ? 1 : -1);
     }, { passive: false });
+    // Once the keynote fills the window, scrolling moves the slides rather than the page: one slide per gesture (a
+    // gesture ends at a short pause, or when a new push starts in a trackpad's coast). The page takes the scroll
+    // back past the last slide, or before the first. Caught before Lenis sees it.
+    let wheelAt = 0, wheelAbs = 0, wheelFired = 0, wheelArmed = false;
+    addEventListener('wheel', (e) => {
+      const now = performance.now(), abs = Math.abs(e.deltaY), gap = now - wheelAt, prevAbs = wheelAbs;
+      wheelAt = now; wheelAbs = abs;
+      const y = scrollY - deskTop, dir = e.deltaY > 0 ? 1 : -1;
+      const own = wide.matches && kn && atPhone && y >= b1 - 2 && y <= end + 2 && !e.ctrlKey && abs > Math.abs(e.deltaX)
+        && !e.target.closest?.(SCROLLERS) && !kn.atEdge(dir);
+      if (!own) { wheelArmed = false; return; }
+      e.preventDefault(); e.stopImmediatePropagation();
+      // whatever scroll was still coasting stops here, on the keynote
+      if (lenis && Math.abs(lenis.targetScroll - (deskTop + b1)) > 1) lenis.scrollTo(deskTop + b1, { immediate: true });
+      if (gap > 200 || (now - wheelFired > 300 && abs > prevAbs * 2 && abs > 20)) wheelArmed = true;
+      if (!wheelArmed || abs < 4) return;
+      wheelArmed = false; wheelFired = now;
+      dir > 0 ? kn.next() : kn.prev();
+    }, { capture: true, passive: false });
 
     // Scroll to a target offset inside section.desk; returns how long it'll take (ms)
     function scrollToDesk(targetY, immediate = false) {

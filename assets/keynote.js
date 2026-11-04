@@ -2,13 +2,13 @@
    launched in 2008, one idea per slide, full screen. Slides are laid out on a fixed canvas (1600 × 900, or 780 × 1400
    on a phone) and scaled to fit, the way Keynote does. Everything on them comes from the page's own notes (.desk-data .note), and
    every demo plays through the site's own player, so recordings and recreations behave as they do on the laptop.
-   window.Keynote(host, { notes, makePlayer, narrow }) builds it in host and returns { run, layout }. */
+   window.Keynote(host, { notes, makePlayer, narrow }) builds it in host and returns { run, layout, focus, next, prev, atEdge }. */
 (() => {
   'use strict';
 
   const GROUPS = [
     { id: 'borderplus', label: 'BorderPlus', when: '2026', role: 'Lead PM, AI products', mark: 'borderplus-mark.png', keys: ['carepilot', 'ask', 'learn', 'mis', 'pathways'] },
-    { id: 'zenea', label: 'Zenea', when: '2026', role: 'Built at BorderPlus', mark: 'zenea-mark.svg', keys: ['zenea-caregiver', 'zenea-parent'] },
+    { id: 'zenea', label: 'Zenea', when: '2026', role: 'Managed childcare at home, built at BorderPlus', mark: 'zenea-icon.png', keys: ['zenea-caregiver', 'zenea-parent'] },
     { id: 'pixis', label: 'Pixis', when: '2020–25', role: 'Founding PM, optimisation', mark: 'pixis-mark.svg', keys: ['ads', 'pixis'] },
     { id: 'personal', label: 'Personal', when: '2026', role: 'On my own time', mark: null, keys: ['money-plan', 'trade', 'eatouts', 'gbf'] },
   ];
@@ -17,7 +17,7 @@
   const ICON = {
     wave: '<svg viewBox="0 0 48 48"><path d="M6 24h3M12 17v14M18 11v26M24 15v18M30 8v32M36 14v20M42 24h-3"/></svg>',
     ask: '<svg viewBox="0 0 48 48"><path d="M40 23a15 15 0 0 1-22 13.3L8 39l2.8-8.6A15 15 0 1 1 40 23z"/><path d="M20 19.5a4.2 4.2 0 1 1 5.6 4c-1.2.4-1.6 1.3-1.6 2.6M24 30.5v.4"/></svg>',
-    chart: '<svg viewBox="0 0 48 48"><path d="M8 40h32M13 33V22M21 33V14M29 33V25M37 33V10"/></svg>',
+    globe: '<svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="15"/><path d="M9 24h30M24 9c-4.6 4.2-6.8 9.2-6.8 15s2.2 10.8 6.8 15c4.6-4.2 6.8-9.2 6.8-15S28.6 13.2 24 9z"/></svg>',
   };
   const esc = (s) => String(s ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
   const txt = (el, sel) => (el.querySelector(sel)?.textContent || '').trim().replace(/\s+/g, ' ');
@@ -85,9 +85,9 @@
           <div class="kn-three">
             <div class="kn-b"><span class="kn-ico">${ICON.wave}</span><p>A care record you can talk to</p></div>
             <div class="kn-b"><span class="kn-ico">${ICON.ask}</span><p>Answers for nurses, in German and English</p></div>
-            <div class="kn-b"><span class="kn-ico">${ICON.chart}</span><p>An ad budget you can talk to</p></div>
+            <div class="kn-b"><span class="kn-ico">${ICON.globe}</span><p>Work abroad, worked out in a chat</p></div>
           </div></div>`;
-        case 'idea': return `<div class="kn-ctr"><p class="kn-sub kn-b kn-lead">These aren't three products. They're one idea:</p><p class="kn-big kn-b">Give people their <span class="kn-brush">hours back</span>.</p></div>`;
+        case 'idea': return `<div class="kn-ctr"><p class="kn-sub kn-b kn-lead">The pain point I keep solving for:</p><p class="kn-big kn-b">Hours lost to work that should take <span class="kn-brush">minutes</span>.</p></div>`;
         case 'chapter': return `<div class="kn-ctr"><img class="kn-mark kn-b${g.mark ? '' : ' kn-mark--me'}" src="${brand(g.mark || 'sujith.jpg')}" alt=""><p class="kn-big kn-b">${esc(g.label)}</p><p class="kn-sub kn-b">${esc(g.when)} · ${esc(g.role)}</p></div>`;
         case 'demo': {
           const name = demoName(it, narrow);
@@ -226,8 +226,8 @@
     });
     addEventListener('keydown', (e) => {
       if (!running || e.metaKey || e.ctrlKey || e.altKey || e.target.closest?.('input, textarea, select, [contenteditable]')) return;
-      if (['ArrowRight', 'PageDown', ' ', 'Enter'].includes(e.key) && !(e.key === 'Enter' && e.target.closest?.('a, button'))) { e.preventDefault(); next(); }
-      else if (['ArrowLeft', 'PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
+      if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter'].includes(e.key) && !(e.key === 'Enter' && e.target.closest?.('a, button'))) { e.preventDefault(); next(); }
+      else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); prev(); }
     });
     let sx = null;
     screen.addEventListener('touchstart', (e) => { sx = e.touches.length === 1 ? [e.touches[0].clientX, e.touches[0].clientY] : null; }, { passive: true });
@@ -260,6 +260,9 @@
       },
       layout,
       focus() { screen.focus({ preventScroll: true }); },
+      next, prev,
+      // true when there are no more slides that way, so the page can have the scroll
+      atEdge: (dir) => (dir > 0 ? cur === slides.length - 1 && step >= (slides[cur].steps || 1) : cur === 0),
     };
   }
 

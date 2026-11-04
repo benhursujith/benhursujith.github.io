@@ -1499,10 +1499,9 @@ svg.defs { position: absolute; width: 0; height: 0; overflow: hidden; }
   font-size: calc(var(--env-w, 600px) * .03); line-height: 1; color: #22283A; }
 .env-grid p { display: grid; grid-template-columns: 1fr 1fr; align-items: end; margin: 0; border-top: 1px solid rgba(110, 60, 30, .5); }
 .env-grid p:first-child { border-top: 0; align-items: center; font: 600 .62em/1 var(--text); letter-spacing: .12em; text-transform: uppercase; color: rgba(110, 60, 30, .8); }
-.env-grid span, .env-grid s { padding: 0 .5em .28em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.env-grid span { padding: 0 .5em .28em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .env-grid p:first-child span { padding-bottom: 0; }
 .env-grid p:not(:first-child) { font: italic 400 1em/1 var(--display); }
-.env-grid s { text-decoration-thickness: 1px; color: #3A3F52; }
 /* the holes punched down its side, so you can see whether anything is inside */
 .env-holes { position: absolute; left: 9%; top: 40%; bottom: 10%; width: 4.5%;
   background: radial-gradient(circle at 50% 50%, rgba(40, 26, 8, .78) 0 36%, transparent 40%) 0 0 / 100% 20%; }
